@@ -2,11 +2,9 @@
 # vim: set fileencoding=utf-8:
 
 import os
-from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 
-load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 ME = int(os.getenv('ME'))
