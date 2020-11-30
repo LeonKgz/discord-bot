@@ -5,8 +5,8 @@ import os
 import discord
 from discord.ext import commands
 
-TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
+TOKEN = str(os.getenv('DISCORD_TOKEN'))
+GUILD = str(os.getenv('DISCORD_GUILD'))
 ME = int(os.getenv('ME'))
 
 intents = discord.Intents.all()
@@ -23,7 +23,9 @@ async def play(ctx):
 
 @bot.command(name='рассылка')
 async def mems(ctx):
-  send_to = ["Актёр Запаса"]
+  if not ctx.author == bot.get_user(ME):
+    return
+  send_to = ["Копия №7"]
   for r in ctx.guild.roles:
     if (str(r) in send_to):
       for member in r.members:
@@ -37,7 +39,7 @@ async def on_message(message):
     return
   me = bot.get_user(ME)
   if not message.guild:
-    await me.send(message.author.name + ": " + message.content)
+    await me.send("**" + message.author.name + "**: " + message.content)
   await bot.process_commands(message)
 
 bot.run(TOKEN)
