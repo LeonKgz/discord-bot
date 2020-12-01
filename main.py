@@ -42,6 +42,11 @@ async def on_message(message):
     await me.send("**" + message.author.name + "**: " + message.content)
   await bot.process_commands(message)
 
+def get_guild():
+  for guild in bot.guilds:
+    if (guild.name == GUILD):
+      return guild
+
 bot.run(TOKEN)
 
 # test comment
