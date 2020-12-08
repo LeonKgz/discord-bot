@@ -4,10 +4,25 @@
 import os
 import discord
 from discord.ext import commands
+import pymysql.cursors
 
+# retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
 GUILD = str(os.getenv('DISCORD_GUILD'))
 ME = int(os.getenv('ME'))
+
+# retrieving JAWSDB credentials
+HOST = str(os.getenv('DB_HOST'))
+USER = str(os.getenv('DB_USER'))
+PASSWORD = str(os.getenv('DB_PASSWORD'))
+DB = str(os.getenv('DB_DATABASE'))
+
+connection = pymysql.connect(host=HOST,
+                             user=USER,
+                             password=PASSWORD,
+                             db=DB,
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
