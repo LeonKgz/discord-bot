@@ -65,7 +65,7 @@ async def on_message(message):
     return
   me = bot.get_user(ME)
   if not message.guild:
-    await me.send("**" + message.author.name + "**: " + message.content)
+    await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
   await bot.process_commands(message)
 
 def get_guild():
