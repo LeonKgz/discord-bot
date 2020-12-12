@@ -37,15 +37,19 @@ async def play(ctx):
   await ctx.send(response)
 
 @bot.command(name='рассылка')
-async def mems(ctx):
-  if not ctx.author == bot.get_user(ME):
+async def mems(ctx, role, text):
+  # Old way of adressing the issue, now multiple roles can use the command (in check_rights)
+  #if not ctx.author == bot.get_user(ME):
+  #  return
+  if (not check_rights(ctx)):
     return
-  send_to = ["Копия №7"]
+
+  send_to = [role]
   for r in ctx.guild.roles:
     if (str(r) in send_to):
       for member in r.members:
         await member.create_dm()
-        await member.dm_channel.send("Здоровеньки булы! Тестирую бота для спама. По идее он должен пересылать мне все ваши сообщения, можно проверить.")
+        await member.dm_channel.send("--------------------------------------------------------------------------\n*Сообщение от* **" + str(ctx.author.name) + "**!\n\n\t" + text + "\n\n[*Сообщения боту автоматически пересылаются Албанцу*]\n--------------------------------------------------------------------------")
       return
 
 @bot.event
@@ -61,6 +65,13 @@ def get_guild():
   for guild in bot.guilds:
     if (guild.name == GUILD):
       return guild
+
+def check_rights(ctx):
+  super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
+  for role in list(map(str, ctx.author.roles)):
+    if (role in super_roles):
+      return True
+  return False
 
 bot.run(TOKEN)
 
