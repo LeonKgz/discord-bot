@@ -31,12 +31,19 @@ bot = commands.Bot(intents=intents, command_prefix="!")
 async def on_ready():
   print(f'{bot.user.name} has connected to Discord!')
 
-@bot.command(name='пьеса')
+@bot.command(
+  name='пьеса',
+  brief='Cообщает следующую пьесу',
+  help='Cообщает следующую пьесу'
+)
 async def play(ctx):
   response = "Тестовая пьеса"
   await ctx.send(response)
 
-@bot.command(name='рассылка')
+@bot.command(
+  name='рассылка',
+  brief='Рассылка в лс по роли',
+  help='Делает рассылку сообщения в лс всем участникам сервера с данной ролью. \nПример: !рассылка \"Актёр Запаса\" \"Пьеса завтра в 8 вечера!\"')
 async def mems(ctx, role, text):
   # Old way of adressing the issue, now multiple roles can use the command (in check_rights)
   #if not ctx.author == bot.get_user(ME):
