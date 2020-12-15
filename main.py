@@ -27,6 +27,7 @@ connection = pymysql.connect(host=HOST,
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
 
+
 @bot.event
 async def on_ready():
   print(f'{bot.user.name} has connected to Discord!')
@@ -41,6 +42,36 @@ async def play(ctx):
   await ctx.send(response)
 
 @bot.command(
+  name='посадить',
+  brief='отправить пролетария в гулаг',
+  help='Убирает роль Пролетария и даёт роль Политзаключённого. Пользоваться командой могут Политбюро и ВЧК. '
+)
+async def jail(ctx, poor_guy):
+  if not check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
+    return
+  for mem in ctx.guild.members:
+    if (mem.name == poor_guy):
+      proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
+      politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
+      await mem.add_roles(politzek)
+      await mem.remove_roles(proletariat)
+
+@bot.command(
+  name='выпустить',
+  brief='выпустить политзэка из гулага',
+  help='Убирает роль Политзаключённого и даёт роль Пролетария. Пользоваться командой могут Политбюро и ВЧК.'
+)
+async def free(ctx, lucky_guy):
+  if not check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
+    return
+  for mem in ctx.guild.members:
+    if (mem.name == lucky_guy):
+      proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
+      politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
+      await mem.add_roles(proletariat)
+      await mem.remove_roles(politzek)
+
+@bot.command(
   name='рассылка',
   brief='Рассылка в лс по роли',
   help='Делает рассылку сообщения в лс всем участникам сервера с данной ролью. Так же указывает кто сделал рассылку. Пользоваться командой могут Политбюро, ВЧК, СовНарМод и Главлит. \nПример: !рассылка \"Актёр Запаса\" \"Пьеса завтра в 8 вечера!\"')
@@ -48,7 +79,7 @@ async def mems(ctx, role, text):
   # Old way of adressing the issue, now multiple roles can use the command (in check_rights)
   #if not ctx.author == bot.get_user(ME):
   #  return
-  if (not check_rights(ctx)):
+  if (not check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
     return
 
   send_to = [role]
@@ -73,12 +104,14 @@ def get_guild():
     if (guild.name == GUILD):
       return guild
 
-def check_rights(ctx):
-  super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
+def check_rights(ctx, acceptable_roles):
+  #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
+  super_roles = acceptable_roles 
   for role in list(map(str, ctx.author.roles)):
     if (role in super_roles):
       return True
   return False
+
 
 bot.run(TOKEN)
 
