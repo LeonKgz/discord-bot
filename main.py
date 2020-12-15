@@ -34,7 +34,7 @@ async def on_ready():
 
 @bot.command(
   name='пьеса',
-  brief='Cообщает следующую пьесу',
+  brief='\tCообщает следующую пьесу',
   help='Cообщает следующую пьесу'
 )
 async def play(ctx):
@@ -43,7 +43,7 @@ async def play(ctx):
 
 @bot.command(
   name='посадить',
-  brief='отправить пролетария в гулаг',
+  brief='\tОтправить пролетария в гулаг',
   help='Убирает роль Пролетария и даёт роль Политзаключённого. Пользоваться командой могут Политбюро и ВЧК. '
 )
 async def jail(ctx, poor_guy):
@@ -58,7 +58,7 @@ async def jail(ctx, poor_guy):
 
 @bot.command(
   name='выпустить',
-  brief='выпустить политзэка из гулага',
+  brief='\tВыпустить политзэка из гулага',
   help='Убирает роль Политзаключённого и даёт роль Пролетария. Пользоваться командой могут Политбюро и ВЧК.'
 )
 async def free(ctx, lucky_guy):
@@ -73,7 +73,7 @@ async def free(ctx, lucky_guy):
 
 @bot.command(
   name='рассылка',
-  brief='Рассылка в лс по роли',
+  brief='\t   Рассылка в лс по роли',
   help='Делает рассылку сообщения в лс всем участникам сервера с данной ролью. Так же указывает кто сделал рассылку. Пользоваться командой могут Политбюро, ВЧК, СовНарМод и Главлит. \nПример: !рассылка \"Актёр Запаса\" \"Пьеса завтра в 8 вечера!\"')
 async def mems(ctx, role, text):
   # Old way of adressing the issue, now multiple roles can use the command (in check_rights)
