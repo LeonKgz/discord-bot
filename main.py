@@ -65,7 +65,6 @@ async def jail(ctx, poor_guy, protocol):
         db.commit()
       except:
         db.rollback()
-      db.close()
 
 @bot.command(
   name='начальник',
@@ -88,7 +87,6 @@ async def nachalnik(ctx):
   except:
     db.rollback()
   await ctx.send(res)
-  db.close()
 
 @bot.command(
   name='протокол',
@@ -110,7 +108,6 @@ async def protocol(ctx, name):
   except:
     db.rollback()
   await ctx.send(res)
-  db.close()
 
 @bot.command(
   name='выпустить',
