@@ -17,7 +17,7 @@ USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
 DB = str(os.getenv('DB_DATABASE'))
 
-connection = pymysql.connect(host=HOST,
+db = pymysql.connect(host=HOST,
                              user=USER,
                              password=PASSWORD,
                              db=DB,
@@ -43,18 +43,72 @@ async def play(ctx):
 
 @bot.command(
   name='посадить',
-  brief='\tОтправить пролетария в гулаг',
-  help='Убирает роль Пролетария и даёт роль Политзаключённого. Пользоваться командой могут Политбюро и ВЧК. '
+  brief='\tОтправить пролетария в гулаг, с протоколом',
+  help='Убирает роль Пролетария и даёт роль Политзаключённого. Можно заполнить протокол, который сохраняется в базе данных. Задержанный может ознакомиться с протоколом после задержания. Пользоваться командой могут Политбюро и ВЧК. '
 )
-async def jail(ctx, poor_guy):
+async def jail(ctx, poor_guy, protocol):
   if not check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
     return
+  cursor = db.cursor()
   for mem in ctx.guild.members:
     if (mem.name == poor_guy):
       proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
       politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
       await mem.add_roles(politzek)
       await mem.remove_roles(proletariat)
+
+      sql = f"""INSERT INTO prisoners(ID, Protocol)
+        VALUES(\"{mem.name}\", \"{protocol}\")
+      """
+      try:
+        cursor.execute(sql)
+        db.commit()
+      except:
+        db.rollback()
+      db.close()
+
+@bot.command(
+  name='начальник',
+)
+async def nachalnik(ctx):
+  if not check_rights(ctx, ['Политзаключённый']):
+    return
+
+  cursor = db.cursor()
+  name = ctx.author.name
+  sql = f""" SELECT Protocol 
+    FROM prisoners
+    WHERE ID = \"{name}\"
+  """ 
+  res = f"Заключённый **{name}**! Ошибочка вышла!"
+  try:
+    cursor.execute(sql)
+    res = cursor.fetchone()['Protocol']
+    res =  f"Заключённый **{name}**!\nВаш протокол: *" + res + "*"
+  except:
+    db.rollback()
+  await ctx.send(res)
+
+@bot.command(
+  name='протокол',
+)
+async def protocol(ctx, name):
+  if not check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
+    return
+  cursor = db.cursor()
+  sql = f""" SELECT Protocol 
+    FROM prisoners
+    WHERE ID = \"{name}\"
+  """ 
+  res = f"Товарищ **{name}**! Ошибочка вышла!"
+  try:
+    cursor.execute(sql)
+    res1 = cursor.fetchone()['Protocol']
+    higher_rank_name = ctx.author.name
+    res =  f"Товарищ **{higher_rank_name}**!\nПротокол заключённого **{name}**: *" + res1 + "*"
+  except:
+    db.rollback()
+  await ctx.send(res)
 
 @bot.command(
   name='выпустить',
