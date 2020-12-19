@@ -4,6 +4,7 @@
 import os
 import discord
 from discord.ext import commands
+from discord.utils import get
 import pymysql.cursors
 
 # retrieving Discord credentials
@@ -34,7 +35,7 @@ async def on_ready():
 
 @bot.command(
   name='пьеса',
-  brief='\tCообщает следующую пьесу',
+  brief='Cообщает следующую пьесу',
   help='Cообщает следующую пьесу'
 )
 async def play(ctx):
@@ -43,11 +44,11 @@ async def play(ctx):
 
 @bot.command(
   name='посадить',
-  brief='\tОтправить пролетария в гулаг, с протоколом',
+  brief='Отправить пролетария в гулаг, с протоколом',
   help='Убирает роль Пролетария и даёт роль Политзаключённого. Можно заполнить протокол, который сохраняется в базе данных. Задержанный может ознакомиться с протоколом после задержания. Пользоваться командой могут Политбюро и ВЧК. '
 )
 async def jail(ctx, poor_guy, protocol):
-  if not check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
+  if not await heck_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
     return
   cursor = db.cursor()
   for mem in ctx.guild.members:
@@ -70,7 +71,7 @@ async def jail(ctx, poor_guy, protocol):
   name='начальник',
 )
 async def nachalnik(ctx):
-  if not check_rights(ctx, ['Политзаключённый']):
+  if not await check_rights(ctx, ['Политзаключённый']):
     return
 
   cursor = db.cursor()
@@ -92,7 +93,7 @@ async def nachalnik(ctx):
   name='протокол',
 )
 async def protocol(ctx, name):
-  if not check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
+  if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
     return
   cursor = db.cursor()
   sql = f""" SELECT Protocol 
@@ -111,11 +112,11 @@ async def protocol(ctx, name):
 
 @bot.command(
   name='выпустить',
-  brief='\tВыпустить политзэка из гулага',
+  brief='Выпустить политзэка из гулага',
   help='Убирает роль Политзаключённого и даёт роль Пролетария. Пользоваться командой могут Политбюро и ВЧК.'
 )
 async def free(ctx, lucky_guy):
-  if not check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
+  if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
     return
   for mem in ctx.guild.members:
     if (mem.name == lucky_guy):
@@ -126,13 +127,13 @@ async def free(ctx, lucky_guy):
 
 @bot.command(
   name='рассылка',
-  brief='\t   Рассылка в лс по роли',
+  brief='Рассылка в лс по роли',
   help='Делает рассылку сообщения в лс всем участникам сервера с данной ролью. Так же указывает кто сделал рассылку. Пользоваться командой могут Политбюро, ВЧК, СовНарМод и Главлит. \nПример: !рассылка \"Актёр Запаса\" \"Пьеса завтра в 8 вечера!\"')
 async def mems(ctx, role, text):
   # Old way of adressing the issue, now multiple roles can use the command (in check_rights)
   #if not ctx.author == bot.get_user(ME):
   #  return
-  if (not check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
+  if (not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
     return
 
   send_to = [role]
@@ -157,16 +158,35 @@ def get_guild():
     if (guild.name == GUILD):
       return guild
 
-def check_rights(ctx, acceptable_roles):
+async def check_rights(ctx, acceptable_roles):
   #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
   super_roles = acceptable_roles 
   for role in list(map(str, ctx.author.roles)):
     if (role in super_roles):
       return True
+  response = "**" + str(ctx.author.name) + "**, ты кто " + str(get(bot.emojis, name='peepoClown'))
+  await ctx.send(response) 
   return False
 
+def convert_brief(message):
+  # REPLACE BAD PRACTISE
+  total = 61
+  desired_indent = 5
+  actual_indent = 0
 
+#print(commands.Command.walk_commands())
+#bot.remove_command("help")
 bot.run(TOKEN)
+
+@bot.command(
+  name='help',
+  brief='Shows this message KKona',
+)
+async def help(ctx):
+  print(42)
+      
+
+
 
 # test comment
 
