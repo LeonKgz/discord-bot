@@ -48,7 +48,7 @@ async def play(ctx):
   help='Убирает роль Пролетария и даёт роль Политзаключённого. Можно заполнить протокол, который сохраняется в базе данных. Задержанный может ознакомиться с протоколом после задержания. Пользоваться командой могут Политбюро и ВЧК. '
 )
 async def jail(ctx, poor_guy, protocol):
-  if not await heck_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
+  if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
     return
   cursor = db.cursor()
   for mem in ctx.guild.members:
