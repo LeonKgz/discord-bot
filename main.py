@@ -18,12 +18,14 @@ USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
 DB = str(os.getenv('DB_DATABASE'))
 
-db = pymysql.connect(host=HOST,
-                             user=USER,
-                             password=PASSWORD,
-                             db=DB,
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
+def get_db_cursor():
+  db = pymysql.connect(host=HOST,
+                       user=USER,
+                       password=PASSWORD,
+                       db=DB,
+                       charset='utf8mb4',
+                       cursorclass=pymysql.cursors.DictCursor)
+  return db, db.cursor()
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
@@ -35,8 +37,7 @@ async def on_ready():
 
 @bot.command(
   name='пьеса',
-  brief='Cообщает следующую пьесу',
-  help='Cообщает следующую пьесу'
+  brief='Cообщает следующую пьесу'
 )
 async def play(ctx):
   response = "Тестовая пьеса"
@@ -50,7 +51,7 @@ async def play(ctx):
 async def jail(ctx, poor_guy, protocol):
   if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
     return
-  cursor = db.cursor()
+  db, cursor = get_db_cursor()
   for mem in ctx.guild.members:
     if (mem.name == poor_guy):
       proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
@@ -66,6 +67,8 @@ async def jail(ctx, poor_guy, protocol):
         db.commit()
       except:
         db.rollback()
+        db.close()
+  db.close()
 
 @bot.command(
   name='начальник',
@@ -74,7 +77,7 @@ async def nachalnik(ctx):
   if not await check_rights(ctx, ['Политзаключённый']):
     return
 
-  cursor = db.cursor()
+  db, cursor = get_db_cursor()
   name = ctx.author.name
   sql = f""" SELECT Protocol 
     FROM prisoners
@@ -87,15 +90,18 @@ async def nachalnik(ctx):
     res =  f"Заключённый **{name}**!\nВаш протокол: *" + res + "*"
   except:
     db.rollback()
+    db.close()
   await ctx.send(res)
+  db.close()
 
 @bot.command(
   name='протокол',
+  rest_is_raw=False,
 )
 async def protocol(ctx, name):
   if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
     return
-  cursor = db.cursor()
+  db, cursor = get_db_cursor()
   sql = f""" SELECT Protocol 
     FROM prisoners
     WHERE ID = \"{name}\"
@@ -108,7 +114,9 @@ async def protocol(ctx, name):
     res =  f"Товарищ **{higher_rank_name}**!\nПротокол заключённого **{name}**: *" + res1 + "*"
   except:
     db.rollback()
+    db.close()
   await ctx.send(res)
+  db.close()
 
 @bot.command(
   name='выпустить',
@@ -174,19 +182,20 @@ def convert_brief(message):
   desired_indent = 5
   actual_indent = 0
 
-#print(commands.Command.walk_commands())
 #bot.remove_command("help")
+#
+#@bot.command(
+#  name='help',
+#  brief='Shows this message KKona',
+#)
+#async def help(ctx):
+#  desc =  ""
+#  for cmd in list(bot.commands):
+#    desc += f'\t{cmd.name}\t\t\t{cmd.brief}\n' 
+#  embed=discord.Embed(title="Как управляться с Манкуртом", description=desc, color=0x8c8c8c)
+#  await ctx.channel.send(embed=embed)
+
 bot.run(TOKEN)
-
-@bot.command(
-  name='help',
-  brief='Shows this message KKona',
-)
-async def help(ctx):
-  print(42)
-      
-
-
 
 # test comment
 
