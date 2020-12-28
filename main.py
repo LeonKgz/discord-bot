@@ -27,6 +27,8 @@ def get_db_cursor():
                        cursorclass=pymysql.cursors.DictCursor)
   return db, db.cursor()
 
+# test commit
+
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
 
