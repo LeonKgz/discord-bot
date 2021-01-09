@@ -42,8 +42,49 @@ async def on_ready():
   brief='Cообщает следующую пьесу'
 )
 async def play(ctx):
-  response = "Тестовая пьеса"
+  response = "Ромео и Джульетта — Уильям Шекспир"
   await ctx.send(response)
+
+@bot.command(
+  name='втруппу',
+  brief='Убирает роль актёра, включает в труппу'
+)
+async def include(ctx, actor):
+  if (not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
+    return
+  
+  actor_id = int(str(actor)[3:-1])
+  name = ""
+
+  for mem in ctx.guild.members:
+    if (mem.id == actor_id):
+      truppa = discord.utils.get(ctx.guild.roles, name='Драматическая Труппа')
+      actor_zapasa = discord.utils.get(ctx.guild.roles, name='Актёр Запаса')
+      await mem.add_roles(truppa)
+      await mem.remove_roles(actor_zapasa)
+  await ctx.send(f"{actor} благополучно включён в Драматическую Труппу")
+
+def get_id(ref):
+  return int(str(ref)[3:-1])
+
+@bot.command(
+  name='изтруппы',
+  brief='Убирает роль Драм Труппы, возвращает в запас'
+)
+async def include(ctx, actor):
+  if (not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
+    return
+
+  actor_id = int(str(actor)[3:-1])
+  name = ""
+
+  for mem in ctx.guild.members:
+    if (mem.id == actor_id):
+      truppa = discord.utils.get(ctx.guild.roles, name='Драматическая Труппа')
+      actor_zapasa = discord.utils.get(ctx.guild.roles, name='Актёр Запаса')
+      await mem.add_roles(actor_zapasa)
+      await mem.remove_roles(truppa)
+  await ctx.send(f"{actor} благополучно исключён из Драматической Труппы")
 
 @bot.command(
   name='посадить',
@@ -55,7 +96,7 @@ async def jail(ctx, poor_guy, protocol):
     return
   db, cursor = get_db_cursor()
   for mem in ctx.guild.members:
-    if (mem.name == poor_guy):
+    if (mem.id == get_id(poor_guy)):
       proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
       politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
       await mem.add_roles(politzek)
@@ -85,11 +126,11 @@ async def nachalnik(ctx):
     FROM prisoners
     WHERE ID = \"{name}\"
   """ 
-  res = f"Заключённый **{name}**! Ошибочка вышла!"
+  res = f"Заключённый <@!{ctx.author.id}>! Ошибочка вышла!"
   try:
     cursor.execute(sql)
     res = cursor.fetchone()['Protocol']
-    res =  f"Заключённый **{name}**!\nВаш протокол: *" + res + "*"
+    res =  f"Заключённый <@!{ctx.author.id}>!\nВаш протокол: *" + res + "*"
   except:
     db.rollback()
     db.close()
@@ -103,17 +144,22 @@ async def nachalnik(ctx):
 async def protocol(ctx, name):
   if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
     return
+  nname = "" 
+  for mem in ctx.guild.members:
+    if (mem.id == get_id(name)):
+      nname = mem.name
+
   db, cursor = get_db_cursor()
   sql = f""" SELECT Protocol 
     FROM prisoners
-    WHERE ID = \"{name}\"
+    WHERE ID = \"{nname}\"
   """ 
-  res = f"Товарищ **{name}**! Ошибочка вышла!"
+  res = f"Товарищ <@!{ctx.author.id}>! Ошибочка вышла!"
   try:
     cursor.execute(sql)
     res1 = cursor.fetchone()['Protocol']
     higher_rank_name = ctx.author.name
-    res =  f"Товарищ **{higher_rank_name}**!\nПротокол заключённого **{name}**: *" + res1 + "*"
+    res =  f"Товарищ <@!{ctx.author.id}>!\nПротокол заключённого {name}: *" + res1 + "*"
   except:
     db.rollback()
     db.close()
@@ -129,7 +175,7 @@ async def free(ctx, lucky_guy):
   if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
     return
   for mem in ctx.guild.members:
-    if (mem.name == lucky_guy):
+    if (mem.id == get_id(lucky_guy)):
       proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
       politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
       await mem.add_roles(proletariat)
