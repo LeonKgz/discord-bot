@@ -200,6 +200,22 @@ async def mems(ctx, role, text):
         await member.dm_channel.send("--------------------------------------------------------------------------\n*Сообщение от* **" + str(ctx.author.name) + "**!\n\n\t" + text + "\n\n[*Сообщения боту автоматически пересылаются Албанцу*]\n--------------------------------------------------------------------------")
       return
 
+@bot.command(
+  name='списки',
+  brief='Список участников с данной ролью')
+async def spisok(ctx, role):
+  if (not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
+    return
+
+  send_to = [role]
+  ret = f"Список — \"{role}\"\n"
+  for r in ctx.guild.roles:
+    if (str(r) in send_to):
+      for member in r.members:
+        ret += "\t" + member.name + ";\n"
+  await ctx.send(ret)      
+  return
+
 @bot.event
 async def on_message(message):
   if message.author == bot.user:
