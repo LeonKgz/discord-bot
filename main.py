@@ -196,8 +196,12 @@ async def mems(ctx, role, text):
   for r in ctx.guild.roles:
     if (str(r) in send_to):
       for member in r.members:
-        await member.create_dm()
-        await member.dm_channel.send("--------------------------------------------------------------------------\n*Сообщение от* **" + str(ctx.author.name) + "**!\n\n\t" + text + "\n\n[*Сообщения боту автоматически пересылаются Албанцу*]\n--------------------------------------------------------------------------")
+        try:  
+            await member.create_dm()
+            await member.dm_channel.send("--------------------------------------------------------------------------\n*Сообщение от* **" + str(ctx.author.name) + "**!\n\n\t" + text + "\n\n[*Сообщения боту автоматически пересылаются Албанцу*]\n--------------------------------------------------------------------------")
+        except Exception as e:
+            print(e)
+
       return
 
 @bot.command(
