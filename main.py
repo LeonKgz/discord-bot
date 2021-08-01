@@ -213,9 +213,9 @@ async def mems(ctx, role, text):
   if (not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
     return
 
-  send_to = [role]
+  send_to = get_id(role)
   for r in ctx.guild.roles:
-    if (str(r) in send_to):
+    if (r.id == send_to):
       for member in r.members:
         try:  
             await member.create_dm()
@@ -226,16 +226,14 @@ async def mems(ctx, role, text):
       return
 
 @bot.command(
-  name='списки',
+  name='список',
   brief='Список участников с данной ролью')
 async def spisok(ctx, role):
   if (not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
     return
   send_to = get_id(role)
-  print(send_to)
   ret = f"Список — {role}\n"
   for r in ctx.guild.roles:
-    print(str(r))  
     if (r.id == send_to):
       for member in r.members:
         ret += "\t" + member.name + ";\n"
