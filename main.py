@@ -3,13 +3,15 @@
 
 import os
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord.utils import get
 import pymysql.cursors
+import json
+import requests
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
-GUILD = str(os.getenv('DISCORD_GUILD'))
+GUILD = int(str(os.getenv('DISCORD_GUILD')))
 ME = int(os.getenv('ME'))
 
 # retrieving JAWSDB credentials
@@ -32,6 +34,25 @@ def get_db_cursor():
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
 
+@tasks.loop(seconds=5.0)
+async def looop():
+    guild = bot.get_guild(GUILD) 
+    if (guild):
+        for ch in guild.channels:
+            if ("технический" in ch.name):
+                       
+                url = 'https://quotes.rest/quote/random.json?maxlength=150'
+                api_token = "KSc626pHvMVZOrzi7F2pegeF"
+                headers = {'content-type': 'application/json',
+                               'X-TheySaidSo-Api-Secret': format(api_token)}
+
+                response = requests.get(url, headers=headers)
+                response = response.json()['contents']['quotes'][0]
+
+                quote = response['quote']
+                author = response['author']
+                text = quote + " — " + author
+                await ch.send(text)
 
 @bot.event
 async def on_ready():
@@ -210,11 +231,12 @@ async def mems(ctx, role, text):
 async def spisok(ctx, role):
   if (not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
     return
-
-  send_to = [role]
-  ret = f"Список — \"{role}\"\n"
+  send_to = get_id(role)
+  print(send_to)
+  ret = f"Список — {role}\n"
   for r in ctx.guild.roles:
-    if (str(r) in send_to):
+    print(str(r))  
+    if (r.id == send_to):
       for member in r.members:
         ret += "\t" + member.name + ";\n"
   await ctx.send(ret)      
@@ -231,6 +253,7 @@ async def on_message(message):
 
 def get_guild():
   for guild in bot.guilds:
+    print(guild.name)
     if (guild.name == GUILD):
       return guild
 
@@ -263,7 +286,7 @@ def convert_brief(message):
 #  embed=discord.Embed(title="Как управляться с Манкуртом", description=desc, color=0x8c8c8c)
 #  await ctx.channel.send(embed=embed)
 
+# TODO uncomment to start the loop
+#looop.start()
 bot.run(TOKEN)
-
-# test comment
 
