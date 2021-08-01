@@ -319,7 +319,7 @@ async def nick2(ctx):
   if (not await check_rights(ctx, ['Krabick'])):
     return
   guild = bot.get_guild(GUILD) 
-  await guild.get_member(384492518043287555).edit(nick="Сергей")
+  await guild.get_member(498264068415553537).edit(nick="Сергей")
   response = "Дело сделано!"
   await ctx.send(response)
 
@@ -331,7 +331,7 @@ async def nick3(ctx):
   if (not await check_rights(ctx, ['Krabick'])):
     return
   guild = bot.get_guild(GUILD) 
-  await guild.get_member(384492518043287555).edit(nick="Артур")
+  await guild.get_member(498264068415553537).edit(nick="Артур")
   response = "Дело сделано!"
   await ctx.send(response)
 
@@ -343,7 +343,7 @@ async def nick4(ctx):
   if (not await check_rights(ctx, ['Krabick'])):
     return
   guild = bot.get_guild(GUILD) 
-  await guild.get_member(384492518043287555).edit(nick="Егорыч")
+  await guild.get_member(498264068415553537).edit(nick="Егорыч")
   response = "Дело сделано!"
   await ctx.send(response)
 
@@ -356,7 +356,7 @@ async def nick5(ctx):
     return
 
   guild = bot.get_guild(GUILD) 
-  await guild.get_member(384492518043287555).edit(nick="Кирсанов")
+  await guild.get_member(498264068415553537).edit(nick="Кирсанов")
   response = "Дело сделано!"
   await ctx.send(response)
 
