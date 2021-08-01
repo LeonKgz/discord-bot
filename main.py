@@ -286,5 +286,66 @@ def convert_brief(message):
 
 # TODO uncomment to start the loop
 #looop.start()
+
+@bot.command(
+  name='1',
+  brief=''
+)
+async def nick1(ctx):
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(277128557925367808).edit(nick="Чёрный Человек")
+  response = "Дело сделано!"
+  await ctx.send(response)
+
+@bot.command(
+  name='6',
+  brief=''
+)
+async def nick6(ctx):
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(277128557925367808).edit(nick="Александр")
+  response = "Дело сделано!"
+  await ctx.send(response)
+
+@bot.command(
+  name='2',
+  brief=''
+)
+async def nick2(ctx):
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(***REMOVED***).edit(nick="Сергей")
+  response = "Дело сделано!"
+  await ctx.send(response)
+
+@bot.command(
+  name='3',
+  brief=''
+)
+async def nick3(ctx):
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(***REMOVED***).edit(nick="Артур")
+  response = "Дело сделано!"
+  await ctx.send(response)
+
+@bot.command(
+  name='4',
+  brief=''
+)
+async def nick4(ctx):
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(***REMOVED***).edit(nick="Егорыч")
+  response = "Дело сделано!"
+  await ctx.send(response)
+
+@bot.command(
+  name='5',
+  brief=''
+)
+async def nick5(ctx):
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(***REMOVED***).edit(nick="Кирсанов")
+  response = "Дело сделано!"
+  await ctx.send(response)
+
 bot.run(TOKEN)
 
