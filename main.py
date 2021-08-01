@@ -292,6 +292,8 @@ def convert_brief(message):
   brief=''
 )
 async def nick1(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
   guild = bot.get_guild(GUILD) 
   await guild.get_member(277128557925367808).edit(nick="Чёрный Человек")
   response = "Дело сделано!"
@@ -302,6 +304,8 @@ async def nick1(ctx):
   brief=''
 )
 async def nick6(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
   guild = bot.get_guild(GUILD) 
   await guild.get_member(277128557925367808).edit(nick="Александр")
   response = "Дело сделано!"
@@ -312,6 +316,8 @@ async def nick6(ctx):
   brief=''
 )
 async def nick2(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
   guild = bot.get_guild(GUILD) 
   await guild.get_member(384492518043287555).edit(nick="Сергей")
   response = "Дело сделано!"
@@ -322,6 +328,8 @@ async def nick2(ctx):
   brief=''
 )
 async def nick3(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
   guild = bot.get_guild(GUILD) 
   await guild.get_member(384492518043287555).edit(nick="Артур")
   response = "Дело сделано!"
@@ -332,6 +340,8 @@ async def nick3(ctx):
   brief=''
 )
 async def nick4(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
   guild = bot.get_guild(GUILD) 
   await guild.get_member(384492518043287555).edit(nick="Егорыч")
   response = "Дело сделано!"
@@ -342,6 +352,9 @@ async def nick4(ctx):
   brief=''
 )
 async def nick5(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+
   guild = bot.get_guild(GUILD) 
   await guild.get_member(384492518043287555).edit(nick="Кирсанов")
   response = "Дело сделано!"
