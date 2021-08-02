@@ -68,44 +68,47 @@ async def play(ctx):
 
 @bot.command(
   name='втруппу',
-  brief='Убирает роль актёра, включает в труппу'
+  brief='Убирает роль актёра, включает в труппу',
+  pass_context=True
 )
-async def include(ctx, actor):
+async def include(ctx, *, actor):
   if (not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
     return
   
-  actor_id = int(str(actor)[3:-1])
-  name = ""
+  actor_ids = str(actor).split()
+  actor_ids = [int(i[3:-1]) for i in actor_ids]
 
   for mem in ctx.guild.members:
-    if (mem.id == actor_id):
+    if (mem.id in actor_ids):
       truppa = discord.utils.get(ctx.guild.roles, name='Драматическая Труппа')
       actor_zapasa = discord.utils.get(ctx.guild.roles, name='Актёр Запаса')
       await mem.add_roles(truppa)
       await mem.remove_roles(actor_zapasa)
-  await ctx.send(f"{actor} благополучно включён в Драматическую Труппу")
+      await ctx.send(f"{mem.name} благополучно включён в Драматическую Труппу")
 
 def get_id(ref):
   return int(str(ref)[3:-1])
 
 @bot.command(
   name='изтруппы',
-  brief='Убирает роль Драм Труппы, возвращает в запас'
+  brief='Убирает роль Драм Труппы, возвращает в запас',
+  pass_context=True
 )
-async def include(ctx, actor):
+async def include(ctx, *, actor):
   if (not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
     return
 
-  actor_id = int(str(actor)[3:-1])
-  name = ""
+
+  actor_ids = str(actor).split()
+  actor_ids = [int(i[3:-1]) for i in actor_ids]
 
   for mem in ctx.guild.members:
-    if (mem.id == actor_id):
+    if (mem.id in actor_ids):
       truppa = discord.utils.get(ctx.guild.roles, name='Драматическая Труппа')
       actor_zapasa = discord.utils.get(ctx.guild.roles, name='Актёр Запаса')
       await mem.add_roles(actor_zapasa)
       await mem.remove_roles(truppa)
-  await ctx.send(f"{actor} благополучно исключён из Драматической Труппы")
+      await ctx.send(f"{mem.name} благополучно исключён из Драматической Труппы")
 
 @bot.command(
   name='посадить',
