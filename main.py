@@ -111,6 +111,26 @@ async def include(ctx, *, actor):
       await ctx.send(f"{mem.name} благополучно исключён из Драматической Труппы")
 
 @bot.command(
+  name='распустить',
+  brief='Распускает всю Драматическую Труппу разом',
+  pass_context=True
+)
+async def include(ctx):
+  if (not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит'])):
+    return
+
+  truppa = discord.utils.get(ctx.guild.roles, name='Драматическая Труппа')
+  actor_zapasa = discord.utils.get(ctx.guild.roles, name='Актёр Запаса')
+
+  #for mem in ctx.guild.members:
+  #  if (mem.)  
+
+  for mem in truppa.members:
+    await mem.add_roles(actor_zapasa)
+    await mem.remove_roles(truppa)
+    await ctx.send(f"{mem.name} благополучно исключён из Драматической Труппы")
+
+@bot.command(
   name='посадить',
   brief='Отправить пролетария в гулаг, с протоколом',
   help='Убирает роль Пролетария и даёт роль Политзаключённого. Можно заполнить протокол, который сохраняется в базе данных. Задержанный может ознакомиться с протоколом после задержания. Пользоваться командой могут Политбюро и ВЧК. '
