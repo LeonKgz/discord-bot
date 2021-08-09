@@ -155,7 +155,10 @@ async def jail(ctx, poor_guy, protocol):
       except:
         db.rollback()
         db.close()
-  db.close()
+  try:      
+    db.close()
+  except:
+    print("Already closed")
 
 @bot.command(
   name='начальник',
@@ -265,11 +268,29 @@ async def spisok(ctx, role):
 
 @bot.event
 async def on_message(message):
+
   if message.author == bot.user:
     return
   me = bot.get_user(ME)
   if not message.guild:
     await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
+  elif 'гулаг' not in message.channel.name:
+    name = message.author.name
+    iid = message.author.id
+    time = message.created_at
+
+    db, cursor = get_db_cursor()
+    sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
+
+    try:
+      cursor.execute(sql)
+      db.commit()
+    except Exception as e:
+      print(e)
+      db.rollback()
+
+    db.close()
+
   await bot.process_commands(message)
 
 def get_guild():
@@ -323,65 +344,154 @@ async def nick1(ctx):
   await ctx.send(response)
 
 @bot.command(
-  name='6',
-  brief=''
+  name='history',
 )
-async def nick6(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
+async def print_history(ctx):
+
+  db, cursor = get_db_cursor()
+
   guild = bot.get_guild(GUILD) 
-  await guild.get_member(277128557925367808).edit(nick="Александр")
-  response = "Дело сделано!"
-  await ctx.send(response)
+  if (guild):
+    total = len(guild.members)
+    curr = 0
+#    for mem in guild.members:
+
+    cache = {} 
+#    obj = load_obj("history")
+#    print(obj)
+
+    curr += 1
+    lastMessage = None
+    for ch in guild.channels:
+      if (not str(ch.type) == 'text'):
+        continue
+      
+      #fetchMessage = await ch.history(limit=10000).find(lambda m: m.author.id == mem.id)
+      print("checking...")
+      history = await ch.history(limit=10000).flatten()
+      for m in history:
+        if (m.author.id not in cache):
+          cache[m.author.id] = m
+        else:
+          if (cache[m.author.id].created_at < m.created_at):
+            cache[m.author.id] = m
+
+    for mem in guild.members:
+      if (mem.id in cache):
+        content = cache[mem.id]
+        try:
+          await ctx.send(f"For user {mem.name} — last message is \t\t\t \"{content.content}\"")
+          sql = f"""INSERT INTO activity(ID, name, timestamp)
+                  VALUES(\"{mem.id}\", \"{mem.name}\", \"{content.created_at}\")
+                """
+          try:
+            cursor.execute(sql)
+            db.commit()
+          except Exception as e:
+            print(e)
+            db.rollback()
+
+        except Exception as e:
+          #await ctx.send(f"For user {mem.name} — ERROR")
+          print(f"For user {mem.name} — ERROR")
+      else:
+        #await ctx.send(f"For user {mem.name} — no message was found")
+        print(f"For user {mem.name} — no message was found")
+
+    try:      
+      db.close()
+    except:
+      print("Already closed")
+    print("Scanning is finished.")  
 
 @bot.command(
-  name='2',
-  brief=''
+  name='выпусти',
 )
-async def nick2(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(498264068415553537).edit(nick="Сергей")
-  response = "Дело сделано!"
-  await ctx.send(response)
-
-@bot.command(
-  name='3',
-  brief=''
-)
-async def nick3(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(498264068415553537).edit(nick="Артур")
-  response = "Дело сделано!"
-  await ctx.send(response)
-
-@bot.command(
-  name='4',
-  brief=''
-)
-async def nick4(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(498264068415553537).edit(nick="Егорыч")
-  response = "Дело сделано!"
-  await ctx.send(response)
-
-@bot.command(
-  name='5',
-  brief=''
-)
-async def nick5(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
+async def let_free(ctx):
+  
+  if not await check_rights(ctx, ['Политзаключённый']):
     return
 
+  db, cursor = get_db_cursor()
+  name = ctx.author.name
+  
   guild = bot.get_guild(GUILD) 
-  await guild.get_member(498264068415553537).edit(nick="Кирсанов")
-  response = "Дело сделано!"
-  await ctx.send(response)
 
+  proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+  politzek= discord.utils.get(guild.roles, name='Политзаключённый')
+
+  await ctx.author.add_roles(proletariat)
+  await ctx.author.remove_roles(politzek)
+
+  name = ctx.author.name
+  iid = ctx.author.id
+  time = ctx.message.created_at
+
+  db, cursor = get_db_cursor()
+  sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
+
+  try:
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    print(e)
+    db.rollback()
+
+  db.close()
+
+@tasks.loop(seconds=259200.0)
+async def scan():
+  db, cursor = get_db_cursor()
+
+  guild = bot.get_guild(GUILD) 
+  if (guild):
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Политзаключённый')
+
+    for m in proletariat.members:
+      #if (not "Albanec69" in m.name):
+      #  continue
+      iid = m.id
+      sql = f"SELECT * from cache WHERE `ID` = \"{iid}\""
+      try:
+        cursor.execute(sql)
+        res = cursor.fetchone()
+      
+        if (res is None):
+
+          await m.add_roles(politzek)
+          await m.remove_roles(proletariat)
+          
+          for ch in guild.channels:
+            if ("гулаг" in ch.name):
+              res = f"Заключённый <@!{m.id}>! Вы были неактивны более 3-х дней! «!выпусти» чтобы выйти из гулага"
+              await ch.send(res)
+
+
+      except Exception as e:
+        print(e)
+
+    sql = f"DELETE FROM cache"
+
+    try:
+      cursor.execute(sql)
+      db.commit()
+    
+      if (res is None):
+
+        await m.add_roles(politzek)
+        await m.remove_roles(proletariat)
+
+    except Exception as e:
+      db.rollback()
+      print(e)
+
+    try:      
+      db.close()
+    except:
+      print("Already closed")
+
+scan.start()
 bot.run(TOKEN)
 
