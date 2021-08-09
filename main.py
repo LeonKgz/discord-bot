@@ -487,10 +487,10 @@ async def scan():
       cursor.execute(sql)
       db.commit()
     
-      if (res is None):
-
-        await m.add_roles(politzek)
-        await m.remove_roles(proletariat)
+#      if (res is None):
+#
+#        await m.add_roles(politzek)
+#        await m.remove_roles(proletariat)
 
     except Exception as e:
       db.rollback()
