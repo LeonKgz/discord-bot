@@ -444,7 +444,7 @@ async def scan():
   db, cursor = get_db_cursor()
 
   guild = bot.get_guild(GUILD) 
-  super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
+  super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит', 'NPC can\'t meme']
 
   if (guild):
 
