@@ -501,6 +501,71 @@ async def scan():
     except:
       print("Already closed")
 
+import datetime
+import requests
+
+def linkFetch():
+    url = "https://api.unsplash.com/photos/random/?query=meal&client_id=***REMOVED***"
+
+    response = requests.get(url)
+    data = response.json()["urls"]["raw"]
+    return data
+
+
+@tasks.loop(seconds=3600.0)
+async def breakfast():
+
+  guild = bot.get_guild(GUILD) 
+  
+  hour = int(datetime.datetime.now().hour)
+  if (guild and hour == 5):
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Политзаключённый')
+
+    for ch in guild.channels:
+      if ("технический" in ch.name):
+        res = f"{politzek.mention}! Завтрак! \n\n https://cs8.pikabu.ru/post_img/big/2017/12/01/4/151210232712574780.jpg"
+        await ch.send(res)
+
+@tasks.loop(seconds=3600.0)
+async def dinner():
+
+  guild = bot.get_guild(GUILD) 
+  
+  hour = int(datetime.datetime.now().hour)
+  
+  if (guild and hour == 15):
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Политзаключённый')
+
+    for ch in guild.channels:
+      if ("технический" in ch.name):
+        url = linkFetch()
+        res = f"{politzek.mention}! Ужин! \n\n {url}"
+        await ch.send(res)
+
+@tasks.loop(seconds=3600.0)
+async def lunch():
+
+  guild = bot.get_guild(GUILD) 
+  
+  hour = int(datetime.datetime.now().hour)
+  if (guild and hour == 10):
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Политзаключённый')
+
+    for ch in guild.channels:
+      if ("технический" in ch.name):
+        res = f"{politzek.mention}! Обед! \n\n https://cs8.pikabu.ru/post_img/big/2017/12/01/4/151210232712574780.jpg"
+        await ch.send(res)
+
 scan.start()
+dinner.start()
+lunch.start()
+breakfast.start()
+
 bot.run(TOKEN)
 
