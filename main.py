@@ -525,7 +525,9 @@ async def breakfast():
 
     for ch in guild.channels:
       if ("гулаг" in ch.name):
-        res = f"{politzek.mention}! Завтрак! \n\n https://cs8.pikabu.ru/post_img/big/2017/12/01/4/151210232712574780.jpg"
+        url = linkFetch()
+        res = f"{politzek.mention}! Завтрак! \n\n {url}"
+        res = f"Завтрак! \n\n {url}"
         await ch.send(res)
 
 @tasks.loop(seconds=3600.0)
@@ -544,6 +546,7 @@ async def dinner():
       if ("гулаг" in ch.name):
         url = linkFetch()
         res = f"{politzek.mention}! Ужин! \n\n {url}"
+        res = f"Ужин! \n\n {url}"
         await ch.send(res)
 
 @tasks.loop(seconds=3600.0)
@@ -559,7 +562,9 @@ async def lunch():
 
     for ch in guild.channels:
       if ("гулаг" in ch.name):
-        res = f"{politzek.mention}! Обед! \n\n https://cs8.pikabu.ru/post_img/big/2017/12/01/4/151210232712574780.jpg"
+        url = linkFetch()
+        res = f"{politzek.mention}! Обед! \n\n {url}"
+        res = f"Обед! \n\n {url}"
         await ch.send(res)
 
 scan.start()
