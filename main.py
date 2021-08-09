@@ -524,7 +524,7 @@ async def breakfast():
     politzek= discord.utils.get(guild.roles, name='Политзаключённый')
 
     for ch in guild.channels:
-      if ("технический" in ch.name):
+      if ("гулаг" in ch.name):
         res = f"{politzek.mention}! Завтрак! \n\n https://cs8.pikabu.ru/post_img/big/2017/12/01/4/151210232712574780.jpg"
         await ch.send(res)
 
@@ -541,7 +541,7 @@ async def dinner():
     politzek= discord.utils.get(guild.roles, name='Политзаключённый')
 
     for ch in guild.channels:
-      if ("технический" in ch.name):
+      if ("гулаг" in ch.name):
         url = linkFetch()
         res = f"{politzek.mention}! Ужин! \n\n {url}"
         await ch.send(res)
@@ -558,7 +558,7 @@ async def lunch():
     politzek= discord.utils.get(guild.roles, name='Политзаключённый')
 
     for ch in guild.channels:
-      if ("технический" in ch.name):
+      if ("гулаг" in ch.name):
         res = f"{politzek.mention}! Обед! \n\n https://cs8.pikabu.ru/post_img/big/2017/12/01/4/151210232712574780.jpg"
         await ch.send(res)
 
