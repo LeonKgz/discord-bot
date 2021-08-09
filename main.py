@@ -444,14 +444,23 @@ async def scan():
   db, cursor = get_db_cursor()
 
   guild = bot.get_guild(GUILD) 
+  super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
+
   if (guild):
 
     proletariat = discord.utils.get(guild.roles, name='Пролетарий')
     politzek= discord.utils.get(guild.roles, name='Политзаключённый')
 
     for m in proletariat.members:
-      #if (not "Albanec69" in m.name):
-      #  continue
+      done = False
+      for role in list(map(str, m.roles)):
+        if (role in super_roles):
+         print(f"{m.name}")
+         done = True
+         break
+      if (done):
+        continue
+
       iid = m.id
       sql = f"SELECT * from cache WHERE `ID` = \"{iid}\""
       try:
