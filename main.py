@@ -8,6 +8,7 @@ from discord.utils import get
 import pymysql.cursors
 import json
 import requests
+import datetime
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
@@ -19,6 +20,8 @@ HOST = str(os.getenv('DB_HOST'))
 USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
 DB = str(os.getenv('DB_DATABASE'))
+QUOTES = str(os.getenv('QUOTES_KEY'))
+FOOD_KEY = str(os.getenv('FOOD_KEY'))
 
 def get_db_cursor():
   db = pymysql.connect(host=HOST,
@@ -42,7 +45,7 @@ async def looop():
             if ("технический" in ch.name):
                        
                 url = 'https://quotes.rest/quote/random.json?maxlength=150'
-                api_token = "***REMOVED***"
+                api_token = QUOTES
                 headers = {'content-type': 'application/json',
                                'X-TheySaidSo-Api-Secret': format(api_token)}
 
@@ -439,14 +442,16 @@ async def let_free(ctx):
 
   db.close()
 
-@tasks.loop(seconds=259200.0)
+@tasks.loop(seconds=86400.0)
 async def scan():
+
   db, cursor = get_db_cursor()
-
   guild = bot.get_guild(GUILD) 
-  super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит', 'NPC can\'t meme']
+  day = int(datetime.datetime.now().day)
 
-  if (guild):
+  if (guild and day % 3 == 0):
+
+    super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит', 'NPC can\'t meme']
 
     proletariat = discord.utils.get(guild.roles, name='Пролетарий')
     politzek= discord.utils.get(guild.roles, name='Политзаключённый')
@@ -487,10 +492,10 @@ async def scan():
       cursor.execute(sql)
       db.commit()
     
-#      if (res is None):
-#
-#        await m.add_roles(politzek)
-#        await m.remove_roles(proletariat)
+  #    if (res is None):
+  #
+  #      await m.add_roles(politzek)
+  #      await m.remove_roles(proletariat)
 
     except Exception as e:
       db.rollback()
@@ -501,16 +506,13 @@ async def scan():
     except:
       print("Already closed")
 
-import datetime
-import requests
-
 def linkFetch():
-    url = "https://api.unsplash.com/photos/random/?query=meal&client_id=***REMOVED***"
+    key = FOOD_KEY
+    url = f"https://api.unsplash.com/photos/random/?query=meal&client_id={key}"
 
     response = requests.get(url)
     data = response.json()["urls"]["raw"]
     return data
-
 
 @tasks.loop(seconds=3600.0)
 async def breakfast():
@@ -561,13 +563,14 @@ async def lunch():
     politzek= discord.utils.get(guild.roles, name='Политзаключённый')
 
     for ch in guild.channels:
-      if ("гулаг" in ch.name):
+      if ("технический" in ch.name):
         url = linkFetch()
         res = f"{politzek.mention}! Обед! \n\n {url}"
         res = f"Обед! \n\n {url}"
         await ch.send(res)
 
 scan.start()
+#looop.start()
 dinner.start()
 lunch.start()
 breakfast.start()
