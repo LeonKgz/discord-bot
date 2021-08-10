@@ -551,7 +551,7 @@ async def dinner():
         res = f"Ужин! \n\n {url}"
         await ch.send(res)
 
-@tasks.loop(seconds=5.0)
+@tasks.loop(seconds=3600.0)
 async def lunch():
 
   guild = bot.get_guild(GUILD) 
