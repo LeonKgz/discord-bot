@@ -551,7 +551,7 @@ async def dinner():
         res = f"Ужин! \n\n {url}"
         await ch.send(res)
 
-@tasks.loop(seconds=3600.0)
+@tasks.loop(seconds=5.0)
 async def lunch():
 
   guild = bot.get_guild(GUILD) 
@@ -563,7 +563,7 @@ async def lunch():
     politzek= discord.utils.get(guild.roles, name='Политзаключённый')
 
     for ch in guild.channels:
-      if ("технический" in ch.name):
+      if ("гулаг" in ch.name):
         url = linkFetch()
         res = f"{politzek.mention}! Обед! \n\n {url}"
         res = f"Обед! \n\n {url}"
