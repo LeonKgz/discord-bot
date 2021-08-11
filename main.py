@@ -578,11 +578,7 @@ breakfast.start()
 @bot.command(name='on')
 async def play(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
     channel = ctx.message.author.voice.channel
-    global player
-    try:
-      player = await channel.connect()
-    except:
-      pass
+    player = await channel.connect()
     player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/music128'))
 
 @bot.command(name='off', pass_context = True)
