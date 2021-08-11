@@ -9,6 +9,9 @@ import pymysql.cursors
 import json
 import requests
 import datetime
+from discord.ext.commands import Bot
+from dotenv import load_dotenv
+from discord import FFmpegPCMAudio
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
@@ -31,8 +34,6 @@ def get_db_cursor():
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
   return db, db.cursor()
-
-# test commit
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
@@ -61,13 +62,13 @@ async def looop():
 async def on_ready():
   print(f'{bot.user.name} has connected to Discord!')
 
-@bot.command(
-  name='пьеса',
-  brief='Cообщает следующую пьесу'
-)
-async def play(ctx):
-  response = "Ромео и Джульетта — Уильям Шекспир"
-  await ctx.send(response)
+#@bot.command(
+#  name='пьеса',
+#  brief='Cообщает следующую пьесу'
+#)
+#async def play(ctx):
+#  response = "Ромео и Джульетта — Уильям Шекспир"
+#  await ctx.send(response)
 
 @bot.command(
   name='втруппу',
@@ -574,6 +575,24 @@ scan.start()
 dinner.start()
 lunch.start()
 breakfast.start()
+
+@bot.command(name='join')
+async def play(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
+    channel = ctx.message.author.voice.channel
+    global player
+    try:
+      player = await channel.connect()
+    except:
+      pass
+    player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/music128'))
+
+@bot.command(name='leave', pass_context = True)
+async def leavevoice(ctx):
+    for x in bot.voice_clients:
+        if(x.guild == ctx.message.guild):
+            return await x.disconnect()
+
+    return await ctx.send("I am not connected to any voice channel on this server!")
 
 bot.run(TOKEN)
 
