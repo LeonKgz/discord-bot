@@ -10,7 +10,6 @@ import json
 import requests
 import datetime
 from discord.ext.commands import Bot
-from dotenv import load_dotenv
 from discord import FFmpegPCMAudio
 
 # retrieving Discord credentials
