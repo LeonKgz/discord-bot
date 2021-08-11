@@ -1,3 +1,5 @@
 discord.py
 PyMySQL
 requests
+discord.py[voice]
+ffmpeg
