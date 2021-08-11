@@ -575,7 +575,7 @@ dinner.start()
 lunch.start()
 breakfast.start()
 
-@bot.command(name='join')
+@bot.command(name='on')
 async def play(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
     channel = ctx.message.author.voice.channel
     global player
@@ -585,7 +585,7 @@ async def play(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
       pass
     player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/music128'))
 
-@bot.command(name='leave', pass_context = True)
+@bot.command(name='off', pass_context = True)
 async def leavevoice(ctx):
     for x in bot.voice_clients:
         if(x.guild == ctx.message.guild):
