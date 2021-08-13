@@ -526,7 +526,7 @@ async def breakfast():
     politzek= discord.utils.get(guild.roles, name='Политзаключённый')
 
     for ch in guild.channels:
-      if ("гулаг" in ch.name):
+      if ("колхоз" in ch.name):
         url = linkFetch()
         res = f"{politzek.mention}! Завтрак! \n\n {url}"
         res = f"Завтрак! \n\n {url}"
@@ -545,7 +545,7 @@ async def dinner():
     politzek= discord.utils.get(guild.roles, name='Политзаключённый')
 
     for ch in guild.channels:
-      if ("гулаг" in ch.name):
+      if ("колхоз" in ch.name):
         url = linkFetch()
         res = f"{politzek.mention}! Ужин! \n\n {url}"
         res = f"Ужин! \n\n {url}"
@@ -563,14 +563,14 @@ async def lunch():
     politzek= discord.utils.get(guild.roles, name='Политзаключённый')
 
     for ch in guild.channels:
-      if ("гулаг" in ch.name):
+      if ("колхоз" in ch.name):
         url = linkFetch()
         res = f"{politzek.mention}! Обед! \n\n {url}"
         res = f"Обед! \n\n {url}"
         await ch.send(res)
 
-scan.start()
 #looop.start()
+scan.start()
 dinner.start()
 lunch.start()
 breakfast.start()
@@ -581,6 +581,12 @@ async def play(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
     player = await channel.connect()
     player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/music128'))
 
+@bot.command(name='onn')
+async def kaligula(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
+    player.play(FFmpegPCMAudio('/files/kaligula.mp3'))
+
 @bot.command(name='off', pass_context = True)
 async def leavevoice(ctx):
     for x in bot.voice_clients:
@@ -588,6 +594,8 @@ async def leavevoice(ctx):
             return await x.disconnect()
 
     return await ctx.send("I am not connected to any voice channel on this server!")
+
+
 
 bot.run(TOKEN)
 
