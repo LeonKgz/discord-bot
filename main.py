@@ -571,9 +571,9 @@ async def lunch():
 
 #looop.start()
 scan.start()
-dinner.start()
-lunch.start()
-breakfast.start()
+#dinner.start()
+#lunch.start()
+#breakfast.start()
 
 @bot.command(name='on')
 async def play(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
