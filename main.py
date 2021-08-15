@@ -408,11 +408,11 @@ async def print_history(ctx):
     print("Scanning is finished.")  
 
 @bot.command(
-  name='выпусти',
+  name='пропуск',
 )
 async def let_free(ctx):
   
-  if not await check_rights(ctx, ['Политзаключённый']):
+  if not await check_rights(ctx, ['Апатрид']):
     return
 
   db, cursor = get_db_cursor()
@@ -421,7 +421,7 @@ async def let_free(ctx):
   guild = bot.get_guild(GUILD) 
 
   proletariat = discord.utils.get(guild.roles, name='Пролетарий')
-  politzek= discord.utils.get(guild.roles, name='Политзаключённый')
+  politzek= discord.utils.get(guild.roles, name='Апатрид')
 
   await ctx.author.add_roles(proletariat)
   await ctx.author.remove_roles(politzek)
