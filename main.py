@@ -133,35 +133,53 @@ async def include(ctx):
     await mem.remove_roles(truppa)
     await ctx.send(f"{mem.name} благополучно исключён из Драматической Труппы")
 
-@bot.command(
-  name='посадить',
-  brief='Отправить пролетария в гулаг, с протоколом',
-  help='Убирает роль Пролетария и даёт роль Политзаключённого. Можно заполнить протокол, который сохраняется в базе данных. Задержанный может ознакомиться с протоколом после задержания. Пользоваться командой могут Политбюро и ВЧК. '
-)
-async def jail(ctx, poor_guy, protocol):
-  if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
-    return
-  db, cursor = get_db_cursor()
-  for mem in ctx.guild.members:
-    if (mem.id == get_id(poor_guy)):
-      proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
-      politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
-      await mem.add_roles(politzek)
-      await mem.remove_roles(proletariat)
-
-      sql = f"""INSERT INTO prisoners(ID, Protocol)
-        VALUES(\"{mem.name}\", \"{protocol}\")
-      """
-      try:
-        cursor.execute(sql)
-        db.commit()
-      except:
-        db.rollback()
-        db.close()
-  try:      
-    db.close()
-  except:
-    print("Already closed")
+#@bot.command(
+#  name='посадить',
+#  brief='Отправить пролетария в гулаг, с протоколом',
+#  help='Убирает роль Пролетария и даёт роль Политзаключённого. Можно заполнить протокол, который сохраняется в базе данных. Задержанный может ознакомиться с протоколом после задержания. Пользоваться командой могут Политбюро и ВЧК. '
+#)
+#async def jail(ctx, poor_guy, protocol):
+#  if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
+#    return
+#  db, cursor = get_db_cursor()
+#  for mem in ctx.guild.members:
+#    if (mem.id == get_id(poor_guy)):
+#      proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
+#      politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
+#      await mem.add_roles(politzek)
+#      await mem.remove_roles(proletariat)
+#
+#      status = None
+#      mem_id = mem.id
+#      sql = f"SELECT EXISTS(SELECT * from prisoners WHERE ID={mem_id});"
+#      try:
+#        cursor.execute(sql)
+#        res = cursor.fetchone()['Status']
+#        print("Result is" + str(res))
+#        status = "Second Time"
+#        db.commit()
+#      except:
+#        status = "First Time"  
+#        db.rollback()
+#        db.close()
+#
+#      print("Status is " + status) 
+#      exit(1)
+#
+#
+#      sql = f"""INSERT INTO prisoners(ID, Protocol, Status)
+#        VALUES(\"{mem.id}\", \"{protocol}\", \"{status}\")
+#      """
+#      try:
+#        cursor.execute(sql)
+#        db.commit()
+#      except:
+#        db.rollback()
+#        db.close()
+#  try:      
+#    db.close()
+#  except:
+#    print("Already closed")
 
 @bot.command(
   name='начальник',
