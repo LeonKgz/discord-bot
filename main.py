@@ -277,7 +277,7 @@ async def on_message(message):
   me = bot.get_user(ME)
   if not message.guild:
     await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
-  elif 'гулаг' not in message.channel.name:
+  elif 'погран' not in message.channel.name and '':
     name = message.author.name
     iid = message.author.id
     time = message.created_at
