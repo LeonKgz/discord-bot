@@ -454,7 +454,7 @@ async def scan():
     super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит', 'NPC can\'t meme']
 
     proletariat = discord.utils.get(guild.roles, name='Пролетарий')
-    politzek= discord.utils.get(guild.roles, name='Политзаключённый')
+    politzek= discord.utils.get(guild.roles, name='Апатрид')
 
     for m in proletariat.members:
       done = False
@@ -478,8 +478,8 @@ async def scan():
           await m.remove_roles(proletariat)
           
           for ch in guild.channels:
-            if ("гулаг" in ch.name):
-              res = f"Заключённый <@!{m.id}>! Вы были неактивны более 3-х дней! «!выпусти» чтобы выйти из гулага"
+            if ("погран" in ch.name):
+              res = f"Гражданин <@!{m.id}>! Вы были неактивны более 3-х дней и мы не можем установить вашу личность! «!пропуск» чтобы пересечь границу Мошны!"
               await ch.send(res)
 
 
