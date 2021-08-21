@@ -10,7 +10,7 @@ import json
 import requests
 import datetime
 from discord.ext.commands import Bot
-from discord.ext import timers
+#from discord.ext import timers
 from discord import FFmpegPCMAudio
 
 # retrieving Discord credentials
@@ -37,7 +37,7 @@ def get_db_cursor():
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
-bot.timer_manager = timers.TimerManager(bot)
+#bot.timer_manager = timers.TimerManager(bot)
 
 @tasks.loop(seconds=5.0)
 async def looop():
@@ -329,6 +329,7 @@ async def on_message(message):
   if not message.guild:
     await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
   elif 'погран' not in message.channel.name:
+    print("Should be here")
     name = message.author.name
     iid = message.author.id
     time = message.created_at
