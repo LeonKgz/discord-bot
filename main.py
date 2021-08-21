@@ -10,6 +10,7 @@ import json
 import requests
 import datetime
 from discord.ext.commands import Bot
+from discord.ext import timers
 from discord import FFmpegPCMAudio
 
 # retrieving Discord credentials
@@ -36,6 +37,7 @@ def get_db_cursor():
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
+bot.timer_manager = timers.TimerManager(bot)
 
 @tasks.loop(seconds=5.0)
 async def looop():
@@ -133,53 +135,84 @@ async def include(ctx):
     await mem.remove_roles(truppa)
     await ctx.send(f"{mem.name} благополучно исключён из Драматической Труппы")
 
-#@bot.command(
-#  name='посадить',
-#  brief='Отправить пролетария в гулаг, с протоколом',
-#  help='Убирает роль Пролетария и даёт роль Политзаключённого. Можно заполнить протокол, который сохраняется в базе данных. Задержанный может ознакомиться с протоколом после задержания. Пользоваться командой могут Политбюро и ВЧК. '
-#)
-#async def jail(ctx, poor_guy, protocol):
-#  if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
-#    return
-#  db, cursor = get_db_cursor()
-#  for mem in ctx.guild.members:
-#    if (mem.id == get_id(poor_guy)):
-#      proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
-#      politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
-#      await mem.add_roles(politzek)
-#      await mem.remove_roles(proletariat)
+#from datetime import timedelta
 #
-#      status = None
-#      mem_id = mem.id
-#      sql = f"SELECT EXISTS(SELECT * from prisoners WHERE ID={mem_id});"
-#      try:
-#        cursor.execute(sql)
-#        res = cursor.fetchone()['Status']
-#        print("Result is" + str(res))
-#        status = "Second Time"
-#        db.commit()
-#      except:
-#        status = "First Time"  
-#        db.rollback()
-#        db.close()
+#@bot.command(name="remind")
+#async def remind(ctx, seconds):
+#    
+#    date = datetime.datetime.now() + timedelta(seconds=int(seconds))
+#    time = "21/08/15"
+#    date = datetime.datetime(*map(int, time.split("/")))
+#    
+#    res = await bot.timer_manager.create_timer("reminder", date, args=(ctx.channel.id, ctx.author.id))
+#    print(str(res))
+#    print("created " + str(date))
+#    # or without the manager
+#    timers.Timer(bot, "reminder", date, args=(ctx.channel.id, ctx.author.id)).start()
 #
-#      print("Status is " + status) 
-#      exit(1)
+#@bot.event
+#async def on_reminder(channel_id, author_id):
+#    print("got")
+#    channel = bot.get_channel(channel_id)
 #
-#
-#      sql = f"""INSERT INTO prisoners(ID, Protocol, Status)
-#        VALUES(\"{mem.id}\", \"{protocol}\", \"{status}\")
-#      """
-#      try:
-#        cursor.execute(sql)
-#        db.commit()
-#      except:
-#        db.rollback()
-#        db.close()
-#  try:      
-#    db.close()
-#  except:
-#    print("Already closed")
+#    await channel.send("Hey, <@{0}>, remember to:".format(author_id))
+
+@bot.command(
+  name='посадить',
+  brief='Отправить пролетария в гулаг, с протоколом',
+  help='Убирает роль Пролетария и даёт роль Политзаключённого. Можно заполнить протокол, который сохраняется в базе данных. Задержанный может ознакомиться с протоколом после задержания. Пользоваться командой могут Политбюро и ВЧК. '
+)
+async def jail(ctx, poor_guy, protocol):
+  if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
+    return
+  db, cursor = get_db_cursor()
+  for mem in ctx.guild.members:
+    if (mem.id == get_id(poor_guy)):
+      proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
+      politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
+      await mem.add_roles(politzek)
+      await mem.remove_roles(proletariat)
+
+      status = None
+
+      statuses = ["zamechanie", "vigovor", "zakluchenie"] 
+      lengths = {"zamechanie": 10, "vigovor": 60, "zakluchenie": 1440}
+      lengths = {"zamechanie": 1, "vigovor": 2, "zakluchenie": 3}
+
+      mem_id = mem.id
+      sql = f"SELECT * from prisoners WHERE ID={mem_id};"
+
+      try:
+        cursor.execute(sql)
+        res = cursor.fetchone()['Status']
+        newidx = statuses.index(res) + 1
+        if (newidx == len(statuses)):
+          newidx = 0
+        status = statuses[newidx]
+        
+      except Exception as e:
+        status = statuses[0]
+      
+      length = lengths[status]
+
+      guild = bot.get_guild(GUILD) 
+      for ch in guild.channels:
+        if ("технический" in ch.name):
+          res = f".remind here {length}m free {mem_id}"
+          await ch.send(res)
+
+      sql = f"REPLACE INTO prisoners(ID, Protocol, Status) VALUES(\"{mem.id}\", \"{protocol}\", \"{status}\")"
+      try:
+        cursor.execute(sql)
+        db.commit()
+      except Exception as e:
+        print(e)
+        db.rollback()
+        db.close()
+  try:      
+    db.close()
+  except:
+    print("Already closed")
 
 @bot.command(
   name='начальник',
@@ -295,7 +328,7 @@ async def on_message(message):
   me = bot.get_user(ME)
   if not message.guild:
     await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
-  elif 'погран' not in message.channel.name and '':
+  elif 'погран' not in message.channel.name:
     name = message.author.name
     iid = message.author.id
     time = message.created_at
@@ -311,6 +344,18 @@ async def on_message(message):
       db.rollback()
 
     db.close()
+  elif 'технический' in message.channel.name and message.author.id == 116275390695079945:
+    msg = message.content
+    mss = msg.split()
+    if (mss[0] == "free"):
+      lucky_id = message.author.id
+      for mem in ctx.guild.members:
+        if (mem.id == lucky_id):
+          proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
+          politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
+          await mem.add_roles(proletariat)
+          await mem.remove_roles(politzek)
+      await channel.send("The guy is free!") 
 
   await bot.process_commands(message)
 
