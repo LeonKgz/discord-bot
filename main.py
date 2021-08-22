@@ -712,7 +712,7 @@ async def confess(ctx, confession):
         try:
           cursor.execute(replace)
           db.commit()
-          await ctx.send(f"<@!{iid}> ваше описание обновлёно!")
+          await ctx.send(f"<@!{iid}> ваше описание обновлено!")
         except Exception as e:
           print(e)
           await ctx.send(f"<@!{iid}> c вашим описанием была проблема!")
@@ -725,7 +725,7 @@ async def confess(ctx, confession):
       try:
         cursor.execute(replace)
         db.commit()
-        await ctx.send(f"<@!{iid}> ваше описание обновлёно!")
+        await ctx.send(f"<@!{iid}> ваше описание обновлено!")
       except Exception as e:
         print(e)
         db.rollback()
