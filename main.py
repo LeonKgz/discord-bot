@@ -329,7 +329,6 @@ async def on_message(message):
   if not message.guild:
     await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
   elif 'погран' not in message.channel.name:
-    print("Should be here")
     name = message.author.name
     iid = message.author.id
     time = message.created_at
@@ -519,7 +518,7 @@ async def scan():
 
     proletariat = discord.utils.get(guild.roles, name='Пролетарий')
     politzek= discord.utils.get(guild.roles, name='Апатрид')
-
+    ms = []
     for m in proletariat.members:
       done = False
       for role in list(map(str, m.roles)):
@@ -537,18 +536,22 @@ async def scan():
         res = cursor.fetchone()
       
         if (res is None):
-
+          ms.append(m)
           await m.add_roles(politzek)
           await m.remove_roles(proletariat)
-          
-          for ch in guild.channels:
-            if ("погран" in ch.name):
-              res = f"Гражданин <@!{m.id}>! Вы были неактивны более 3-х дней и мы не можем установить вашу личность! «!пропуск» чтобы пересечь границу Мошны!"
-              await ch.send(res)
-
 
       except Exception as e:
         print(e)
+
+    for ch in guild.channels:
+      if ("погран" in ch.name):
+        mentions = ""
+        for m in ms:
+          mentions += f"<@!{m.id}> "
+        
+        res = f"Граждане {mentions}! \n\nВы были неактивны более 3-х дней и мы не можем установить вашу личность! «!пропуск» чтобы пересечь границу Мошны!"
+        await ch.send(res)
+        break
 
     sql = f"DELETE FROM cache"
 
@@ -659,7 +662,101 @@ async def leavevoice(ctx):
 
     return await ctx.send("I am not connected to any voice channel on this server!")
 
+@bot.command(name="кто")
+async def confess(ctx, mem):
+ 
+    id_author = ctx.author.id
+    id_to_search = get_id(mem)
+    mem = bot.get_user(id_to_search)
+    
+    db, cursor = get_db_cursor()
 
+    select = f"SELECT * from confessions WHERE ID={id_to_search};"
+
+    try:
+      cursor.execute(select)
+      confession = cursor.fetchone()['Confession']
+      await ctx.send(f"<@!{id_author}>, вот что {mem.name} говорит о себе: \n\n\t*{confession}*")
+      
+    except Exception as e:
+      print(e)
+      db.rollback()
+      await ctx.send(f"<@!{id_author}>, пока нам ничего не известно о {mem.name}.")
+      
+    db.close()
+
+@bot.command(name='рассказать')
+async def confess(ctx, confession):
+  
+    name = ctx.author.name
+    iid = ctx.author.id
+    confession = str(confession)
+    time = datetime.datetime.now()
+
+    db, cursor = get_db_cursor()
+
+    select = f"SELECT * from confessions WHERE ID={iid};"
+    replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{confession}\", \"{time}\")"
+
+    try:
+      cursor.execute(select)
+      timestamp = cursor.fetchone()['Timestamp']
+      period = datetime.datetime.now() - timestamp
+      days_passed = period.days
+      if (days_passed < 7):
+        diff = 7 - days_passed
+        await ctx.send(f"<@!{iid}> своё описание можно обновлять только один раз в 7 дней! \n\n\t**Вы сможете обновить своё через {diff}**")
+        return
+      
+      else:
+        try:
+          cursor.execute(replace)
+          db.commit()
+          await ctx.send(f"<@!{iid}> ваше описание обновлёно!")
+        except Exception as e:
+          print(e)
+          await ctx.send(f"<@!{iid}> c вашим описанием была проблема!")
+          db.rollback()
+
+    except Exception as e:
+      print(e)
+      print(f"No entry for {name}...\nInserting new entry...")
+      
+      try:
+        cursor.execute(replace)
+        db.commit()
+        await ctx.send(f"<@!{iid}> ваше описание обновлёно!")
+      except Exception as e:
+        print(e)
+        db.rollback()
+        await ctx.send(f"<@!{iid}> c вашим описанием была проблема!")
+      
+    db.close()
+
+@bot.event 
+async def on_member_join(member):
+  guild = bot.get_guild(GUILD) 
+  apatrid = discord.utils.get(guild.roles, name='Апатрид')
+  await member.add_roles(apatrid)
+  db, cursor = get_db_cursor()
+  name = member.name
+  for ch in guild.channels:
+    if "manifesto" in ch.name:
+      manifesto = ch
+
+  for ch in guild.channels:
+    if "погран" in ch.name:
+      await ch.send(f"<@!{member.id}>, добро пожаловать в ТМГ!\n\nЭто пограничная застава, охраняющая суверенитет Мошны.\n В канале {manifesto.mention} ты найдёшь Трактат о Мошне — основополагающий документ сего сообщества.\nЧтобы получить доступ ко всем остальным каналам сервера и стать полноценным гражданином, достаточно ввести команду « !пропуск ». \n\nДа прибудет с тобой Мошна!")
+    if "карандаш" in ch.name:
+      await ch.send(f"<@!{member.id}> вступил в ТМГ!")
+
+@bot.event 
+async def on_member_remove(member):
+  guild = bot.get_guild(GUILD) 
+
+  for ch in guild.channels:
+    if "карандаш" in ch.name:
+      await ch.send(f"<@!{member.id}> **покинул** ТМГ!")
 
 bot.run(TOKEN)
 
