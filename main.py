@@ -505,6 +505,39 @@ async def let_free(ctx):
 
   db.close()
 
+@bot.command(name='все')
+async def vse(ctx):
+  guild = bot.get_guild(GUILD) 
+  db, cursor = get_db_cursor()
+  proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+  politzek= discord.utils.get(guild.roles, name='Апатрид')
+  #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит', 'NPC can\'t meme']
+  ms = []
+  for m in guild.members:
+    iid = m.id
+    sql = f"SELECT * from confessions WHERE `ID` = \"{iid}\""
+    try:
+     cursor.execute(sql)
+     res = cursor.fetchone()
+    
+     if (res is None):
+       ms.append(m)
+       #await m.add_roles(politzek)
+       #await m.remove_roles(proletariat)       
+
+    except Exception as e:
+      print(e)
+
+  for ch in guild.channels:
+    if ("технический" in ch.name):
+      mentions = ""
+      for m in ms:
+        mentions += f"<@!{m.id}> "
+      
+      res = f"Граждане {mentions}! \n\nМы не можем установить вашу личность! Вам нужно зарекомендовать себя! \n\n\t\tЭто можно сделать с помощью команды **« !рассказать »**\n\n\t\t Например: !рассказать \"Привет, я Албанец. Мне 22 года, по образованию программист. Устраиваю читки пьес в дискорде, пытаюсь собрать народ на групповые чтения поэзии и просмотры японских мультиков. В свободное время люблю почитать что-то по философии или религии. Могу сыграть на гитаре твой реквест. В видео-игры не играю. Играю в Го. Энтузиаст Высокой Мошны.\"\n\n\t Боту можно написать и в личку. Соответственно рекомендации пользователя можно узнать с помощью команды **« !кто »**, например: !кто @Albance69 . Учтите, что **записи о себе можно править только один раз в 7 дней!**"
+      await ch.send(res)
+      break
+
 @tasks.loop(seconds=86400.0)
 async def scan():
 
@@ -643,10 +676,19 @@ scan.start()
 #breakfast.start()
 
 @bot.command(name='on')
-async def play(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
+async def play(ctx, number):
     channel = ctx.message.author.voice.channel
     player = await channel.connect()
-    player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/music128'))
+    number = int(number)
+    if (number == 0):
+      # Музыка
+      player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/music128'))
+    elif number == 1:  
+      # Старое радио
+      player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/ices128'))
+    elif number == 2:  
+      # Детское радио
+      player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/detskoe128'))
 
 @bot.command(name='onn')
 async def kaligula(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
