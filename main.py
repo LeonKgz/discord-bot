@@ -328,7 +328,7 @@ async def spisok(ctx, role):
 @bot.event
 async def on_message(message):
 
-  if message.author == bot.user:
+  if message.author == bot.user and "!кто" not in str(message.content):
     return
   me = bot.get_user(ME)
   if not message.guild:
@@ -701,10 +701,51 @@ async def lunch():
         res = f"Обед! \n\n {url}"
         await ch.send(res)
 
+import random
+
+@tasks.loop(seconds=3600.0)
+async def important_info():
+
+  guild = bot.get_guild(GUILD) 
+  
+  hour = int(datetime.datetime.now().hour)
+
+  if (guild and hour == 9):
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    npc = discord.utils.get(guild.roles, name='NPC can\'t meme')
+
+    ps = proletariat.members 
+    ns = npc.members
+    ps = [p for p in ps if p not in ns]
+
+    m = ps[random.randint(0, len(ps) - 1)]
+
+    for ch in guild.channels:
+      if ("колхоз" in ch.name or "погран" in ch.name):
+
+        db, cursor = get_db_cursor()
+
+        select = f"SELECT * from confessions WHERE ID={m.id};"
+
+        try:
+          cursor.execute(select)
+          confession = cursor.fetchone()['Confession']
+          res = f"Товарищи! А знали ли вы что-нибудь о {m.name}? Вот что {m.name} говорит о себе: \n\n\t*{confession}*"
+          await ch.send(res)
+           
+        except Exception as e:
+          print(e)
+          db.rollback()
+          
+        db.close()
+
+
 #looop.start()
 scan.start()
 #dinner.start()
 #lunch.start()
+important_info.start()
 #breakfast.start()
 
 @bot.command(name='on')
