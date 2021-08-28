@@ -731,7 +731,7 @@ async def important_info():
         try:
           cursor.execute(select)
           confession = cursor.fetchone()['Confession']
-          res = f"Товарищи! А знали ли вы что-нибудь о {m.name}? Вот что {m.name} говорит о себе: \n\n\t*{confession}*"
+          res = f"Товарищи! А знали ли вы что-нибудь о {m.name}? Вот что {m.name} говорит о себе: \n\n\t*{confession}*\n\nНе забывайте, что можно обновить своё описание (« **!рассказать** ») как минимум раз в 7 дней."
           await ch.send(res)
            
         except Exception as e:
