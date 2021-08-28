@@ -92,7 +92,12 @@ async def include(ctx, *, actor):
       await ctx.send(f"{mem.name} благополучно включён в Драматическую Труппу")
 
 def get_id(ref):
-  return int(str(ref)[3:-1])
+  if(str(ref)[2] == '!'): 
+    a = int(str(ref)[3:-1])
+  else:
+    a = int(str(ref)[2:-1])
+
+  return a
 
 @bot.command(
   name='изтруппы',
@@ -738,6 +743,10 @@ async def confess(ctx, mem):
     id_to_search = get_id(mem)
     mem = bot.get_user(id_to_search)
     
+    #if (mem is None):
+    #  await ctx.send(f"<@!{id_author}>, к сожалению эта команда не работает в мобильном приложении. \nВсе вопросы к дикорду!")
+    #  return
+
     db, cursor = get_db_cursor()
 
     select = f"SELECT * from confessions WHERE ID={id_to_search};"
