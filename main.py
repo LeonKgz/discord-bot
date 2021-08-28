@@ -527,7 +527,7 @@ async def let_free(ctx):
 
   db.close()
 
-@bot.command(name='все')
+@bot.command(name='19273468236482734627846798326486')
 async def vse(ctx):
   guild = bot.get_guild(GUILD) 
   db, cursor = get_db_cursor()
@@ -549,14 +549,14 @@ async def vse(ctx):
     
      if (res is None):
        ms.append(m)
-       #await m.add_roles(politzek)
-       #await m.remove_roles(proletariat)       
+       await m.add_roles(politzek)
+       await m.remove_roles(proletariat)       
 
     except Exception as e:
       print(e)
 
   for ch in guild.channels:
-    if ("технический" in ch.name):
+    if ("погранnnn" in ch.name):
       mentions = ""
       for m in ms:
         mentions += f"<@!{m.id}> "
@@ -609,7 +609,7 @@ async def scan():
         for m in ms:
           mentions += f"<@!{m.id}> "
         
-        res = f"Граждане {mentions}! \n\nВы были неактивны более 3-х дней и мы не можем установить вашу личность! « **!пропуск** » чтобы пересечь границу Мошны!"
+        res = f"Граждане {mentions}! \n\nВы были неактивны более 3-х дней и нам нужно убедиться, что вы ещё живы! « **!пропуск** » чтобы пересечь границу Мошны!"
         await ch.send(res)
         break
 
