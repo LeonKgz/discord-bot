@@ -810,6 +810,12 @@ async def confess(ctx, confession):
     name = ctx.author.name
     iid = ctx.author.id
     confession = str(confession)
+
+    check = confession.split()
+    if len(check) == 1:
+      await ctx.send(f"<@!{iid}> твоё описание либо **слишком короткое** либо ты забыл(а) **кавычки**!")
+      return
+
     time = datetime.datetime.now()
 
     db, cursor = get_db_cursor()
@@ -828,6 +834,7 @@ async def confess(ctx, confession):
         return
       
       else:
+
         try:
           cursor.execute(replace)
           db.commit()
