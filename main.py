@@ -547,7 +547,7 @@ async def scan():
 
   if (guild and day % 3 == 0):
 
-    super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит', 'NPC can\'t meme']
+    super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
 
     proletariat = discord.utils.get(guild.roles, name='Пролетарий')
     politzek= discord.utils.get(guild.roles, name='Апатрид')
