@@ -377,7 +377,7 @@ async def check_rights(ctx, acceptable_roles):
   for role in list(map(str, ctx.author.roles)):
     if (role in super_roles):
       return True
-  response = "**" + str(ctx.author.name) + "**, ты кто " + str(get(bot.emojis, name='peepoClown'))
+  response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(get(bot.emojis, name='peepoClown'))
   await ctx.send(response) 
   return False
 
