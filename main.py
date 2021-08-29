@@ -92,7 +92,8 @@ async def include(ctx, *, actor):
       await ctx.send(f"{mem.name} благополучно включён в Драматическую Труппу")
 
 def get_id(ref):
-  if(str(ref)[2] == '!'): 
+  
+  if(str(ref)[2] == '!' or str(ref)[2] == '&'): 
     a = int(str(ref)[3:-1])
   else:
     a = int(str(ref)[2:-1])
