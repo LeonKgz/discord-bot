@@ -806,13 +806,30 @@ async def confess(ctx, mem):
     db.close()
 
 @bot.command(name='рассказать')
-async def confess(ctx, confession):
-  
+async def confess(ctx, *, args=None):
+#async def confess(ctx, confession):
+
     name = ctx.author.name
     iid = ctx.author.id
-    confession = str(confession)
+    confession = str(args)
+    confession = confession.strip()
+    quotes = confession.count("\"")
+    backed = confession.count("\\\"")
+    quotes -= backed
 
+    if (quotes == 0):
+      await ctx.send(f"<@!{iid}> ты забыл(а) **кавычки**!")
+      return
+    elif (confession[0] != "\"" or confession[-1] != "\""):
+      await ctx.send(f"<@!{iid}> **кавычки** должны быть вокруг!")
+      return
+    elif (quotes > 2):
+      await ctx.send(f"<@!{iid}> если ты хочешь использовать **кавычки** в описании, нужно перед ними поставить **« \\\\ »**, то есть например:\nВместо \"Я работаю в комании \"Комплекс\" три года\" =>  \"Я работаю в комании \\\\\"Комплекс\\\\\" три года\"")
+      return
+    confession = confession[1:-1]
+    confession = confession.strip()
     check = confession.split()
+    #check = quotes.split()
     if len(check) == 1:
       await ctx.send(f"<@!{iid}> твоё описание либо **слишком короткое** либо ты забыл(а) **кавычки**!")
       return
