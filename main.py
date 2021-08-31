@@ -703,14 +703,14 @@ async def lunch():
 
 import random
 
-@tasks.loop(seconds=10.0)
+@tasks.loop(seconds=3600.0)
 async def important_info():
 
   guild = bot.get_guild(GUILD) 
   
   hour = int(datetime.datetime.now().hour)
 
-  if (guild and hour == 12):
+  if (guild and hour == 9):
 
     proletariat = discord.utils.get(guild.roles, name='Пролетарий')
     npc = discord.utils.get(guild.roles, name='NPC can\'t meme')
