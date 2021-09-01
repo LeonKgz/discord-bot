@@ -491,7 +491,6 @@ async def let_free(ctx):
   proletariat = discord.utils.get(guild.roles, name='Пролетарий')
   politzek= discord.utils.get(guild.roles, name='Апатрид')
 
-
   name = ctx.author.name
   iid = ctx.author.id
   time = ctx.message.created_at
@@ -816,6 +815,10 @@ async def confess(ctx, *, args=None):
     backed = confession.count("\\\"")
     quotes -= backed
 
+    guild = bot.get_guild(GUILD) 
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Апатрид')
+
     if (quotes == 0):
       await ctx.send(f"<@!{iid}> ты забыл(а) **кавычки**!")
       return
@@ -855,7 +858,23 @@ async def confess(ctx, *, args=None):
         try:
           cursor.execute(replace)
           db.commit()
-          await ctx.send(f"<@!{iid}> ваше описание обновлено!")
+
+          time = datetime.datetime.now()
+
+          db, cursor = get_db_cursor()
+          sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
+
+          try:
+            cursor.execute(sql)
+            db.commit()
+          except Exception as e:
+            print(e)
+            db.rollback()
+
+          await ctx.send(f"<@!{iid}> проходите, ваше описание обновлено!")
+          await ctx.author.add_roles(proletariat)
+          await ctx.author.remove_roles(politzek)
+
         except Exception as e:
           print(e)
           await ctx.send(f"<@!{iid}> c вашим описанием была проблема!")
@@ -868,7 +887,23 @@ async def confess(ctx, *, args=None):
       try:
         cursor.execute(replace)
         db.commit()
-        await ctx.send(f"<@!{iid}> ваше описание обновлено!")
+        await ctx.send(f"<@!{iid}> ваше описание обновлено, проходите!")
+
+        time = datetime.datetime.now()
+
+        db, cursor = get_db_cursor()
+        sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
+
+        try:
+          cursor.execute(sql)
+          db.commit()
+        except Exception as e:
+          print(e)
+          db.rollback()
+
+        await ctx.author.add_roles(proletariat)
+        await ctx.author.remove_roles(politzek)
+
       except Exception as e:
         print(e)
         db.rollback()
