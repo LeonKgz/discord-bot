@@ -730,7 +730,7 @@ async def important_info():
         try:
           cursor.execute(select)
           confession = cursor.fetchone()['Confession']
-          res = f"Товарищи! А знали ли вы что-нибудь о {m.name}? Вот что {m.name} говорит о себе: \n\n\t*{confession}*\n\nНе забывайте, что можно обновить своё описание (« **!рассказать** ») как минимум раз в 7 дней."
+          res = f"Товарищи! А знали ли вы что-нибудь о {m.name}? Вот что {m.name} говорит о себе: \n\n\t*{confession}*\n\nНе забывайте, что можно обновить своё описание (« **!рассказать** ») максимум один раз в 7 дней."
           await ch.send(res)
            
         except Exception as e:
@@ -850,7 +850,7 @@ async def confess(ctx, *, args=None):
       days_passed = period.days
       if (days_passed < 7):
         diff = 7 - days_passed
-        await ctx.send(f"<@!{iid}> своё описание можно обновлять только один раз в 7 дней! \n\n\t**Вы сможете обновить своё через {diff}**")
+        await ctx.send(f"<@!{iid}> своё описание можно обновлять максимум один раз в 7 дней! \n\n\t**Вы сможете обновить своё через {diff}**")
         return
       
       else:
