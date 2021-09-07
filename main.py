@@ -574,9 +574,9 @@ async def scan():
 
   db, cursor = get_db_cursor()
   guild = bot.get_guild(GUILD) 
-  day = int(datetime.datetime.now().day)
+  day = int(datetime.datetime.today().weekday())
 
-  if (guild and day % 3 == 0):
+  if (guild and day == 0):
 
     super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
 
@@ -613,7 +613,7 @@ async def scan():
         for m in ms:
           mentions += f"<@!{m.id}> "
         
-        res = f"Граждане {mentions}! \n\nВы были неактивны более 3-х дней и нам нужно убедиться, что вы ещё живы! « **!пропуск** » чтобы пересечь границу Мошны!"
+        res = f"Граждане {mentions}! \n\nВы были неактивны более 7 дней и нам нужно убедиться, что вы ещё живы! « **!пропуск** » чтобы пересечь границу Мошны!"
         await ch.send(res)
         break
 
