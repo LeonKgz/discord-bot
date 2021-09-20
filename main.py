@@ -797,14 +797,17 @@ async def play(ctx, number):
 
 @bot.command(name='31')
 async def kaligula(ctx):
+    for x in bot.voice_clients:
+        print("disconnected from " + str(x))
+        x.disconnect()
     channel = ctx.message.author.voice.channel
     player = await channel.connect()
     player.play(FFmpegPCMAudio('files/gong.mp3'))
 
 @bot.command(name='32')
 async def kaligula(ctx):
-
     for x in bot.voice_clients:
+        print("disconnected from " + str(x))
         x.disconnect()
     channel = ctx.message.author.voice.channel
     player = await channel.connect()
@@ -812,9 +815,12 @@ async def kaligula(ctx):
 
 @bot.command(name='33')
 async def kaligula(ctx):
+    for x in bot.voice_clients:
+        print("disconnected from " + str(x))
+        x.disconnect()
     channel = ctx.message.author.voice.channel
     player = await channel.connect()
-    player.play(FFmpegPCMAudio('files/gong.mp3'))
+    player.play(FFmpegPCMAudio('files/hackbrett.mp3'))
 
 
 @bot.command(name='off', pass_context = True)
