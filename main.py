@@ -799,19 +799,19 @@ async def play(ctx, number):
 async def kaligula(ctx):
     channel = ctx.message.author.voice.channel
     player = await channel.connect()
-    player.play(FFmpegPCMAudio('/files/gong.mp3'))
+    player.play(FFmpegPCMAudio('files/gong.mp3'))
 
 @bot.command(name='32')
 async def kaligula(ctx):
     #channel = ctx.message.author.voice.channel
     #player = await channel.connect()
-    player.play(FFmpegPCMAudio('/files/final_gong.mp3'))
+    player.play(FFmpegPCMAudio('files/final_gong.mp3'))
 
 @bot.command(name='33')
 async def kaligula(ctx):
     #channel = ctx.message.author.voice.channel
     #player = await channel.connect()
-    player.play(FFmpegPCMAudio('/files/gong.mp3'))
+    player.play(FFmpegPCMAudio('files/gong.mp3'))
 
 
 @bot.command(name='off', pass_context = True)
