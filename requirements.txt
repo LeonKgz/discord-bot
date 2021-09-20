@@ -3,3 +3,4 @@ discord.py
 PyMySQL
 requests
 ffmpeg
+discord-timers
