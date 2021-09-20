@@ -803,14 +803,17 @@ async def kaligula(ctx):
 
 @bot.command(name='32')
 async def kaligula(ctx):
-    #channel = ctx.message.author.voice.channel
-    #player = await channel.connect()
+
+    for x in bot.voice_clients:
+        x.disconnect()
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
     player.play(FFmpegPCMAudio('files/final_gong.mp3'))
 
 @bot.command(name='33')
 async def kaligula(ctx):
-    #channel = ctx.message.author.voice.channel
-    #player = await channel.connect()
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
     player.play(FFmpegPCMAudio('files/gong.mp3'))
 
 
