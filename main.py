@@ -739,6 +739,39 @@ async def important_info():
           
         db.close()
 
+@tasks.loop(seconds=30000000.0)
+async def start_records():
+    try:
+      guild = bot.get_guild(GUILD) 
+      proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+      politzek= discord.utils.get(guild.roles, name='Апатрид')
+      print(guild.members)
+
+      db, cursor = get_db_cursor()
+      points = 0
+      
+      for m in guild.members:
+        name = m.name
+        id_to_search = m.id
+
+        replace = f"REPLACE INTO rating(ID, Name, Points) VALUES(\"{id_to_search}\", \"{name}\", \"{points}\")"
+
+        try:
+          cursor.execute(replace)
+          db.commit()
+          
+        except Exception as e:
+          print(e)
+          db.rollback()
+      db.close()
+      exit(0)
+
+    except Exception as e:
+      print("oof")
+
+
+#start_records.start()
+ 
 
 #looop.start()
 scan.start()
@@ -762,11 +795,24 @@ async def play(ctx, number):
       # Детское радио
       player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/detskoe128'))
 
-@bot.command(name='onn')
-async def kaligula(ctx, url: str = 'http://stream.radioparadise.com/rock-128'):
+@bot.command(name='31')
+async def kaligula(ctx):
     channel = ctx.message.author.voice.channel
     player = await channel.connect()
-    player.play(FFmpegPCMAudio('/files/kaligula.mp3'))
+    player.play(FFmpegPCMAudio('/files/gong.mp3'))
+
+@bot.command(name='32')
+async def kaligula(ctx):
+    #channel = ctx.message.author.voice.channel
+    #player = await channel.connect()
+    player.play(FFmpegPCMAudio('/files/final_gong.mp3'))
+
+@bot.command(name='33')
+async def kaligula(ctx):
+    #channel = ctx.message.author.voice.channel
+    #player = await channel.connect()
+    player.play(FFmpegPCMAudio('/files/gong.mp3'))
+
 
 @bot.command(name='off', pass_context = True)
 async def leavevoice(ctx):
@@ -775,6 +821,75 @@ async def leavevoice(ctx):
             return await x.disconnect()
 
     return await ctx.send("I am not connected to any voice channel on this server!")
+
+def get_db_row(db_name, id_to_search):
+
+    db, cursor = get_db_cursor()
+
+    select = f"SELECT * from {db_name} WHERE ID={id_to_search};"
+
+    try:
+      cursor.execute(select)
+      row = cursor.fetchone()
+      return row
+      
+    except Exception as e:
+      print(e)
+      db.rollback()
+      db.close()
+      return False
+ 
+import json
+
+@bot.command(name="оценить")
+async def confess(ctx, mem, points):
+
+    if (not await check_rights(ctx, ['СовНарМод'])):
+      return
+ 
+    id_author = ctx.author.id
+    id_to_search = get_id(mem)
+    mem = bot.get_user(id_to_search)
+    points = int(points)
+    
+    if (points < 0 or points > 10):
+      await ctx.send(f"<@!{id_author}>, количество очков должно быть между 0 и 10")
+      return
+    
+    row = get_db_row("confessions", id_to_search)
+
+    if (row):
+      if (row["Points"] is None):
+        data = {
+          int(id_author): points          
+        }
+        
+      else:
+        data = json.loads(row["Points"])
+        data[f"{id_author}"] = points
+
+      data = json.dumps(data)
+      data = data.replace("\"", "\\\"")
+    else:
+      await ctx.send(f"<@!{id_author}>, оценивать нечего!")
+      return
+
+    db, cursor = get_db_cursor()
+    name = row["Name"]
+    confession = row["Confession"]
+    time = row["Timestamp"]
+
+    replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{id_to_search}\", \"{name}\", \"{confession}\", \"{time}\", \"{data}\")"
+
+    try:
+      cursor.execute(replace)
+      db.commit()
+      
+    except Exception as e:
+      print(e)
+      db.rollback()
+    db.close()
+    await ctx.send(f"<@!{id_author}>, оценка обновлена!")
 
 @bot.command(name="кто")
 async def confess(ctx, mem):
@@ -838,10 +953,17 @@ async def confess(ctx, *, args=None):
 
     time = datetime.datetime.now()
 
+    data = json.dumps(None)
+    #data = data.replace("\"", "\\\"")
+
+    row = get_db_row("confessions", iid)
+    if row:
+      points = row["Points"]
+
     db, cursor = get_db_cursor()
 
     select = f"SELECT * from confessions WHERE ID={iid};"
-    replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{confession}\", \"{time}\")"
+    replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{iid}\", \"{name}\", \"{confession}\", \"{time}\", \"{points}\")"
 
     try:
       cursor.execute(select)
