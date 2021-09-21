@@ -1,4 +1,5 @@
 #! /usr/bin/python
+
 # vim: set fileencoding=utf-8:
 
 import os
@@ -402,6 +403,15 @@ def convert_brief(message):
 # TODO uncomment to start the loop
 #looop.start()
 
+names = {
+  "frolov": 499303760653189121,
+  "wlg": 202531183790260224,
+  "hitary": 214320783357378560,
+  "harper": 376990474466099201,
+  "nina": 201692729879560192,
+  "rainlich": 277128557925367808,
+}
+
 @bot.command(
   name='1',
   brief=''
@@ -410,9 +420,203 @@ async def nick1(ctx):
   if (not await check_rights(ctx, ['Krabick'])):
     return
   guild = bot.get_guild(GUILD) 
-  await guild.get_member(277128557925367808).edit(nick="Чёрный Человек")
-  response = "Дело сделано!"
-  await ctx.send(response)
+  await guild.get_member(names["frolov"]).edit(nick="Калигула")
+
+@bot.command(
+  name='2',
+  brief=''
+)
+async def nick2(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["frolov"]).edit(nick="Второй патриций")
+
+@bot.command(
+  name='3',
+  brief=''
+)
+async def nick3(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["nina"]).edit(nick="Цезония")
+  
+@bot.command(
+  name='4',
+  brief=''
+)
+async def nick4(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["nina"]).edit(nick="Первый патриций")
+
+@bot.command(
+  name='5',
+  brief=''
+)
+async def nick5(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["nina"]).edit(nick="Первый поэт")
+
+@bot.command(
+  name='6',
+  brief=''
+)
+async def nick6(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["nina"]).edit(nick="Седьмой поэт")
+
+@bot.command(
+  name='7',
+  brief=''
+)
+async def nick7(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["hitary"]).edit(nick="Геликон")
+
+@bot.command(
+  name='8',
+  brief=''
+)
+async def nick8(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["hitary"]).edit(nick="Муций")
+
+@bot.command(
+  name='9',
+  brief=''
+)
+async def nick9(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["hitary"]).edit(nick="Второй поэт")
+
+
+@bot.command(
+  name='10',
+  brief=''
+)
+async def nick10(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["rainlich"]).edit(nick="Сципион")
+
+@bot.command(
+  name='11',
+  brief=''
+)
+async def nick11(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["rainlich"]).edit(nick="Третий патриций")
+
+@bot.command(
+  name='12',
+  brief=''
+)
+async def nick12(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["rainlich"]).edit(nick="Третий поэт")
+
+
+@bot.command(
+  name='13',
+  brief=''
+)
+async def nick13(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["harper"]).edit(nick="Керея")
+
+@bot.command(
+  name='14',
+  brief=''
+)
+async def nick14(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["harper"]).edit(nick="Cтраж")
+
+@bot.command(
+  name='15',
+  brief=''
+)
+async def nick15(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["harper"]).edit(nick="Пятый поэт")
+
+
+@bot.command(
+  name='16',
+  brief=''
+)
+async def nick16(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["wlg"]).edit(nick="Старый патриций")
+
+@bot.command(
+  name='17',
+  brief=''
+)
+async def nick17(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["wlg"]).edit(nick="Управитель")
+
+@bot.command(
+  name='18',
+  brief=''
+)
+async def nick18(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["wlg"]).edit(nick="Мерея")
+
+
+@bot.command(
+  name='19',
+  brief=''
+)
+async def nick19(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["wlg"]).edit(nick="Метелий")
+
+
+@bot.command(
+  name='20',
+  brief=''
+)
+async def nick20(ctx):
+  if (not await check_rights(ctx, ['Krabick'])):
+    return
+  guild = bot.get_guild(GUILD) 
+  await guild.get_member(names["wlg"]).edit(nick="Шестой поэт")
+
 
 @bot.command(
   name='history',
