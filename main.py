@@ -796,7 +796,7 @@ async def play(ctx, number):
       player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/detskoe128'))
 
 @bot.command(name='init')
- async def kaligula0(ctx):
+async def kaligula0(ctx):
      channel = ctx.message.author.voice.channel
      player = await channel.connect()
 
@@ -833,15 +833,15 @@ async def kaligula2(ctx):
 @bot.command(name='33')
 async def kaligula3(ctx):
 
-		for x in bot.voice_clients:
+    for x in bot.voice_clients:
 
-       if (x.is_connected()):
-           x.stop()
-           x.play(FFmpegPCMAudio('files/hackbrett.mp3'))
-       else:
-           channel = ctx.message.author.voice.channel
-           player = await channel.connect()
-    			 player.play(FFmpegPCMAudio('files/hackbrett.mp3'))
+        if (x.is_connected()):
+            x.stop()
+            x.play(FFmpegPCMAudio('files/hackbrett.mp3'))
+        else:
+            channel = ctx.message.author.voice.channel
+            player = await channel.connect()
+            player.play(FFmpegPCMAudio('files/hackbrett.mp3'))
 
 @bot.command(name='off', pass_context = True)
 async def leavevoice(ctx):
