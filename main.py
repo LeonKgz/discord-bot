@@ -999,13 +999,15 @@ async def play(ctx, number):
       # Детское радио
       player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/detskoe128'))
 
-@bot.command(name='init')
+@bot.command(name='i')
 async def kaligula0(ctx):
      channel = ctx.message.author.voice.channel
      player = await channel.connect()
 
 @bot.command(name='31')
 async def kaligula1(ctx):
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
 
     for x in bot.voice_clients:
 
@@ -1036,6 +1038,9 @@ async def kaligula2(ctx):
 
 @bot.command(name='33')
 async def kaligula3(ctx):
+
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
 
     for x in bot.voice_clients:
 
