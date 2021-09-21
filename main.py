@@ -1042,12 +1042,12 @@ async def kaligula3(ctx):
         if (x.is_connected()):
             x.stop()
             while (True):
-                x.play(FFmpegPCMAudio('files/hackbrett.mp3'))
+                x.play(FFmpegPCMAudio('files/hackbrett2.mp3'))
         else:
             channel = ctx.message.author.voice.channel
             player = await channel.connect()
             while (True):
-                player.play(FFmpegPCMAudio('files/hackbrett.mp3'))
+                player.play(FFmpegPCMAudio('files/hackbrett2.mp3'))
 
 @bot.command(name='off', pass_context = True)
 async def leavevoice(ctx):
