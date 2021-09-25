@@ -326,44 +326,44 @@ async def spisok(ctx, role):
   await ctx.send(ret)      
   return
 
-# @bot.event
-# async def on_message(message):
-#
-#   if message.author == bot.user and "!кто" not in str(message.content):
-#     return
-#   me = bot.get_user(ME)
-#   if not message.guild:
-#     await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
-#   elif 'погран' not in message.channel.name:
-#     name = message.author.name
-#     iid = message.author.id
-#     time = message.created_at
-#
-#     db, cursor = get_db_cursor()
-#     sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
-#
-#     try:
-#       cursor.execute(sql)
-#       db.commit()
-#     except Exception as e:
-#       print(e)
-#       db.rollback()
-#
-#     db.close()
-#   elif 'технический' in message.channel.name and message.author.id == 116275390695079945:
-#     msg = message.content
-#     mss = msg.split()
-#     if (mss[0] == "free"):
-#       lucky_id = message.author.id
-#       for mem in ctx.guild.members:
-#         if (mem.id == lucky_id):
-#           proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
-#           politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
-#           await mem.add_roles(proletariat)
-#           await mem.remove_roles(politzek)
-#       await channel.send("The guy is free!")
-#
-#   await bot.process_commands(message)
+@bot.event
+async def on_message(message):
+
+  if message.author == bot.user and "!кто" not in str(message.content):
+    return
+  me = bot.get_user(ME)
+  if not message.guild:
+    await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
+  elif 'погран' not in message.channel.name:
+    name = message.author.name
+    iid = message.author.id
+    time = message.created_at
+
+    db, cursor = get_db_cursor()
+    sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
+
+    try:
+      cursor.execute(sql)
+      db.commit()
+    except Exception as e:
+      print(e)
+      db.rollback()
+
+    db.close()
+  elif 'технический' in message.channel.name and message.author.id == 116275390695079945:
+    msg = message.content
+    mss = msg.split()
+    if (mss[0] == "free"):
+      lucky_id = message.author.id
+      for mem in ctx.guild.members:
+        if (mem.id == lucky_id):
+          proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
+          politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
+          await mem.add_roles(proletariat)
+          await mem.remove_roles(politzek)
+      await channel.send("The guy is free!")
+
+  await bot.process_commands(message)
 
 def get_guild():
   for guild in bot.guilds:
@@ -950,8 +950,8 @@ async def remove_points(ctx, target_id, points):
         print(e)
         await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
 
-@b.command(name="add")
-asc def add_points(ctx, target_id, points):
+@bot.command(name="add")
+async def add_points(ctx, target_id, points):
   if (not await check_rights_dm(ctx)):
     return
 
