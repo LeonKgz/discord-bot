@@ -326,44 +326,44 @@ async def spisok(ctx, role):
   await ctx.send(ret)      
   return
 
-@bot.event
-async def on_message(message):
-
-  if message.author == bot.user and "!кто" not in str(message.content):
-    return
-  me = bot.get_user(ME)
-  if not message.guild:
-    await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
-  elif 'погран' not in message.channel.name:
-    name = message.author.name
-    iid = message.author.id
-    time = message.created_at
-
-    db, cursor = get_db_cursor()
-    sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
-
-    try:
-      cursor.execute(sql)
-      db.commit()
-    except Exception as e:
-      print(e)
-      db.rollback()
-
-    db.close()
-  elif 'технический' in message.channel.name and message.author.id == 116275390695079945:
-    msg = message.content
-    mss = msg.split()
-    if (mss[0] == "free"):
-      lucky_id = message.author.id
-      for mem in ctx.guild.members:
-        if (mem.id == lucky_id):
-          proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
-          politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
-          await mem.add_roles(proletariat)
-          await mem.remove_roles(politzek)
-      await channel.send("The guy is free!") 
-
-  await bot.process_commands(message)
+# @bot.event
+# async def on_message(message):
+#
+#   if message.author == bot.user and "!кто" not in str(message.content):
+#     return
+#   me = bot.get_user(ME)
+#   if not message.guild:
+#     await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
+#   elif 'погран' not in message.channel.name:
+#     name = message.author.name
+#     iid = message.author.id
+#     time = message.created_at
+#
+#     db, cursor = get_db_cursor()
+#     sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
+#
+#     try:
+#       cursor.execute(sql)
+#       db.commit()
+#     except Exception as e:
+#       print(e)
+#       db.rollback()
+#
+#     db.close()
+#   elif 'технический' in message.channel.name and message.author.id == 116275390695079945:
+#     msg = message.content
+#     mss = msg.split()
+#     if (mss[0] == "free"):
+#       lucky_id = message.author.id
+#       for mem in ctx.guild.members:
+#         if (mem.id == lucky_id):
+#           proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
+#           politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
+#           await mem.add_roles(proletariat)
+#           await mem.remove_roles(politzek)
+#       await channel.send("The guy is free!")
+#
+#   await bot.process_commands(message)
 
 def get_guild():
   for guild in bot.guilds:
@@ -380,6 +380,15 @@ async def check_rights(ctx, acceptable_roles):
   response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(get(bot.emojis, name='peepoClown'))
   await ctx.send(response) 
   return False
+
+async def check_rights_dm(ctx):
+  super_roles = [214320783357378560, 696405991876722718, 384492518043287555]
+  if ctx.author.id in super_roles:
+      return True
+  response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(get(bot.emojis, name='peepoClown'))
+  await ctx.send(response)
+  return False
+
 
 def convert_brief(message):
   # REPLACE BAD PRACTISE
@@ -403,220 +412,15 @@ def convert_brief(message):
 # TODO uncomment to start the loop
 #looop.start()
 
-names = {
-  "frolov": 499303760653189121,
-  "wlg": 202531183790260224,
-  "hitary": 214320783357378560,
-  "harper": 376990474466099201,
-  "nina": 201692729879560192,
-  "rainlich": 277128557925367808,
-}
-
-@bot.command(
-  name='1',
-  brief=''
-)
-async def nick1(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["frolov"]).edit(nick="Калигула")
-
-@bot.command(
-  name='2',
-  brief=''
-)
-async def nick2(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["frolov"]).edit(nick="Второй патриций")
-
-@bot.command(
-  name='3',
-  brief=''
-)
-async def nick3(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["nina"]).edit(nick="Цезония")
-  
-@bot.command(
-  name='4',
-  brief=''
-)
-async def nick4(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["nina"]).edit(nick="Первый патриций")
-
-@bot.command(
-  name='5',
-  brief=''
-)
-async def nick5(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["nina"]).edit(nick="Первый поэт")
-
-@bot.command(
-  name='6',
-  brief=''
-)
-async def nick6(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["nina"]).edit(nick="Седьмой поэт")
-
-@bot.command(
-  name='7',
-  brief=''
-)
-async def nick7(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["hitary"]).edit(nick="Геликон")
-
-@bot.command(
-  name='8',
-  brief=''
-)
-async def nick8(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["hitary"]).edit(nick="Муций")
-
-@bot.command(
-  name='9',
-  brief=''
-)
-async def nick9(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["hitary"]).edit(nick="Второй поэт")
-
-
-@bot.command(
-  name='10',
-  brief=''
-)
-async def nick10(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["rainlich"]).edit(nick="Сципион")
-
-@bot.command(
-  name='11',
-  brief=''
-)
-async def nick11(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["rainlich"]).edit(nick="Третий патриций")
-
-@bot.command(
-  name='12',
-  brief=''
-)
-async def nick12(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["rainlich"]).edit(nick="Третий поэт")
-
-
-@bot.command(
-  name='13',
-  brief=''
-)
-async def nick13(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["harper"]).edit(nick="Керея")
-
-@bot.command(
-  name='14',
-  brief=''
-)
-async def nick14(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["harper"]).edit(nick="Cтраж")
-
-@bot.command(
-  name='15',
-  brief=''
-)
-async def nick15(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["harper"]).edit(nick="Пятый поэт")
-
-
-@bot.command(
-  name='16',
-  brief=''
-)
-async def nick16(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["wlg"]).edit(nick="Старый патриций")
-
-@bot.command(
-  name='17',
-  brief=''
-)
-async def nick17(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["wlg"]).edit(nick="Управитель")
-
-@bot.command(
-  name='18',
-  brief=''
-)
-async def nick18(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["wlg"]).edit(nick="Мерея")
-
-
-@bot.command(
-  name='19',
-  brief=''
-)
-async def nick19(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["wlg"]).edit(nick="Метелий")
-
-
-@bot.command(
-  name='20',
-  brief=''
-)
-async def nick20(ctx):
-  if (not await check_rights(ctx, ['Krabick'])):
-    return
-  guild = bot.get_guild(GUILD) 
-  await guild.get_member(names["wlg"]).edit(nick="Шестой поэт")
-
+# @bot.command(
+#   name='1',
+#   brief=''
+# )
+# async def nick1(ctx):
+#   if (not await check_rights(ctx, ['Krabick'])):
+#     return
+#   guild = bot.get_guild(GUILD)
+#   await guild.get_member(names["frolov"]).edit(nick="Калигула")
 
 @bot.command(
   name='history',
@@ -973,7 +777,6 @@ async def start_records():
     except Exception as e:
       print("oof")
 
-
 #start_records.start()
  
 
@@ -999,60 +802,23 @@ async def play(ctx, number):
       # Детское радио
       player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/detskoe128'))
 
-@bot.command(name='i')
-async def kaligula0(ctx):
-     channel = ctx.message.author.voice.channel
-     player = await channel.connect()
-
-@bot.command(name='31')
-async def kaligula1(ctx):
-    channel = ctx.message.author.voice.channel
-    player = await channel.connect()
-
-    for x in bot.voice_clients:
-
-       if (x.is_connected()):
-           x.stop()
-           while (True):
-               x.play(FFmpegPCMAudio('files/gong.mp3'))
-       else:
-
-           channel = ctx.message.author.voice.channel
-           player = await channel.connect()
-           while (True):
-               player.play(FFmpegPCMAudio('files/gong.mp3'))
-
-
-@bot.command(name='32')
-async def kaligula2(ctx):
-    for x in bot.voice_clients:
-
-       if (x.is_connected()):
-           x.stop()
-           x.play(FFmpegPCMAudio('files/final_gong.mp3'))
-       else:
-           channel = ctx.message.author.voice.channel
-           player = await channel.connect()
-           player.play(FFmpegPCMAudio('files/final_gong.mp3'))
-
-
-@bot.command(name='33')
-async def kaligula3(ctx):
-
-    channel = ctx.message.author.voice.channel
-    player = await channel.connect()
-
-    for x in bot.voice_clients:
-
-        if (x.is_connected()):
-            x.stop()
-            while (True):
-                x.play(FFmpegPCMAudio('files/hackbrett2.mp3'))
-        else:
-            channel = ctx.message.author.voice.channel
-            player = await channel.connect()
-            while (True):
-                player.play(FFmpegPCMAudio('files/hackbrett2.mp3'))
+# @bot.command(name='31')
+# async def kaligula1(ctx):
+#     channel = ctx.message.author.voice.channel
+#     player = await channel.connect()
+#
+#     for x in bot.voice_clients:
+#
+#        if (x.is_connected()):
+#            x.stop()
+#            while (True):
+#                x.play(FFmpegPCMAudio('files/gong.mp3'))
+#        else:
+#
+#            channel = ctx.message.author.voice.channel
+#            player = await channel.connect()
+#            while (True):
+#                player.play(FFmpegPCMAudio('files/gong.mp3'))
 
 @bot.command(name='off', pass_context = True)
 async def leavevoice(ctx):
@@ -1079,10 +845,13 @@ def get_db_row(db_name, id_to_search):
       db.close()
       return False
  
+
+
+
 import json
 
 @bot.command(name="оценить")
-async def confess(ctx, mem, points):
+async def evaluate(ctx, mem, points):
 
     if (not await check_rights(ctx, ['СовНарМод'])):
       return
@@ -1131,8 +900,103 @@ async def confess(ctx, mem, points):
     db.close()
     await ctx.send(f"<@!{id_author}>, оценка обновлена!")
 
+@bot.command(name="remove")
+async def remove_points(ctx, target_id, points):
+  if (not await check_rights_dm(ctx)):
+    return
+
+    if (ctx.guild):
+        msg_id = ctx.message.id
+        await ctx.message.delete()
+        # await ctx.send(f"<@!{ctx.message.author.id}>, ваше сообщение было удалено!")
+    else:
+        try:
+            try:
+                points = int(points)
+            except Exception as e:
+                await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
+                return
+
+            if (points < 1 or points > 15):
+                await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
+                return
+
+            db, cursor = get_db_cursor()
+            row = get_db_row("raiting", target_id)
+            if (not row):
+              await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка соединения! Попробуйте ещё раз.")
+
+            curr = row["Points"]
+            end = curr - points
+            if (end < 0):
+              end = 0
+
+            db, cursor = get_db_cursor()
+            sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
+
+            try:
+              cursor.execute(sql)
+              db.commit()
+            except Exception as e:
+              print(e)
+              await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+
+              db.rollback()
+
+            db.close()
+            await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно сняты ! Текущий рейтинг - {end}")
+
+        except Exception as e:
+          print(e)
+          await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+
+@bot.command(name="add")
+async def add_points(ctx, target_id, points):
+    if (not await check_rights_dm(ctx)):
+      return
+
+    if (ctx.guild):
+        msg_id = ctx.message.id
+        await ctx.message.delete()
+        # await ctx.send(f"<@!{ctx.message.author.id}>, ваше сообщение было удалено!")
+    else:
+
+        try:
+          points = int(points)
+        except Exception as e:
+            await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
+            return
+
+        if (points < 1 or points > 15):
+            await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
+            return
+
+        db, cursor = get_db_cursor()
+        row = get_db_row("raiting", target_id)
+        if (not row):
+          await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка соединения! Попробуйте ещё раз.")
+
+        curr = row["Points"]
+        end = curr + points
+
+        db, cursor = get_db_cursor()
+        sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
+
+        try:
+          cursor.execute(sql)
+          db.commit()
+        except Exception as e:
+          print(e)
+          await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+
+          db.rollback()
+
+        db.close()
+        await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
+
+
 @bot.command(name="кто")
-async def confess(ctx, mem):
+async def who(ctx, mem):
  
     id_author = ctx.author.id
     id_to_search = get_id(mem)
@@ -1186,7 +1050,7 @@ async def confess(ctx, *, args=None):
     confession = confession[1:-1]
     confession = confession.strip()
     check = confession.split()
-    #check = quotes.split()
+    #check = qu        otes.split()
     if len(check) == 1:
       await ctx.send(f"<@!{iid}> твоё описание либо **слишком короткое** либо ты забыл(а) **кавычки**!")
       return
