@@ -905,94 +905,94 @@ async def remove_points(ctx, target_id, points):
   if (not await check_rights_dm(ctx)):
     return
 
-    if (ctx.guild):
-        msg_id = ctx.message.id
-        await ctx.message.delete()
-        # await ctx.send(f"<@!{ctx.message.author.id}>, ваше сообщение было удалено!")
-    else:
-        try:
-            try:
-                points = int(points)
-            except Exception as e:
-                await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
-                return
+  if (ctx.guild):
+      msg_id = ctx.message.id
+      await ctx.message.delete()
+      # await ctx.send(f"<@!{ctx.message.author.id}>, ваше сообщение было удалено!")
+  else:
+      try:
+          try:
+              points = int(points)
+          except Exception as e:
+              await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
+              return
 
-            if (points < 1 or points > 15):
-                await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
-                return
+          if (points < 1 or points > 15):
+              await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
+              return
 
-            db, cursor = get_db_cursor()
-            row = get_db_row("raiting", target_id)
-            if (not row):
-              await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка соединения! Попробуйте ещё раз.")
+          db, cursor = get_db_cursor()
+          row = get_db_row("raiting", target_id)
+          if (not row):
+            await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка соединения! Попробуйте ещё раз.")
 
-            curr = row["Points"]
-            end = curr - points
-            if (end < 0):
-              end = 0
+          curr = row["Points"]
+          end = curr - points
+          if (end < 0):
+            end = 0
 
-            db, cursor = get_db_cursor()
-            sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
+          db, cursor = get_db_cursor()
+          sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
 
-            try:
-              cursor.execute(sql)
-              db.commit()
-            except Exception as e:
-              print(e)
-              await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+          try:
+            cursor.execute(sql)
+            db.commit()
+          except Exception as e:
+            print(e)
+            await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
 
-              db.rollback()
+            db.rollback()
 
-            db.close()
-            await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно сняты ! Текущий рейтинг - {end}")
+          db.close()
+          await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно сняты ! Текущий рейтинг - {end}")
 
-        except Exception as e:
-          print(e)
-          await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+      except Exception as e:
+        print(e)
+        await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
 
-@bot.command(name="add")
-async def add_points(ctx, target_id, points):
-    if (not await check_rights_dm(ctx)):
-      return
+@b.command(name="add")
+asc def add_points(ctx, target_id, points):
+  if (not await check_rights_dm(ctx)):
+    return
 
-    if (ctx.guild):
-        msg_id = ctx.message.id
-        await ctx.message.delete()
-        # await ctx.send(f"<@!{ctx.message.author.id}>, ваше сообщение было удалено!")
-    else:
+  if (ctx.guild):
+      msg_id = ctx.message.id
+      await ctx.message.delete()
+      # await ctx.send(f"<@!{ctx.message.author.id}>, ваше сообщение было удалено!")
+  else:
 
-        try:
-          points = int(points)
-        except Exception as e:
-            await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
-            return
+      try:
+        points = int(points)
+      except Exception as e:
+          await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
+          return
 
-        if (points < 1 or points > 15):
-            await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
-            return
+      if (points < 1 or points > 15):
+          await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
+          return
 
-        db, cursor = get_db_cursor()
-        row = get_db_row("raiting", target_id)
-        if (not row):
-          await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка соединения! Попробуйте ещё раз.")
+      db, cursor = get_db_cursor()
+      row = get_db_row("raiting", target_id)
+      if (not row):
+        await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка соединения! Попробуйте ещё раз.")
 
-        curr = row["Points"]
-        end = curr + points
+      curr = row["Points"]
+      end = curr + points
 
-        db, cursor = get_db_cursor()
-        sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
+      db, cursor = get_db_cursor()
+      sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
 
-        try:
-          cursor.execute(sql)
-          db.commit()
-        except Exception as e:
-          print(e)
-          await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+      try:
+        cursor.execute(sql)
+        db.commit()
+      except Exception as e:
+        print(e)
+        await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
 
-          db.rollback()
+        db.rollback()
 
-        db.close()
-        await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
+      db.close()
+      await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
 
 
 @bot.command(name="кто")
