@@ -329,7 +329,7 @@ async def spisok(ctx, role):
 @bot.event
 async def on_message(message):
 
-  if message.author == bot.user and "!кто" not in str(message.content):
+  if (message.author == bot.user or int(message.author.id) == ME) and "!кто" not in str(message.content):
     return
   me = bot.get_user(ME)
   if not message.guild:
@@ -1103,7 +1103,7 @@ async def confess(ctx, *, args=None):
 
         except Exception as e:
           print(e)
-          await ctx.send(f"<@!{iid}> c вашим описанием была проблема!")
+          await ctx.send(f"<@!{iid}> c вашим описанием была проблема или проблема подключения к базе данных. \nПопробуйте ещё раз чуть позже или напишите в личку Албанцу.")
           db.rollback()
 
     except Exception as e:
@@ -1133,8 +1133,7 @@ async def confess(ctx, *, args=None):
       except Exception as e:
         print(e)
         db.rollback()
-        await ctx.send(f"<@!{iid}> c вашим описанием была проблема!")
-      
+
     db.close()
 
 @bot.event 
