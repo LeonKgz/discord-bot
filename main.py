@@ -1090,6 +1090,10 @@ async def confess(ctx, *, args=None):
       timestamp = cursor.fetchone()['Timestamp']
       period = datetime.datetime.now() - timestamp
       days_passed = period.days
+
+      if (days_passed < 0):
+        days_passed = 0
+
       if (days_passed < 7):
         diff = 7 - days_passed
         await ctx.send(f"<@!{iid}> своё описание можно обновлять максимум один раз в 7 дней! \n\n\t**Вы сможете обновить своё через {diff}**")
