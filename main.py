@@ -331,9 +331,10 @@ async def spisok(ctx, role):
 @bot.event
 async def on_message(message):
 
-  if (message.author == bot.user or int(message.author.id) == ME) and "!кто" not in str(message.content):
+  if message.author == bot.user and "!кто" not in str(message.content):
     return
   me = bot.get_user(ME)
+  #if not message.guild and message.content[0] != "!" and int(message.author.id) != ME :
   if not message.guild:
     await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
   elif 'погран' not in message.channel.name:
@@ -1059,17 +1060,30 @@ async def confess(ctx, *, args=None):
 
     time = datetime.datetime.now()
 
-    data = json.dumps(None)
+    #data = json.dumps(None)
     #data = data.replace("\"", "\\\"")
 
     row = get_db_row("confessions", iid)
     if row:
-      points = row["Points"]
+      #points = row["Points"]
+
+      if (row["Points"] is None):
+        data = {}
+        
+      else:
+        data = json.loads(row["Points"])
+        #data[f"{id_author}"] = points
+
+      data = json.dumps(data)
+      data = data.replace("\"", "\\\"")
+
+    else:
+      data = {}
 
     db, cursor = get_db_cursor()
 
     select = f"SELECT * from confessions WHERE ID={iid};"
-    replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{iid}\", \"{name}\", \"{confession}\", \"{time}\", \"{points}\")"
+    replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{iid}\", \"{name}\", \"{confession}\", \"{time}\", \"{data}\")"
 
     try:
       cursor.execute(select)
