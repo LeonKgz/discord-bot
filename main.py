@@ -580,6 +580,16 @@ async def vse(ctx):
       await ch.send(res)
       break
 
+
+
+
+
+
+    
+
+
+
+
 @tasks.loop(seconds=86400.0)
 async def scan():
 
@@ -591,8 +601,36 @@ async def scan():
 
     super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
 
+
     proletariat = discord.utils.get(guild.roles, name='Пролетарий')
     politzek= discord.utils.get(guild.roles, name='Апатрид')
+    sovnarmod = discord.utils.get(guild.roles, name='СовНарМод')
+
+    # Scan through all the unmarked descriptions and remind SovNarMod members to mark them immediately
+    snm_dict = {}
+    for m in sovnarmod.members:
+      snm_dict[str(m.id)] = []
+    
+    select = "SELECT * FROM unmarked_confessions"
+    try:
+      cursor.execute(select)
+      entries = cursor.fetchall()
+      for e in entries:
+        to_remind = [i.strip() for i in e["Markers"].split(",")]
+        for i in to_remind:
+          snm_dict[i].append(e["ID"])
+
+    except Exception as e:
+      print(e)
+      db.rollback()
+   
+    for sovok, spiski in snm_dict.items():
+      sovok = bot.get_user(int(sovok))
+      await sovok.create_dm()
+      quotes = ",\n\t".join([(str(j) + ") \t" + str(i)) for j, i in enumerate(spiski)])
+      await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшую неделю: \n\n\t{quotes}")
+
+    # Scan through all the Proletariat and put to Pogran-Zastava channel all who are not in the «cache» database
     ms = []
     for m in proletariat.members:
       done = False
@@ -996,6 +1034,31 @@ async def add_points(ctx, target_id, points):
 
       db.close()
       await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
+
+
+#db, cursor = get_db_cursor()
+#
+#select = f"SELECT * from confessions"
+#markers = "384492518043287555, 696405991876722718, 214320783357378560"
+#try:
+#  cursor.execute(select)
+#  confession = cursor.fetchall()
+#  for i, c in enumerate(confession):
+#    iid = c["ID"]
+#    replace = f"REPLACE INTO unmarked_confessions(ID, Markers) VALUES(\"{iid}\", \"{markers}\")"
+#    cursor.execute(replace)
+#    db.commit()
+#    print(f"{i}) Done for {iid}")
+#  
+#except Exception as e:
+#  print(e)
+#  db.rollback()
+#  
+#db.close()
+#
+#exit(1)
+
+
 
 
 @bot.command(name="кто")
