@@ -926,8 +926,11 @@ async def evaluate(ctx, mem, points):
         
       else:
         data = json.loads(row["Points"])
-
-      prev_mean = np.mean(list(data.values()))
+      
+      if (len(data) == 0):
+        prev_mean = 0
+      else:
+        prev_mean = np.mean(list(data.values()))
       data[f"{id_author}"] = points
       curr_mean = np.mean(list(data.values()))
 
