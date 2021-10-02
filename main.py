@@ -86,7 +86,7 @@ async def include(ctx, *, actor):
   actor_ids = str(actor).split()
   actor_ids = [int(i[3:-1]) for i in actor_ids]
 
-  for mem in ctx.guild.members:
+  for mem in ctx.guild.embers:
     if (mem.id in actor_ids):
       truppa = discord.utils.get(ctx.guild.roles, name='Драматическая Труппа')
       actor_zapasa = discord.utils.get(ctx.guild.roles, name='Актёр Запаса')
@@ -949,8 +949,26 @@ async def evaluate(ctx, mem, points):
     except Exception as e:
       print(e)
       db.rollback()
-    db.close()
+
     await ctx.send(f"<@!{id_author}>, оценка обновлена!")
+    
+    # Now update unmarked_confessions
+    mods = get_db_row("unmarked_confessions", id_to_search)["Markers"].split(", ")
+    mods.remove(str(id_author))
+    mods = ", ".join([str(m) for m in mods])
+
+    sql = f"UPDATE unmarked_confessions SET Markers = \"{mods}\" WHERE ID=\"{id_to_search}\""
+
+    try:
+      cursor.execute(sql)
+      db.commit()
+    except Exception as e:
+      print(e)
+      await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+      db.rollback()
+
+    db.close()
+
 
 @bot.command(name="remove")
 async def remove_points(ctx, target_id, points):
@@ -1046,7 +1064,6 @@ async def add_points(ctx, target_id, points):
       db.close()
       await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
 
-
 #db, cursor = get_db_cursor()
 #
 #select = f"SELECT * from confessions"
@@ -1056,7 +1073,8 @@ async def add_points(ctx, target_id, points):
 #  confession = cursor.fetchall()
 #  for i, c in enumerate(confession):
 #    iid = c["ID"]
-#    replace = f"REPLACE INTO unmarked_confessions(ID, Markers) VALUES(\"{iid}\", \"{markers}\")"
+#    name = c["Name"]
+#    replace = f"REPLACE INTO unmarked_confessions(ID, Name, Markers) VALUES(\"{iid}\", \"{name}\",\"{markers}\")"
 #    cursor.execute(replace)
 #    db.commit()
 #    print(f"{i}) Done for {iid}")
@@ -1068,9 +1086,6 @@ async def add_points(ctx, target_id, points):
 #db.close()
 #
 #exit(1)
-
-
-
 
 @bot.command(name="кто")
 async def who(ctx, mem):
@@ -1120,6 +1135,9 @@ async def confess(ctx, *, args=None):
     quotes = confession.count("\"")
     backed = confession.count("\\\"")
     quotes -= backed
+    
+    # was a description updated in the end
+    updated = False
 
     guild = bot.get_guild(GUILD) 
     proletariat = discord.utils.get(guild.roles, name='Пролетарий')
@@ -1191,6 +1209,7 @@ async def confess(ctx, *, args=None):
 
           time = datetime.datetime.now()
 
+          # Now also save user into cache, updating one's description counts as activity on server (same as messaging)
           db, cursor = get_db_cursor()
           sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
 
@@ -1204,12 +1223,14 @@ async def confess(ctx, *, args=None):
           await ctx.send(f"<@!{iid}> проходите, ваше описание обновлено!")
           await ctx.author.add_roles(proletariat)
           await ctx.author.remove_roles(politzek)
+          updated = True
 
         except Exception as e:
           print(e)
           await ctx.send(f"<@!{iid}> c вашим описанием была проблема или проблема подключения к базе данных. \nПопробуйте ещё раз чуть позже или напишите в личку Албанцу.")
           db.rollback()
-
+          
+    # If no entry for that user yet exists
     except Exception as e:
       print(e)
       print(f"No entry for {name}...\nInserting new entry...")
@@ -1218,6 +1239,7 @@ async def confess(ctx, *, args=None):
         cursor.execute(replace)
         db.commit()
         await ctx.send(f"<@!{iid}> ваше описание обновлено, проходите!")
+        updated = True
 
         time = datetime.datetime.now()
 
@@ -1236,6 +1258,22 @@ async def confess(ctx, *, args=None):
 
       except Exception as e:
         print(e)
+        db.rollback()
+
+    # If description was updated successfully need to reinsert user into the unmarked_confessions table
+    if updated:
+
+      snm = discord.utils.get(ctx.guild.roles, name='СовНарМод')
+      markers = ", ".join([str(mem.id) for mem in snm.members])
+
+      replace = f"REPLACE INTO unmarked_confessions(ID, Name, Markers) VALUES(\"{iid}\", \"{name}\", \"{markers}\")"
+
+      try:
+        cursor.execute(replace)
+        db.commit()
+      except Exception as e:
+        print(e)
+        await ctx.send(f"Проблема учёта оценок новых описаний!")
         db.rollback()
 
     db.close()
