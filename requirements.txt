@@ -4,3 +4,4 @@ PyMySQL
 requests
 ffmpeg
 discord-timers
+numpy

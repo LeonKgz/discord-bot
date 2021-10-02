@@ -899,6 +899,7 @@ def get_db_row(db_name, id_to_search):
 
 
 import json
+import numpy as np
 
 @bot.command(name="оценить")
 async def evaluate(ctx, mem, points):
@@ -925,8 +926,18 @@ async def evaluate(ctx, mem, points):
         
       else:
         data = json.loads(row["Points"])
-        data[f"{id_author}"] = points
 
+      prev_mean = np.mean(list(data.values()))
+      data[f"{id_author}"] = points
+      curr_mean = np.mean(list(data.values()))
+
+      status1 = await remove_points_quick(id_to_search, prev_mean)
+      status2 = await add_points_quick(id_to_search, curr_mean)
+
+      if (not(status1 and status2)):
+        await ctx.send(f"<@!{id_author}>, произошла ошибка корректировки социального рейтинга!")
+        return
+      
       data = json.dumps(data)
       data = data.replace("\"", "\\\"")
 
@@ -974,6 +985,76 @@ async def evaluate(ctx, mem, points):
 
     db.close()
 
+async def remove_points_quick(target_id, points):
+
+  try:
+      points = int(points)
+
+      db, cursor = get_db_cursor()
+      row = get_db_row("raiting", target_id)
+      if (not row):
+        return False
+
+      curr = row["Points"]
+      end = curr - points
+      if (end < 0):
+        end = 0
+
+      db, cursor = get_db_cursor()
+      sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
+
+      try:
+        cursor.execute(sql)
+        db.commit()
+      except Exception as e:
+        print(e)
+        db.rollback()
+        db.close()
+        return False
+
+      db.close()
+  
+  except Exception as e:
+    print(e)
+    return False
+
+  return True
+
+async def add_points_quick(target_id, points):
+
+  try:
+      points = int(points)
+
+      db, cursor = get_db_cursor()
+      row = get_db_row("raiting", target_id)
+      if (not row):
+        return False
+
+      curr = row["Points"]
+      end = curr + points
+
+      if (end < 0):
+        end = 0
+
+      db, cursor = get_db_cursor()
+      sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
+
+      try:
+        cursor.execute(sql)
+        db.commit()
+      except Exception as e:
+        print(e)
+        db.rollback()
+        db.close()
+        return False
+
+      db.close()
+  
+  except Exception as e:
+    print(e)
+    return False
+
+  return True
 
 @bot.command(name="remove")
 async def remove_points(ctx, target_id, points):
@@ -1055,6 +1136,7 @@ async def add_points(ctx, target_id, points):
       end = curr + points
 
       db, cursor = get_db_cursor()
+
       sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
 
       try:
@@ -1092,6 +1174,7 @@ async def add_points(ctx, target_id, points):
 #
 #exit(1)
 
+
 @bot.command(name="кто")
 async def who(ctx, mem):
     
@@ -1127,6 +1210,37 @@ async def who(ctx, mem):
       db.rollback()
       await ctx.send(f"<@!{id_author}>, пока нам ничего не известно о {mem.name}.")
       
+    db.close()
+
+
+@bot.command(name='resetforgetforgetforget9832164382746')
+async def confess(ctx):
+
+    guild = bot.get_guild(GUILD) 
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Апатрид')
+
+    db, cursor = get_db_cursor()
+    for m in proletariat.members:
+      try:
+        sql = f"REPLACE INTO raiting(ID, Name, Points) VALUES(\"{m.id}\", \"{m.name}\", \"0\")"
+        cursor.execute(sql)
+        db.commit()
+      except Exception as e:
+        print(e)
+        print(f"mistake with {m.name}")
+        db.rollback()
+
+    for m in politzek.members:
+      try:
+        sql = f"REPLACE INTO raiting(ID, Name, Points) VALUES(\"{m.id}\", \"{m.name}\", \"0\")"
+        cursor.execute(sql)
+        db.commit()
+      except Exception as e:
+        print(e)
+        print(f"mistake with {m.name}")
+        db.rollback()
+
     db.close()
 
 @bot.command(name='рассказать')
