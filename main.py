@@ -95,13 +95,17 @@ async def include(ctx, *, actor):
       await ctx.send(f"{mem.name} благополучно включён в Драматическую Труппу")
 
 def get_id(ref):
-  
-  if(str(ref)[2] == '!' or str(ref)[2] == '&'): 
-    a = int(str(ref)[3:-1])
-  else:
-    a = int(str(ref)[2:-1])
 
-  return a
+  try:
+    ret = int(ref)
+    return ret
+  except Exception as e:
+    if(str(ref)[2] == '!' or str(ref)[2] == '&'): 
+      a = int(str(ref)[3:-1])
+    else:
+      a = int(str(ref)[2:-1])
+
+    return a
 
 @bot.command(
   name='изтруппы',
@@ -331,12 +335,17 @@ async def spisok(ctx, role):
 @bot.event
 async def on_message(message):
 
-  if message.author == bot.user and "!кто" not in str(message.content):
+  if message.author == bot.user:
+  #if message.author == bot.user and "!кто" not in str(message.content):
     return
+
   me = bot.get_user(ME)
+
+  
   #if not message.guild and message.content[0] != "!" and int(message.author.id) != ME :
   if not message.guild:
-    await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
+    if int(message.author.id) != ME:
+      await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
   elif 'погран' not in message.channel.name:
     name = message.author.name
     iid = message.author.id
