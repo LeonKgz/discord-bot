@@ -903,7 +903,7 @@ import json
 @bot.command(name="оценить")
 async def evaluate(ctx, mem, points):
 
-    if (not await check_rights(ctx, ['СовНарМод'])):
+    if (not await check_rights_dm(ctx)):
       return
  
     id_author = ctx.author.id
@@ -929,6 +929,7 @@ async def evaluate(ctx, mem, points):
 
       data = json.dumps(data)
       data = data.replace("\"", "\\\"")
+
     else:
       await ctx.send(f"<@!{id_author}>, оценивать нечего!")
       return
@@ -936,6 +937,7 @@ async def evaluate(ctx, mem, points):
     db, cursor = get_db_cursor()
     name = row["Name"]
     confession = row["Confession"]
+    confession = confession.replace("\"", "\\\"")
     time = row["Timestamp"]
 
     replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{id_to_search}\", \"{name}\", \"{confession}\", \"{time}\", \"{data}\")"
