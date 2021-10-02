@@ -394,7 +394,7 @@ async def check_rights(ctx, acceptable_roles):
   return False
 
 async def check_rights_dm(ctx):
-  super_roles = [214320783357378560, 696405991876722718, ***REMOVED***]
+  super_roles = [214320783357378560, 696405991876722718, ***REMOVED***, 498264068415553537]
   if ctx.author.id in super_roles:
       return True
   response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(get(bot.emojis, name='peepoClown'))
@@ -955,9 +955,14 @@ async def evaluate(ctx, mem, points):
     # Now update unmarked_confessions
     mods = get_db_row("unmarked_confessions", id_to_search)["Markers"].split(", ")
     mods.remove(str(id_author))
-    mods = ", ".join([str(m) for m in mods])
 
-    sql = f"UPDATE unmarked_confessions SET Markers = \"{mods}\" WHERE ID=\"{id_to_search}\""
+    # If all the mods have marked this user, remove from unmarked_confessions table
+    if (len(mods) == 0):
+      sql = f"DELETE FROM unmarked_confessions WHERE ID=\"{id_to_search}\""
+    
+    else:  
+      mods = ", ".join([str(m) for m in mods])
+      sql = f"UPDATE unmarked_confessions SET Markers = \"{mods}\" WHERE ID=\"{id_to_search}\""
 
     try:
       cursor.execute(sql)
