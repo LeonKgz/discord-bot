@@ -952,6 +952,7 @@ async def evaluate(ctx, mem, points):
     name = row["Name"]
     confession = row["Confession"]
     confession = confession.replace("\"", "\\\"")
+    confession = confession.replace("\'", "\\\'")
     time = row["Timestamp"]
 
     replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{id_to_search}\", \"{name}\", \"{confession}\", \"{time}\", \"{data}\")"
@@ -961,14 +962,20 @@ async def evaluate(ctx, mem, points):
       db.commit()
       
     except Exception as e:
+      await ctx.send(f"<@!{id_author}>, проблема с описанием!")
       print(e)
       db.rollback()
+      return
 
     await ctx.send(f"<@!{id_author}>, оценка обновлена!")
     
     # Now update unmarked_confessions
     mods = get_db_row("unmarked_confessions", id_to_search)["Markers"].split(", ")
-    mods.remove(str(id_author))
+  
+    try:
+      mods.remove(str(id_author))
+    except Exception as e:
+      print(e)
 
     # If all the mods have marked this user, remove from unmarked_confessions table
     if (len(mods) == 0):
