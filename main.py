@@ -949,16 +949,17 @@ async def evaluate(ctx, mem, points):
       return
 
     db, cursor = get_db_cursor()
-    name = row["Name"]
-    confession = row["Confession"]
-    confession = confession.replace("\"", "\\\"")
-    confession = confession.replace("\'", "\\\'")
-    time = row["Timestamp"]
+    #name = row["Name"]
+    #confession = row["Confession"]
+    #confession = confession.replace("\"", "\\\"")
+    #confession = confession.replace("\'", "\\\'")
+    #time = row["Timestamp"]
 
-    replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{id_to_search}\", \"{name}\", \"{confession}\", \"{time}\", \"{data}\")"
+    #replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{id_to_search}\", \"{name}\", \"{confession}\", \"{time}\", \"{data}\")"
+    update = f"UPDATE confessions SET Points = \"{data}\" WHERE ID =\"{id_to_search}\""
 
     try:
-      cursor.execute(replace)
+      cursor.execute(update)
       db.commit()
       
     except Exception as e:
