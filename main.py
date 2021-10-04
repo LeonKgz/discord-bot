@@ -2,6 +2,7 @@
 
 # vim: set fileencoding=utf-8:
 
+import asyncio
 import os
 import discord
 from discord.ext import commands, tasks
@@ -41,6 +42,7 @@ def get_db_cursor():
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
 #bot.timer_manager = timers.TimerManager(bot)
+
 
 @tasks.loop(seconds=5.0)
 async def looop():
@@ -190,7 +192,7 @@ async def jail(ctx, poor_guy, protocol):
 
       statuses = ["zamechanie", "vigovor", "zakluchenie"] 
       lengths = {"zamechanie": 10, "vigovor": 60, "zakluchenie": 1440}
-      lengths = {"zamechanie": 1, "vigovor": 2, "zakluchenie": 3}
+      words = {"zamechanie": "10 минут", "vigovor": "1 час", "zakluchenie": "сутки"}
 
       mem_id = mem.id
       sql = f"SELECT * from prisoners WHERE ID={mem_id};"
@@ -210,8 +212,8 @@ async def jail(ctx, poor_guy, protocol):
 
       guild = bot.get_guild(GUILD) 
       for ch in guild.channels:
-        if ("технический" in ch.name):
-          res = f".remind here {length}m free {mem_id}"
+        if ("гулаг" in ch.name):
+          res = f"Заключённый <@!{mem_id}>! Ваше заключение составит {words[status]}. Узнать свой протокол можно с помощью команды « !начальник »"
           await ch.send(res)
 
       sql = f"REPLACE INTO prisoners(ID, Protocol, Status) VALUES(\"{mem.id}\", \"{protocol}\", \"{status}\")"
@@ -221,11 +223,13 @@ async def jail(ctx, poor_guy, protocol):
       except Exception as e:
         print(e)
         db.rollback()
-        db.close()
-  try:      
-    db.close()
-  except:
-    print("Already closed")
+      db.close()
+
+      await asyncio.sleep(length * 60)
+
+      await ctx.send(f"Заключённый <@!{mem_id}> свободен!")
+      await mem.add_roles(proletariat)
+      await mem.remove_roles(politzek)
 
 @bot.command(
   name='начальник',
@@ -235,7 +239,7 @@ async def nachalnik(ctx):
     return
 
   db, cursor = get_db_cursor()
-  name = ctx.author.name
+  name = ctx.author.id
   sql = f""" SELECT Protocol 
     FROM prisoners
     WHERE ID = \"{name}\"
@@ -247,9 +251,19 @@ async def nachalnik(ctx):
     res =  f"Заключённый <@!{ctx.author.id}>!\nВаш протокол: *" + res + "*"
   except:
     db.rollback()
-    db.close()
+
   await ctx.send(res)
   db.close()
+
+def is_me(m):
+    return True 
+
+@bot.command(name="clear")
+async def clear(ctx, num):
+  if not await check_rights(ctx, ['Политбюро ЦКТМГ']):
+    return
+  num = int(num) + 1
+  await ctx.channel.purge(limit=num, check=is_me)
 
 @bot.command(
   name='протокол',
@@ -344,6 +358,9 @@ async def on_message(message):
   
   #if not message.guild and message.content[0] != "!" and int(message.author.id) != ME :
   if not message.guild:
+    
+    #print(message.author.mutual_guilds[0].get_member(message.author.id).id)
+
     if int(message.author.id) != ME:
       await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
   elif 'погран' not in message.channel.name:
@@ -1185,6 +1202,33 @@ async def add_points(ctx, target_id, points):
 #
 #exit(1)
 
+@bot.command(name="донести")
+#async def who(ctx, mem, content, *):
+async def donos(ctx, *, args=None):
+    
+    # If somebody tries to supply ID instead of mentioning a user on one of the server's channels, delete the message
+    if (ctx.guild):
+      await ctx.message.delete()
+      return
+    
+    iid = args[:args.find("\"")].strip()
+    after_quote = args[(args.find("\"") + 1):]
+    inside = after_quote[:after_quote.find("\"")].strip()
+    links = after_quote[after_quote.find("\"") + 1:].strip().split() 
+
+    print(inside)
+    print(iid)
+    print(links)
+    
+    #id_author = ctx.author.id
+    #id_to_search = get_id(mem)
+    #mem = bot.get_user(id_to_search)
+
+    #for member in ctx.guild.members:
+    #  p = await member.profile()
+    #  print(p)
+ 
+
 
 @bot.command(name="кто")
 async def who(ctx, mem):
@@ -1423,7 +1467,7 @@ async def on_member_join(member):
     if "погран" in ch.name:
       await ch.send(f"<@!{member.id}>, добро пожаловать в ТМГ!\n\nЭто пограничная застава, охраняющая суверенитет Мошны.\n В канале {manifesto.mention} ты найдёшь Трактат о Мошне — основополагающий документ сего сообщества.\nЧтобы получить доступ ко всем остальным каналам сервера и стать полноценным гражданином, достаточно ввести команду « !пропуск ». \n\nДа прибудет с тобой Мошна!")
     if "карандаш" in ch.name:
-      await ch.send(f"<@!{member.id}> вступил в ТМГ!")
+      await ch.send(f"<@!{member.id}> ({member.name}) вступил в ТМГ!")
 
 @bot.event 
 async def on_member_remove(member):
@@ -1431,7 +1475,7 @@ async def on_member_remove(member):
 
   for ch in guild.channels:
     if "карандаш" in ch.name:
-      await ch.send(f"<@!{member.id}> **покинул** ТМГ!")
+      await ch.send(f"<@!{member.id}> ({member.name}) **покинул** ТМГ!")
 
 bot.run(TOKEN)
 
