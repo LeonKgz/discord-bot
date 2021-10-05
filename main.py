@@ -607,15 +607,6 @@ async def vse(ctx):
       break
 
 
-
-
-
-
-    
-
-
-
-
 @tasks.loop(seconds=86400.0)
 async def scan():
 
@@ -1452,30 +1443,8 @@ async def confess(ctx, *, args=None):
 
     db.close()
 
-@bot.event 
-async def on_member_join(member):
-  guild = bot.get_guild(GUILD) 
-  apatrid = discord.utils.get(guild.roles, name='Апатрид')
-  await member.add_roles(apatrid)
-  db, cursor = get_db_cursor()
-  name = member.name
-  for ch in guild.channels:
-    if "manifesto" in ch.name:
-      manifesto = ch
+from status import Status
 
-  for ch in guild.channels:
-    if "погран" in ch.name:
-      await ch.send(f"<@!{member.id}>, добро пожаловать в ТМГ!\n\nЭто пограничная застава, охраняющая суверенитет Мошны.\n В канале {manifesto.mention} ты найдёшь Трактат о Мошне — основополагающий документ сего сообщества.\nЧтобы получить доступ ко всем остальным каналам сервера и стать полноценным гражданином, достаточно ввести команду « !пропуск ». \n\nДа прибудет с тобой Мошна!")
-    if "карандаш" in ch.name:
-      await ch.send(f"<@!{member.id}> ({member.name}) вступил в ТМГ!")
-
-@bot.event 
-async def on_member_remove(member):
-  guild = bot.get_guild(GUILD) 
-
-  for ch in guild.channels:
-    if "карандаш" in ch.name:
-      await ch.send(f"<@!{member.id}> ({member.name}) **покинул** ТМГ!")
-
+guild = bot.get_guild(GUILD)
+bot.add_cog(Status(bot))
 bot.run(TOKEN)
-
