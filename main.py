@@ -919,6 +919,7 @@ async def evaluate(ctx, mem, points):
     id_to_search = get_id(mem)
     mem = bot.get_user(id_to_search)
     points = int(points)
+    guild = bot.get_guild(GUILD)
     
     if (points < 0 or points > 10):
       await ctx.send(f"<@!{id_author}>, количество очков должно быть между 0 и 10")
@@ -989,6 +990,10 @@ async def evaluate(ctx, mem, points):
     # If all the mods have marked this user, remove from unmarked_confessions table
     if (len(mods) == 0):
       sql = f"DELETE FROM unmarked_confessions WHERE ID=\"{id_to_search}\""
+      for ch in guild.channels:
+        if ("гласность" in ch.name):
+          await ch.send(f"Все Модераторы оценили описание гражданина **{mem.display_name}**!\n\n\t\t Окончательная оценка — **{int(curr_mean)}**\n\n----------------------------------------------------------------------")
+
     
     else:  
       mods = ", ".join([str(m) for m in mods])
