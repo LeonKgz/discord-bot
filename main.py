@@ -256,7 +256,7 @@ async def nachalnik(ctx):
   db.close()
 
 def is_me(m):
-    return True 
+  return True 
 
 @bot.command(name="clear")
 async def clear(ctx, num):
@@ -992,7 +992,7 @@ async def evaluate(ctx, mem, points):
       sql = f"DELETE FROM unmarked_confessions WHERE ID=\"{id_to_search}\""
       for ch in guild.channels:
         if ("гласность" in ch.name):
-          await ch.send(f"Все Модераторы оценили описание гражданина **{mem.display_name}**!\n\n\t\t Окончательная оценка — **{int(curr_mean)}**\n\n----------------------------------------------------------------------")
+          await ch.send(f"Все Модераторы оценили описание гражданина <@!{mem.id}>!\n\n\t\t Окончательная оценка — **{int(curr_mean)}**\n\n----------------------------------------------------------------------")
 
     
     else:  
@@ -1450,6 +1450,6 @@ async def confess(ctx, *, args=None):
 
 from status import Status
 
-guild = bot.get_guild(GUILD)
+#guild = bot.get_guild(GUILD)
 bot.add_cog(Status(bot))
 bot.run(TOKEN)
