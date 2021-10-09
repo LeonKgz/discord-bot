@@ -1245,7 +1245,7 @@ async def donos(ctx, *, args=None):
       await ctx.send(f"<@!{source_id}>, ошибка обновления базы данных! Убедитесь, что в вашей приписке нет кавычек!")
       return
     
-    await ctx.send(f"<@!{source_id}>, ваше заявление принято и вскоре будет рассмотрено одним из Модераторов!")
+    await ctx.send(f"<@!{source_id}>, ваше заявление принято под номером **{res_id}** и вскоре будет рассмотрено одним из Модераторов!")
 
 
     # Now keep track of unprocessed tellings through the 'Status' field
