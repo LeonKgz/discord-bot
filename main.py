@@ -88,7 +88,7 @@ async def include(ctx, *, actor):
   actor_ids = str(actor).split()
   actor_ids = [int(i[3:-1]) for i in actor_ids]
 
-  for mem in ctx.guild.embers:
+  for mem in ctx.guild.members:
     if (mem.id in actor_ids):
       truppa = discord.utils.get(ctx.guild.roles, name='Драматическая Труппа')
       actor_zapasa = discord.utils.get(ctx.guild.roles, name='Актёр Запаса')
@@ -402,12 +402,18 @@ def get_guild():
 
 async def check_rights(ctx, acceptable_roles):
   #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
-  super_roles = acceptable_roles 
-  for role in list(map(str, ctx.author.roles)):
+  super_roles = acceptable_roles
+
+  try:
+    res_roles = ctx.author.roles
+  except Exception as e:
+    res_roles = bot.get_user(ctx.author.id).roles
+
+  for role in list(map(str, res_roles)):
     if (role in super_roles):
       return True
   response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(get(bot.emojis, name='peepoClown'))
-  await ctx.send(response) 
+  await ctx.send(response)
   return False
 
 async def check_rights_dm(ctx):
@@ -902,9 +908,6 @@ def get_db_row(db_name, id_to_search):
       db.rollback()
       db.close()
       return False
- 
-
-
 
 import json
 import numpy as np
@@ -1199,23 +1202,93 @@ async def add_points(ctx, target_id, points):
 #exit(1)
 
 @bot.command(name="донести")
-#async def who(ctx, mem, content, *):
 async def donos(ctx, *, args=None):
     
     # If somebody tries to supply ID instead of mentioning a user on one of the server's channels, delete the message
     if (ctx.guild):
       await ctx.message.delete()
       return
-    
+
+    source_id = ctx.author.id
+    db, cursor = get_db_cursor()
+    guild = bot.get_guild(GUILD)
+
+    # Check that user has a description
+    cnfs = get_db_row("confessions", source_id)
+    if not cnfs:
+      await ctx.send(f"<@!{source_id}>, для использования данной функции нужно иметь описание на сервере!")
+      return
+
+    # Check that user has at least 5 social points
+    points = get_db_row("raiting", source_id)["Points"]
+    if (points < 5):
+      await ctx.send(f"<@!{source_id}>, для использования данной функции нужно иметь минимум 5 очков социального рейтинга! Их можно заработать, например, качественно обновив своё описание.")
+      return
+      
     iid = args[:args.find("\"")].strip()
     after_quote = args[(args.find("\"") + 1):]
     inside = after_quote[:after_quote.find("\"")].strip()
     links = after_quote[after_quote.find("\"") + 1:].strip().split() 
+    links = ", ".join(links)
+    time = datetime.datetime.now()
 
-    print(inside)
-    print(iid)
-    print(links)
+    # Now update the general log of tellings, with an AUTOINCREMENT column ID
+    try:
+      sql = f"INSERT INTO tellings(Timestamp, Target, Source, Description, Evidence, Status) VALUES(\"{time}\", \"{iid}\", \"{source_id}\", \"{inside}\", \"{links}\", \"TBD\")"
+      cursor.execute(sql)
+      db.commit()
+      res_id = cursor.lastrowid
+
+    except Exception as e:
+      print(e)
+      db.rollback()
+      await ctx.send(f"<@!{source_id}>, ошибка обновления базы данных! Убедитесь, что в вашей приписке нет кавычек!")
+      return
     
+    await ctx.send(f"<@!{source_id}>, ваше заявление принято и вскоре будет рассмотрено одним из Модераторов!")
+
+
+    # Now keep track of unprocessed tellings through the 'Status' field
+
+    sovnarmod = discord.utils.get(guild.roles, name='СовНарМод')
+
+    links = "\n\t\t\t\t\t\t\t".join(links.split(","))
+    # Scan through all the unmarked descriptions and remind SovNarMod members to mark them immediately
+    for m in sovnarmod.members:
+      await m.dm_channel.send(f"Товарищ Народный Модератор! Поступило заявление!\n\n\t\tНомер —  {res_id}\n\n\t\tПриписка — *{inside}*\n\n\t\tСсылки — {links}")
+       
+    #
+    #select = "SELECT * FROM unmarked_confessions"
+    #try:
+    #  cursor.execute(select)
+    #  entries = cursor.fetchall()
+    #  for e in entries:
+    #    to_remind = [i.strip() for i in e["Markers"].split(",")]
+    #    for i in to_remind:
+    #      snm_dict[i].append(e["ID"])
+
+    #except Exception as e:
+    #  print(e)
+    #  db.rollback()
+   
+    #for sovok, spiski in snm_dict.items():
+    #  sovok = bot.get_user(int(sovok))
+    #  await sovok.create_dm()
+    #  quotes = ",\n\t".join([(str(j) + ") \t" + str(i)) for j, i in enumerate(spiski)])
+    #  await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшую неделю: \n\n\t{quotes}")
+
+
+
+
+
+
+
+
+
+
+    
+
+
     #id_author = ctx.author.id
     #id_to_search = get_id(mem)
     #mem = bot.get_user(id_to_search)
@@ -1223,7 +1296,90 @@ async def donos(ctx, *, args=None):
     #for member in ctx.guild.members:
     #  p = await member.profile()
     #  print(p)
- 
+
+
+@bot.command(name="статьи")
+async def approve_donos(ctx):
+  if (not await check_rights_dm(ctx)):
+      return
+
+  if (ctx.guild):
+    await ctx.message.delete()
+    return
+
+  res = "1) Ненормативная лексика\n2) Прескриптивная лингвистика\n3) Спам\n4) Необоснованное оскорбление\n5) низкая Мошна"
+
+  await ctx.send(res)
+
+@bot.command(name="approve")
+async def approve_donos(ctx, donos_id, priority):
+
+  # If somebody tries to supply ID instead of mentioning a user on one of the server's channels, delete the message
+  if (ctx.guild):
+    await ctx.message.delete()
+    return
+
+  if (priority < 1 or priority > 5):
+    await ctx.send(f"<@!{ctx.author.id}>, приоритет должен быть между 1 и 5!")
+    return
+
+  source_id = ctx.author.id
+  db, cursor = get_db_cursor()
+  guild = bot.get_guild(GUILD)
+
+  row = get_db_row("tellings", donos_id)
+  if (row):
+    status = row["Status"]
+
+    if status == "TBD":
+
+      add_points_quick(row["Source"], priority)
+      remove_points_quick(row["Target"], priority)
+
+      try:
+        update = f"UPDATE tellings SET Status = \"Approved\" WHERE ID =\"{donos_id}\""
+        cursor.execute(update)
+        db.commit()
+
+      except Exception as e:
+        print(e)
+        db.rollback()
+        await ctx.send(f"<@!{ctx.author.id}>, ошибка обновления базы данных!")
+        return
+
+      await ctx.send(f"<@!{ctx.author.id}>, донос рассмотрен!")
+
+      wording1 = {
+        1: "Статья 3. Пункт 2.",
+        2: "Статья 1. Пункт 3. (д)",
+        3: "Статья 1. Пункт 3. (а)",
+        4: "Статья 1. Пункт 3. (в)",
+        5: "Статья 2. Пункт 2.",
+      }
+
+      wording2 = {
+        1: "Ненормативная лексика",
+        2: "Прескриптивная лингвистика",
+        3: "Спам",
+        4: "Необоснованное оскорбление",
+        5: "низкая Мошна",
+      }
+
+      for ch in guild.channels:
+        if "гласность" in ch.name:
+          user = bot.get_user(row["Target"])
+          await ch.send(f"Модераторы рассмотрели донос на гражданина **{user.display_name}**!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n----------------------------------------------------------------------")
+
+    else:
+      await ctx.send(f"<@!{ctx.author.id}>, донос уже обработан! Вердикт — {status}")
+      return
+
+
+  else:
+    await ctx.send(f"<@!{ctx.author.id}>, такого доноса нет!")
+    return
+
+
 
 
 @bot.command(name="кто")
@@ -1262,7 +1418,6 @@ async def who(ctx, mem):
       await ctx.send(f"<@!{id_author}>, пока нам ничего не известно о {mem.name}.")
       
     db.close()
-
 
 @bot.command(name='resetforgetforgetforget9832164382746')
 async def confess(ctx):
