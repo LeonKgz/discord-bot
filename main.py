@@ -1350,8 +1350,8 @@ async def approve_donos(ctx, donos_id, priority, evidence):
 
     if status == "TBD":
 
-      add_points_quick(row["Source"], priority)
-      remove_points_quick(row["Target"], priority)
+      await add_points_quick(row["Source"], priority)
+      await remove_points_quick(row["Target"], priority)
 
       try:
         update = f"UPDATE tellings SET Status = \"Approved\" WHERE ID =\"{donos_id}\""
@@ -1385,7 +1385,8 @@ async def approve_donos(ctx, donos_id, priority, evidence):
       for ch in guild.channels:
         if "гласность" in ch.name:
           user = bot.get_user(row["Target"])
-          await ch.send(f"Модераторы рассмотрели донос на гражданина **{user.display_name}**!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n\t\t{evidence}\n\n----------------------------------------------------------------------")
+          await ch.send(f"Модераторы рассмотрели донос на гражданина **{user.display_name}**!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n\t\t*Материалы дела* — {evidence}\n\n----------------------------------------------------------------------")
+
 
     else:
       await ctx.send(f"<@!{ctx.author.id}>, донос уже обработан! Вердикт — {status}")
