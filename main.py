@@ -1326,7 +1326,7 @@ async def statji(ctx):
   await ctx.send(res)
 
 @bot.command(name="approve")
-async def approve_donos(ctx, donos_id, priority):
+async def approve_donos(ctx, donos_id, priority, evidence):
 
   # If somebody tries to supply ID instead of mentioning a user on one of the server's channels, delete the message
   if (ctx.guild):
@@ -1385,7 +1385,7 @@ async def approve_donos(ctx, donos_id, priority):
       for ch in guild.channels:
         if "гласность" in ch.name:
           user = bot.get_user(row["Target"])
-          await ch.send(f"Модераторы рассмотрели донос на гражданина **{user.display_name}**!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n----------------------------------------------------------------------")
+          await ch.send(f"Модераторы рассмотрели донос на гражданина **{user.display_name}**!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n\t\t{evidence}\n\n----------------------------------------------------------------------")
 
     else:
       await ctx.send(f"<@!{ctx.author.id}>, донос уже обработан! Вердикт — {status}")
