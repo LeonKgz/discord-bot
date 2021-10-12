@@ -88,7 +88,7 @@ async def include(ctx, *, actor):
   actor_ids = str(actor).split()
   actor_ids = [int(i[3:-1]) for i in actor_ids]
 
-  for mem in ctx.guild.members:
+  for mem in ctx.guild.embers:
     if (mem.id in actor_ids):
       truppa = discord.utils.get(ctx.guild.roles, name='Драматическая Труппа')
       actor_zapasa = discord.utils.get(ctx.guild.roles, name='Актёр Запаса')
@@ -361,8 +361,9 @@ async def on_message(message):
     
     #print(message.author.mutual_guilds[0].get_member(message.author.id).id)
 
-    if int(message.author.id) != ME:
-      await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
+    # if int(message.author.id) != ME:
+    if int(message.author.id) != ME and not "!донести" in message.content:
+        await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
   elif 'погран' not in message.channel.name:
     name = message.author.name
     iid = message.author.id
@@ -1210,8 +1211,21 @@ async def donos(ctx, *, args=None):
       return
 
     source_id = ctx.author.id
+    user = bot.get_user(source_id)
     db, cursor = get_db_cursor()
     guild = bot.get_guild(GUILD)
+
+    blacklist_row = get_db_row("tellings_blacklist", source_id)
+
+    if blacklist_row:
+      unban_time = blacklist_row["Timestamp"]
+      now = datetime.datetime.now()
+      if now < unban_time:
+        period = unban_time - now
+        await user.create_dm()
+        await user.dm_channel.send(f"Вы получили бан на функцию доноса! Бан продлится ещё {period.days} дней.")
+        return
+
 
     # Check that user has a description
     cnfs = get_db_row("confessions", source_id)
@@ -1228,7 +1242,7 @@ async def donos(ctx, *, args=None):
     iid = args[:args.find("\"")].strip()
     after_quote = args[(args.find("\"") + 1):]
     inside = after_quote[:after_quote.find("\"")].strip()
-    links = after_quote[after_quote.find("\"") + 1:].strip().split() 
+    links = after_quote[after_quote.find("\"") + 1:].strip().split()
     links = ", ".join(links)
     time = datetime.datetime.now()
 
@@ -1245,7 +1259,7 @@ async def donos(ctx, *, args=None):
       await ctx.send(f"<@!{source_id}>, ошибка обновления базы данных! Убедитесь, что в вашей приписке нет кавычек!")
       return
     
-    await ctx.send(f"<@!{source_id}>, ваше заявление принято под номером **{res_id}** и вскоре будет рассмотрено одним из Модераторов!")
+    await ctx.send(f"<@!{source_id}>, ваше заявление принято и вскоре будет рассмотрено одним из Модераторов!")
 
 
     # Now keep track of unprocessed tellings through the 'Status' field
@@ -1255,6 +1269,7 @@ async def donos(ctx, *, args=None):
     links = "\n\t\t\t\t\t\t\t".join(links.split(","))
     # Scan through all the unmarked descriptions and remind SovNarMod members to mark them immediately
     for m in sovnarmod.members:
+      await m.create_dm()
       await m.dm_channel.send(f"Товарищ Народный Модератор! Поступило заявление!\n\n\t\tНомер —  {res_id}\n\n\t\tПриписка — *{inside}*\n\n\t\tСсылки — {links}")
        
     #
@@ -1297,9 +1312,8 @@ async def donos(ctx, *, args=None):
     #  p = await member.profile()
     #  print(p)
 
-
 @bot.command(name="статьи")
-async def approve_donos(ctx):
+async def statji(ctx):
   if (not await check_rights_dm(ctx)):
       return
 
@@ -1318,6 +1332,9 @@ async def approve_donos(ctx, donos_id, priority):
   if (ctx.guild):
     await ctx.message.delete()
     return
+
+  priority = int(priority)
+  donos_id = int(donos_id)
 
   if (priority < 1 or priority > 5):
     await ctx.send(f"<@!{ctx.author.id}>, приоритет должен быть между 1 и 5!")
@@ -1379,8 +1396,170 @@ async def approve_donos(ctx, donos_id, priority):
     await ctx.send(f"<@!{ctx.author.id}>, такого доноса нет!")
     return
 
+def get_line(i):
+  total = 50
+  empty = " "
+  line = "="
+  ret = ""
+  return (line * i) +  (empty * (total - i))
+
+import random
+@bot.command(name="мина")
+async def dismiss_donos(ctx):
+  await ctx.send(f"<@!{ctx.author.id}>, вы наступили на мину!")
+  ret = await ctx.send("*Взрыв через 3...*")
+  await asyncio.sleep(1)
+  await ret.edit(content="*Взрыв через 2...*")
+  await asyncio.sleep(1)
+  await ret.edit(content="*Взрыв через 1...*")
+  await asyncio.sleep(1)
+  if (random.random() < 0.5):
+
+    b = await ctx.send("https://i.pinimg.com/originals/0e/14/e8/0e14e85756dbdfe2979998bf8e76e3c4.gif")
+    await ctx.message.delete()
+    await asyncio.sleep(0.01)
+    await ret.edit(content="**Б**")
+    await asyncio.sleep(0.05)
+    await ret.edit(content="**БУ**")
+    await asyncio.sleep(0.05)
+    await ret.edit(content="**БУУ**")
+    await asyncio.sleep(0.05)
+    await ret.edit(content="**БУУУ**")
+    await asyncio.sleep(0.05)
+    await ret.edit(content="**БУУУУ**")
+    await asyncio.sleep(0.05)
+    await ret.edit(content="**БУУУУУ**")
+    await asyncio.sleep(0.05)
+    await ret.edit(content="**БУУУУУМ**")
+    await asyncio.sleep(1)
+    await b.delete()
+    await ret.delete()
+    await asyncio.sleep(1)
+    await ctx.send("Помянем...")
+
+  else:
+    # await ret.edit(content="*Уфф... вам повезло и мина не сработала*")
+    await slow_printout(ctx, "Уфф... вам повезло и мина не сработала", around="*")
+
+  # Взрывом может зацепить людей вокруг (ближайшие 5 сообщений)
+
+async def slow_printout(ctx, content, around=""):
+  msg = await ctx.send(around + content[0] + around)
+  for i in range(2, len(content) + 1):
+    final = around + content[:i] + around
+    await msg.edit(content=final)
+
+@bot.command(name="dismiss")
+async def dismiss_donos(ctx, donos_id):
+
+  # If somebody tries to supply ID instead of mentioning a user on one of the server's channels, delete the message
+  if (ctx.guild):
+    await ctx.message.delete()
+    return
+
+  donos_id = int(donos_id)
+
+  db, cursor = get_db_cursor()
+  guild = bot.get_guild(GUILD)
+
+  row = get_db_row("tellings", donos_id)
+  if (row):
+    status = row["Status"]
+
+    if status == "TBD":
+
+      try:
+        update = f"UPDATE tellings SET Status = \"Dismissed\" WHERE ID =\"{donos_id}\""
+        cursor.execute(update)
+        db.commit()
+
+      except Exception as e:
+        print(e)
+        db.rollback()
+        await ctx.send(f"<@!{ctx.author.id}>, ошибка обновления базы данных!")
+        return
+
+      await ctx.send(f"<@!{ctx.author.id}>, донос рассмотрен!")
+
+      user = bot.get_user(row["Source"])
+      await user.create_dm()
+      iid = row["ID"]
+      await user.dm_channel.send(f"Ваш донос под номером {iid} был отклонён за недостатком улик!")
+
+      await ch.send(f"Модераторы рассмотрели донос на гражданина **{user.display_name}**!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n----------------------------------------------------------------------")
+
+    else:
+      await ctx.send(f"<@!{ctx.author.id}>, донос уже обработан! Вердикт — {status}")
+      return
+  else:
+    await ctx.send(f"<@!{ctx.author.id}>, такого доноса нет!")
+    return
+
+@bot.command(name="blacklist")
+async def blacklist_donos(ctx, donos_id):
+  # If somebody tries to supply ID instead of mentioning a user on one of the server's channels, delete the message
+  if (ctx.guild):
+    await ctx.message.delete()
+    return
+
+  db, cursor = get_db_cursor()
+  guild = bot.get_guild(GUILD)
+
+  row = get_db_row("tellings", donos_id)
+  if (row):
+    status = row["Status"]
+
+    if status == "TBD":
+
+      try:
+        update = f"UPDATE tellings SET Status = \"Blacklisted\" WHERE ID =\"{donos_id}\""
+        cursor.execute(update)
+        db.commit()
+
+      except Exception as e:
+        print(e)
+        db.rollback()
+        await ctx.send(f"<@!{ctx.author.id}>, ошибка обновления статуса доноса!")
+        return
+
+      await ctx.send(f"<@!{ctx.author.id}>, донос рассмотрен!")
+
+      black_row = get_db_row("tellings_blacklist", row["Source"])
+      user = bot.get_user(row["Source"])
+
+      user_id = row['Source']
+      strikes = 0
+      name = user.name
+      now = datetime.datetime.now()
+
+      if black_row:
+        strikes = int(black_row["Strikes"])
+
+      unban_time = now + datetime.timedelta(days=7+strikes)
+
+      try:
+        update = f"REPLACE INTO tellings_blacklist(ID, Name, Strikes, Timestamp) VALUES(\"{user_id}\", \"{name}\", \"{strikes + 1}\", \"{unban_time}\")"
+        cursor.execute(update)
+        db.commit()
+
+      except Exception as e:
+        print(e)
+        db.rollback()
+        await ctx.send(f"<@!{ctx.author.id}>, ошибка обновления бракованных доносов!")
+        return
+
+      user = bot.get_user(row["Source"])
+      await user.create_dm()
+      iid = row["ID"]
+      await user.dm_channel.send(f"Ваш донос под номером {iid} был забракован модератором! Вы получаете бан на данную функцию на {7 + strikes} дней. Если вы считаете, что донос был забракован по ошибке, напишите Албанцу в личку.")
 
 
+    else:
+      await ctx.send(f"<@!{ctx.author.id}>, донос уже обработан! Вердикт — {status}")
+      return
+  else:
+    await ctx.send(f"<@!{ctx.author.id}>, такого доноса нет!")
+    return
 
 @bot.command(name="кто")
 async def who(ctx, mem):
@@ -1420,7 +1599,7 @@ async def who(ctx, mem):
     db.close()
 
 @bot.command(name='resetforgetforgetforget9832164382746')
-async def confess(ctx):
+async def confesss(ctx):
 
     guild = bot.get_guild(GUILD) 
     proletariat = discord.utils.get(guild.roles, name='Пролетарий')

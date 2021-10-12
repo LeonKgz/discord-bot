@@ -22,6 +22,7 @@ class Status(commands.Cog):
     await member.add_roles(apatrid)
 
     ch = self.get_channel(member.guild, "погран")
+    manifesto = self.get_channel(member.guild, "manifesto")
     await ch.send(f"<@!{member.id}>, добро пожаловать в ТМГ!\n\nЭто пограничная      застава, охраняющая суверенитет Мошны.\n В канале {manifesto.mention} ты найдёшь Т     рактат о Мошне — основополагающий документ сего сообщества.\nЧтобы получить доступ      ко всем остальным каналам сервера и стать полноценным гражданином, достаточно вве     сти команду « !пропуск ». \n\nДа прибудет с тобой Мошна!")
 
     ch = self.get_channel(member.guild, "карандаш")
