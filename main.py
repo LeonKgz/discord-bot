@@ -1235,8 +1235,8 @@ async def donos(ctx, *, args=None):
 
     # Check that user has at least 5 social points
     points = get_db_row("raiting", source_id)["Points"]
-    if (points < 5):
-      await ctx.send(f"<@!{source_id}>, для использования данной функции нужно иметь минимум 5 очков социального рейтинга! Их можно заработать, например, качественно обновив своё описание.")
+    if (points < 1):
+      await ctx.send(f"<@!{source_id}>, для использования данной функции нужно иметь минимум 1 очко социального рейтинга! Его можно заработать, например, качественно обновив своё описание.")
       return
       
     iid = args[:args.find("\"")].strip()
