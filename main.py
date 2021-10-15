@@ -1726,8 +1726,11 @@ async def confess(ctx, *, args=None):
             db.rollback()
 
           await ctx.send(f"<@!{iid}> проходите, ваше описание обновлено!")
-          await ctx.author.add_roles(proletariat)
-          await ctx.author.remove_roles(politzek)
+
+          author = bot.get_user(ctx.author.id)
+
+          await author.add_roles(proletariat)
+          await author.remove_roles(politzek)
           updated = True
 
         except Exception as e:
@@ -1768,7 +1771,7 @@ async def confess(ctx, *, args=None):
     # If description was updated successfully need to reinsert user into the unmarked_confessions table
     if updated:
 
-      snm = discord.utils.get(ctx.guild.roles, name='СовНарМод')
+      snm = discord.utils.get(guild.roles, name='СовНарМод')
       markers = ", ".join([str(mem.id) for mem in snm.members])
 
       replace = f"REPLACE INTO unmarked_confessions(ID, Name, Markers) VALUES(\"{iid}\", \"{name}\", \"{markers}\")"
