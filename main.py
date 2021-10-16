@@ -1727,7 +1727,8 @@ async def confess(ctx, *, args=None):
 
           await ctx.send(f"<@!{iid}> проходите, ваше описание обновлено!")
 
-          author = bot.get_user(ctx.author.id)
+          #author = bot.get_user(ctx.author.id)
+          author = guild.get_member(ctx.author.id) 
 
           await author.add_roles(proletariat)
           await author.remove_roles(politzek)
