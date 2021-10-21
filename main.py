@@ -850,6 +850,9 @@ async def important_info():
     ns = npc.members
     ps = [p for p in ps if p not in ns]
 
+    bl = [351749038497988621, 249503118885257216, 486137719647633408, 376990474466099201, 355781240479023115, 347757889210810369]
+
+    ps = [item for item in ps if item.id not in bl]      
     m = ps[random.randint(0, len(ps) - 1)]
 
     for ch in guild.channels:
