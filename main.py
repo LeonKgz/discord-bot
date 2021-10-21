@@ -64,6 +64,58 @@ async def looop():
                 text = quote + " — " + author
                 await ch.send(text)
 
+@tasks.loop(seconds=43200.0)
+async def news_alert():
+  guild = bot.get_guild(GUILD) 
+  db, cursor = get_db_cursor()
+  if (guild):
+    for ch in guild.channels:
+      if ("колхоз" in ch.name or "застава" in ch.name):
+        
+        counter = None
+
+        try:
+          sql = f"SELECT COUNT(*) FROM timers"
+          cursor.execute(sql)
+          counter = int(cursor.fetchone()['COUNT(*)'])
+        except Exception as e:
+          print(e)
+          db.rollback()
+          return
+
+        if (counter == 0):
+          return
+
+        with open('counter.txt', 'r+') as f:
+          current_offset = int(f.readlines()[0])
+          
+          f.seek(0)
+          if (current_offset >= counter - 1):
+            f.write("0")
+          else:
+            f.write(f"{current_offset + 1}")
+
+          f.truncate()
+
+          f.close()
+        
+        try:
+          sql = f"SELECT * FROM timers ORDER By Name LIMIT 1 OFFSET {current_offset}"
+          cursor.execute(sql)
+          content = cursor.fetchone()['Content']
+          await ch.send(content)
+        except Exception as e:
+          print(e)
+          try:
+            db.rollback()
+          except Exception as e:
+            print(re)
+          return
+
+        db.close()
+
+news_alert.start()
+
 @bot.event
 async def on_ready():
   print(f'{bot.user.name} has connected to Discord!')
