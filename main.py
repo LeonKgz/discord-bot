@@ -665,7 +665,6 @@ async def vse(ctx):
       await ch.send(res)
       break
 
-
 @tasks.loop(seconds=86400.0)
 async def scan():
 
@@ -673,8 +672,7 @@ async def scan():
   guild = bot.get_guild(GUILD) 
   day = int(datetime.datetime.today().weekday())
 
-  if (guild and day == 0):
-
+  if (guild):
     super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
 
 
@@ -704,7 +702,16 @@ async def scan():
       sovok = bot.get_user(int(sovok))
       await sovok.create_dm()
       quotes = ",\n\t".join([(str(j) + ") \t" + str(i)) for j, i in enumerate(spiski)])
-      await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшую неделю: \n\n\t{quotes}")
+      if(len(spiski) > 0):
+        await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшие сутки: \n\n\t{quotes}")
+
+  if (guild and day == 0):
+
+    super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Апатрид')
+    sovnarmod = discord.utils.get(guild.roles, name='СовНарМод')
 
     # Scan through all the Proletariat and put to Pogran-Zastava channel all who are not in the «cache» database
     ms = []
