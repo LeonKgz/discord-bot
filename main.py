@@ -69,50 +69,51 @@ async def news_alert():
   guild = bot.get_guild(GUILD) 
   db, cursor = get_db_cursor()
   if (guild):
+
+    counter = None
+
+    try:
+      sql = f"SELECT COUNT(*) FROM timers"
+      cursor.execute(sql)
+      counter = int(cursor.fetchone()['COUNT(*)'])
+    except Exception as e:
+      print(e)
+      db.rollback()
+      return
+
+    if (counter == 0):
+      return
+
+    with open('counter.txt', 'r+') as f:
+      current_offset = int(f.readlines()[0])
+      
+      f.seek(0)
+      if (current_offset >= counter - 1):
+        f.write("0")
+      else:
+        f.write(f"{current_offset + 1}")
+
+      f.truncate()
+
+      f.close()
+    
+    try:
+      sql = f"SELECT * FROM timers ORDER By Name LIMIT 1 OFFSET {current_offset}"
+      cursor.execute(sql)
+      content = cursor.fetchone()['Content']
+    except Exception as e:
+      print(e)
+      try:
+        db.rollback()
+      except Exception as e:
+        print(re)
+      return
+
+    db.close()
+
     for ch in guild.channels:
-      if ("колхоз" in ch.name or "застава" in ch.name):
-        
-        counter = None
-
-        try:
-          sql = f"SELECT COUNT(*) FROM timers"
-          cursor.execute(sql)
-          counter = int(cursor.fetchone()['COUNT(*)'])
-        except Exception as e:
-          print(e)
-          db.rollback()
-          return
-
-        if (counter == 0):
-          return
-
-        with open('counter.txt', 'r+') as f:
-          current_offset = int(f.readlines()[0])
-          
-          f.seek(0)
-          if (current_offset >= counter - 1):
-            f.write("0")
-          else:
-            f.write(f"{current_offset + 1}")
-
-          f.truncate()
-
-          f.close()
-        
-        try:
-          sql = f"SELECT * FROM timers ORDER By Name LIMIT 1 OFFSET {current_offset}"
-          cursor.execute(sql)
-          content = cursor.fetchone()['Content']
-          await ch.send(content)
-        except Exception as e:
-          print(e)
-          try:
-            db.rollback()
-          except Exception as e:
-            print(re)
-          return
-
-        db.close()
+      if ("колхоз" in ch.name or "погран-застава" in ch.name):
+        await ch.send(content)
 
 news_alert.start()
 
@@ -127,6 +128,24 @@ async def on_ready():
 #async def play(ctx):
 #  response = "Ромео и Джульетта — Уильям Шекспир"
 #  await ctx.send(response)
+
+@bot.command(name="embed")
+async def emb(ctx):
+	embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description="This is an embed that will show how to build an embed and the different components", color=0x109319)
+
+	# Add author, thumbnail, fields, and footer to the embed
+	embed.set_author(name="RealDrewData", url="https://twitter.com/RealDrewData", icon_url="https://pbs.twimg.com/profile_images/1327036716226646017/ZuaMDdtm_400x400.jpg")
+
+	embed.set_thumbnail(url="https://i.imgur.com/axLm3p6.jpeg")
+
+	embed.add_field(name="Field 1 Title", value="This is the value for field 1. This is NOT an inline field.", inline=False) 
+	embed.add_field(name="Field 2 Title", value="It is inline with Field 3", inline=True)
+	embed.add_field(name="Field 3 Title", value="It is inline with Field 2", inline=True)
+
+	embed.set_footer(text="This is the footer. It contains text at the bottom of the embed")
+	await ctx.send(embed=embed)
+
+
 
 @bot.command(
   name='втруппу',
