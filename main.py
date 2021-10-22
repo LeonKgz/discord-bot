@@ -64,11 +64,14 @@ async def looop():
                 text = quote + " — " + author
                 await ch.send(text)
 
-@tasks.loop(seconds=43200.0)
+@tasks.loop(seconds=3600.0)
 async def news_alert():
   guild = bot.get_guild(GUILD) 
   db, cursor = get_db_cursor()
-  if (guild):
+
+  hour = int(datetime.datetime.now().hour)
+
+  if (guild and hour%6 == 0):
 
     counter = None
 
@@ -145,7 +148,9 @@ async def emb(ctx):
 	embed.set_footer(text="This is the footer. It contains text at the bottom of the embed")
 	await ctx.send(embed=embed)
 
-
+#  for ch in ctx.guild.channels:
+#    if ("гласность" in ch.name):
+#      await ch.send(f"Все Модераторы оценили описание гражданина <@!158602735581659136>!\n\n\t\t Окончательная оценка — **1**\n\n----------------------------------------------------------------------")
 
 @bot.command(
   name='втруппу',
@@ -1065,8 +1070,12 @@ async def evaluate(ctx, mem, points):
     await ctx.send(f"<@!{id_author}>, оценка обновлена!")
     
     # Now update unmarked_confessions
-    mods = get_db_row("unmarked_confessions", id_to_search)["Markers"].split(", ")
-  
+    mods = get_db_row("unmarked_confessions", id_to_search)
+    if (mods != None):
+      mods = mods["Markers"].split(", ")
+    else:
+      mods = []
+
     try:
       mods.remove(str(id_author))
     except Exception as e:
