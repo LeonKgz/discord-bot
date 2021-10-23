@@ -71,7 +71,7 @@ async def news_alert():
 
   hour = int(datetime.datetime.now().hour)
 
-  if (guild and hour%6 == 0):
+  if (guild and hour%8 == 0):
 
     counter = None
 
