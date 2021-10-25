@@ -64,7 +64,7 @@ async def looop():
                 text = quote + " — " + author
                 await ch.send(text)
 
-@tasks.loop(seconds=3600.0)
+@tasks.loop(seconds=3600000000.0)
 async def news_alert():
   guild = bot.get_guild(GUILD) 
   db, cursor = get_db_cursor()
