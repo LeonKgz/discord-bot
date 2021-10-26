@@ -431,7 +431,10 @@ async def on_message(message):
 
   me = bot.get_user(ME)
 
-  
+  # For now if the bot is on some other server, do nothing!
+  if (message.guild.name != "ТМГ"):
+      return
+
   #if not message.guild and message.content[0] != "!" and int(message.author.id) != ME :
   if not message.guild:
     
