@@ -64,14 +64,14 @@ async def looop():
                 text = quote + " — " + author
                 await ch.send(text)
 
-@tasks.loop(seconds=3600000000.0)
+@tasks.loop(seconds=3600.0)
 async def news_alert():
   guild = bot.get_guild(GUILD) 
   db, cursor = get_db_cursor()
 
   hour = int(datetime.datetime.now().hour)
 
-  if (guild and hour%8 == 0):
+  if (guild and hour == 16):
 
     counter = None
 
@@ -133,24 +133,32 @@ async def on_ready():
 #  await ctx.send(response)
 
 @bot.command(name="embed")
-async def emb(ctx):
-	embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description="This is an embed that will show how to build an embed and the different components", color=0x109319)
+async def emb(ctx, issue):
+#	embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description="This is an embed that will show how to build an embed and the different components", color=0x109319)
+#
+#	# Add author, thumbnail, fields, and footer to the embed
+#	embed.set_author(name="RealDrewData", url="https://twitter.com/RealDrewData", icon_url="https://pbs.twimg.com/profile_images/1327036716226646017/ZuaMDdtm_400x400.jpg")
+#
+#	embed.set_thumbnail(url="https://i.imgur.com/axLm3p6.jpeg")
+#
+#	embed.add_field(name="Field 1 Title", value="This is the value for field 1. This is NOT an inline field.", inline=False) 
+#	embed.add_field(name="Field 2 Title", value="It is inline with Field 3", inline=True)
+#	embed.add_field(name="Field 3 Title", value="It is inline with Field 2", inline=True)
+#
+#	embed.set_footer(text="This is the footer. It contains text at the bottom of the embed")
+#	await ctx.send(embed=embed)
 
-	# Add author, thumbnail, fields, and footer to the embed
-	embed.set_author(name="RealDrewData", url="https://twitter.com/RealDrewData", icon_url="https://pbs.twimg.com/profile_images/1327036716226646017/ZuaMDdtm_400x400.jpg")
 
-	embed.set_thumbnail(url="https://i.imgur.com/axLm3p6.jpeg")
+  for ch in ctx.guild.channels:
+    if ("технический" in ch.name):
+      url = f"http://***REMOVED***:8083/remedy?issue={issue}"
 
-	embed.add_field(name="Field 1 Title", value="This is the value for field 1. This is NOT an inline field.", inline=False) 
-	embed.add_field(name="Field 2 Title", value="It is inline with Field 3", inline=True)
-	embed.add_field(name="Field 3 Title", value="It is inline with Field 2", inline=True)
-
-	embed.set_footer(text="This is the footer. It contains text at the bottom of the embed")
-	await ctx.send(embed=embed)
-
-#  for ch in ctx.guild.channels:
-#    if ("гласность" in ch.name):
-#      await ch.send(f"Все Модераторы оценили описание гражданина <@!158602735581659136>!\n\n\t\t Окончательная оценка — **1**\n\n----------------------------------------------------------------------")
+      response = requests.get(url)
+      print(f"http://***REMOVED***:8083/remedy?issue={issue}")
+      print(response)
+      data = response.json()["files"]
+      
+      await ch.send(f"{data}")
 
 @bot.command(
   name='втруппу',
