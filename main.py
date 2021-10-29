@@ -168,7 +168,7 @@ async def remedies(ctx):
     await ctx.send(f"<@!{ctx.author.id}>, средства не найдены!")
 
   ret_str = ", ".join(data)
-  await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}*")
+  await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
 
 @bot.command(
   name='втруппу',
