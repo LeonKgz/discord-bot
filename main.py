@@ -9,6 +9,8 @@ from discord.ext import commands, tasks
 from discord.utils import get
 import pymysql.cursors
 import json
+import random
+import re
 import requests
 import datetime
 from discord.ext.commands import Bot
@@ -132,33 +134,45 @@ async def on_ready():
 #  response = "Ромео и Джульетта — Уильям Шекспир"
 #  await ctx.send(response)
 
-@bot.command(name="embed")
-async def emb(ctx, issue):
-#	embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description="This is an embed that will show how to build an embed and the different components", color=0x109319)
-#
-#	# Add author, thumbnail, fields, and footer to the embed
-#	embed.set_author(name="RealDrewData", url="https://twitter.com/RealDrewData", icon_url="https://pbs.twimg.com/profile_images/1327036716226646017/ZuaMDdtm_400x400.jpg")
-#
-#	embed.set_thumbnail(url="https://i.imgur.com/axLm3p6.jpeg")
-#
-#	embed.add_field(name="Field 1 Title", value="This is the value for field 1. This is NOT an inline field.", inline=False) 
-#	embed.add_field(name="Field 2 Title", value="It is inline with Field 3", inline=True)
-#	embed.add_field(name="Field 3 Title", value="It is inline with Field 2", inline=True)
-#
-#	embed.set_footer(text="This is the footer. It contains text at the bottom of the embed")
-#	await ctx.send(embed=embed)
-
+@bot.command(name="средство")
+async def remedy(ctx, issue):
 
   for ch in ctx.guild.channels:
     if ("технический" in ch.name):
       url = f"http://***REMOVED***:8083/remedy?issue={issue}"
 
       response = requests.get(url)
-      print(f"http://***REMOVED***:8083/remedy?issue={issue}")
-      print(response)
       data = response.json()["files"]
+      if not data:
+        await ch.send(f"<@!{ctx.author.id}>, средство для *«{issue}»* не найдено!")
+
+      data = data[random.randint(0, len(data) - 1)]
       
-      await ch.send(f"{data}")
+      author = data["author"]
+      title = data["title"]
+      data = data["content"]
+
+      data = data.split("\n\n")[1]
+      #data = data.replace("\\n", "\n")
+      data = data.replace("  ", " ")
+      data = data.strip()
+      
+      await ch.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
+
+@bot.command(name="средства")
+async def remedies(ctx):
+  for ch in ctx.guild.channels:
+    if ("технический" in ch.name):
+      url = f"http://***REMOVED***:8083/remedies"
+
+      response = requests.get(url)
+      data = response.json()["remedies"]
+
+      if not data:
+        await ch.send(f"<@!{ctx.author.id}>, средства не найдены!")
+
+      ret_str = ", ".join(data)
+      await ch.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}*")
 
 @bot.command(
   name='втруппу',
@@ -866,8 +880,6 @@ async def lunch():
         res = f"{politzek.mention}! Обед! \n\n {url}"
         res = f"Обед! \n\n {url}"
         await ch.send(res)
-
-import random
 
 @tasks.loop(seconds=3600.0)
 async def important_info():
