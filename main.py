@@ -137,42 +137,38 @@ async def on_ready():
 @bot.command(name="средство")
 async def remedy(ctx, issue):
 
-  for ch in ctx.guild.channels:
-    if ("технический" in ch.name):
-      url = f"http://45.32.178.186:8083/remedy?issue={issue}"
+  url = f"http://45.32.178.186:8083/remedy?issue={issue}"
 
-      response = requests.get(url)
-      data = response.json()["files"]
-      if not data:
-        await ch.send(f"<@!{ctx.author.id}>, средство для *«{issue}»* не найдено!")
+  response = requests.get(url)
+  data = response.json()["files"]
+  if not data:
+    await ctx.send(f"<@!{ctx.author.id}>, средство для *«{issue}»* не найдено!")
 
-      data = data[random.randint(0, len(data) - 1)]
-      
-      author = data["author"]
-      title = data["title"]
-      data = data["content"]
+  data = data[random.randint(0, len(data) - 1)]
+  
+  author = data["author"]
+  title = data["title"]
+  data = data["content"]
 
-      data = data.split("\n\n")[1]
-      #data = data.replace("\\n", "\n")
-      data = data.replace("  ", " ")
-      data = data.strip()
-      
-      await ch.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
+  data = data.split("\n\n")[1]
+  #data = data.replace("\\n", "\n")
+  data = data.replace("  ", " ")
+  data = data.strip()
+  
+  await ctx.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
 
 @bot.command(name="средства")
 async def remedies(ctx):
-  for ch in ctx.guild.channels:
-    if ("технический" in ch.name):
-      url = f"http://45.32.178.186:8083/remedies"
+  url = f"http://45.32.178.186:8083/remedies"
 
-      response = requests.get(url)
-      data = response.json()["remedies"]
+  response = requests.get(url)
+  data = response.json()["remedies"]
 
-      if not data:
-        await ch.send(f"<@!{ctx.author.id}>, средства не найдены!")
+  if not data:
+    await ctx.send(f"<@!{ctx.author.id}>, средства не найдены!")
 
-      ret_str = ", ".join(data)
-      await ch.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}*")
+  ret_str = ", ".join(data)
+  await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}*")
 
 @bot.command(
   name='втруппу',
