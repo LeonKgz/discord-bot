@@ -142,7 +142,7 @@ async def remedy(ctx, issue):
   response = requests.get(url)
   data = response.json()["files"]
   if not data:
-    await ctx.send(f"<@!{ctx.author.id}>, средство для *«{issue}»* не найдено!")
+    await ctx.send(f"<@!{ctx.author.id}>, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.")
 
   data = data[random.randint(0, len(data) - 1)]
   
