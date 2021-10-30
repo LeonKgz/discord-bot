@@ -450,7 +450,8 @@ async def on_message(message):
   me = bot.get_user(ME)
 
   # For now if the bot is on some other server, do nothing!
-  if (message.guild.name != "ТМГ"):
+  if (message.guild):
+    if (message.guild.name != "ТМГ"):
       return
 
   #if not message.guild and message.content[0] != "!" and int(message.author.id) != ME :
@@ -1130,9 +1131,11 @@ async def remove_points_quick(target_id, points):
       db, cursor = get_db_cursor()
       row = get_db_row("raiting", target_id)
       if (not row):
-        return False
+        #return False
+        curr = 0
+      else:
+        curr = row["Points"]
 
-      curr = row["Points"]
       end = curr - points
       if (end < 0):
         end = 0
@@ -1164,10 +1167,13 @@ async def add_points_quick(target_id, points):
 
       db, cursor = get_db_cursor()
       row = get_db_row("raiting", target_id)
-      if (not row):
-        return False
 
-      curr = row["Points"]
+      if (not row):
+        #return False
+        curr = 0
+      else:
+        curr = row["Points"]
+
       end = curr + points
 
       if (end < 0):
