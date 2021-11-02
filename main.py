@@ -1122,6 +1122,39 @@ async def evaluate(ctx, mem, points):
 
     db.close()
 
+@bot.command(name="populate")
+async def populate_raiting(ctx):
+  db, cursor = get_db_cursor()
+  sql = "SELECT * FROM confessions"
+  try:
+    cursor.execute(sql)
+    res = [e["ID"] for e in cursor.fetchall()]
+  except Exception as e:
+    print(e)
+    db.rollback()
+    return
+
+  for m in ctx.guild.members:
+    
+    curr= get_db_row("raiting", m.id)
+    
+    if (curr):
+      curr = curr["Points"]
+    else:
+      print(curr["Name"] + " is missing")
+      curr = 0
+    bol = str(m.id in res)
+    sql = f"REPLACE INTO raiting(ID, Name, Points, Confession) VALUES(\"{m.id}\", \"{m.name}\", \"{curr}\", \"{bol}\")"
+
+    try:
+      cursor.execute(sql)
+      db.commit()
+    except Exception as e:
+      print(e)
+      db.rollback()
+
+  db.close()
+
 async def remove_points_quick(target_id, points):
 
   try:
@@ -1883,8 +1916,18 @@ async def confess(ctx, *, args=None):
         print(e)
         db.rollback()
 
-    # If description was updated successfully need to reinsert user into the unmarked_confessions table
+    # If description was updated successfully need to reinsert user into the unmarked_confessions table and update Confession status in raiting databse
     if updated:
+
+      update = f"UPDATE raiting SET Confession = \"True\" WHERE ID =\"{iid}\""
+
+      try:
+        cursor.execute(update)
+        db.commit()
+      except Exception as e:
+        print(e)
+        await ctx.send(f"Проблема обновления статуса в raiting!")
+        db.rollback()
 
       snm = discord.utils.get(guild.roles, name='СовНарМод')
       markers = ", ".join([str(mem.id) for mem in snm.members])
