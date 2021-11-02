@@ -54,7 +54,7 @@ class Status(commands.Cog):
     # TODO consider the case when a user with a confessino leave sand rejoins server, for now default Confession field to False
     
     try:
-      sql = f"INSERT INTO raiting(ID, Name, Points, Confession) VALUES (\"{member.id}\", \"{member.name}\", \"{0}\", \"False\")"
+      sql = f"INSERT INTO raiting(ID, Name, Points, Confession) VALUES (\"{member.id}\", \"{member.name}\", \"{0}\", \"No\")"
       cursor.execute(sql)
       db.commit()
       res_id = cursor.lastrowid
