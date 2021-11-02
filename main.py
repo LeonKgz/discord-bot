@@ -68,6 +68,7 @@ async def looop():
 
 @tasks.loop(seconds=3600.0)
 async def news_alert():
+  return
   guild = bot.get_guild(GUILD) 
   db, cursor = get_db_cursor()
 
