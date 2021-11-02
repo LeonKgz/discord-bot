@@ -765,7 +765,6 @@ async def scan():
       done = False
       for role in list(map(str, m.roles)):
         if (role in super_roles):
-         print(f"{m.name}")
          done = True
          break
       if (done):
