@@ -1283,7 +1283,7 @@ async def remove_points(ctx, target_id, points):
         await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
 
 @bot.command(name="add")
-async def add_points(ctx, target_id, points):
+async def add_points(ctx, target_id, points, reason):
   if (not await check_rights_dm(ctx)):
     return
 
@@ -1326,6 +1326,11 @@ async def add_points(ctx, target_id, points):
 
       db.close()
       await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
+
+      guild = bot.get_guild(GUILD)
+      for ch in guild.channels:
+        if "гласность" in ch.name:
+          await ch.send(f"Модераторы начисляют **[ {points} ]** очков социального рейтинга гражданину <@!{target_id}>!\n\n\t\t Причина — *{reason}*\n\n---------------------------------------------------------------------- ")
 
 #db, cursor = get_db_cursor()
 #
@@ -1533,7 +1538,8 @@ async def approve_donos(ctx, donos_id, priority, evidence):
       for ch in guild.channels:
         if "гласность" in ch.name:
           user = bot.get_user(row["Target"])
-          await ch.send(f"Модераторы рассмотрели донос на гражданина **{user.display_name}**!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n\t\t*Материалы дела* — {evidence}\n\n----------------------------------------------------------------------")
+
+          await ch.send(f"Модераторы рассмотрели донос на гражданина <@!{user.id}>!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n\t\t*Материалы дела* — {evidence}\n\n----------------------------------------------------------------------")
 
 
     else:
