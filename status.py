@@ -51,8 +51,10 @@ class Status(commands.Cog):
     ch = self.get_channel(member.guild, "карандаш")
     await ch.send(f"<@!{member.id}> ({member.name}) вступил в ТМГ!")
 
+    # TODO consider the case when a user with a confessino leave sand rejoins server, for now default Confession field to False
+    
     try:
-      sql = f"INSERT INTO raiting(ID, Name, Points) VALUES (\"{member.id}\", \"{member.name}\", \"{0}\")"
+      sql = f"INSERT INTO raiting(ID, Name, Points, Confession) VALUES (\"{member.id}\", \"{member.name}\", \"{0}\", \"False\")"
       cursor.execute(sql)
       db.commit()
       res_id = cursor.lastrowid
