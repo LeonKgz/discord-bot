@@ -1122,8 +1122,9 @@ async def evaluate(ctx, mem, points):
 
     db.close()
 
-@bot.command(name="populate")
+@bot.command(name="ppppoppppulpappte")
 async def populate_raiting(ctx):
+  return
   db, cursor = get_db_cursor()
   sql = "SELECT * FROM confessions"
   try:
@@ -1143,7 +1144,7 @@ async def populate_raiting(ctx):
     else:
       print(curr["Name"] + " is missing")
       curr = 0
-    bol = str(m.id in res)
+    bol = "Yes" if m.id in res else "No"
     sql = f"REPLACE INTO raiting(ID, Name, Points, Confession) VALUES(\"{m.id}\", \"{m.name}\", \"{curr}\", \"{bol}\")"
 
     try:
@@ -1919,7 +1920,7 @@ async def confess(ctx, *, args=None):
     # If description was updated successfully need to reinsert user into the unmarked_confessions table and update Confession status in raiting databse
     if updated:
 
-      update = f"UPDATE raiting SET Confession = \"True\" WHERE ID =\"{iid}\""
+      update = f"UPDATE raiting SET Confession = \"Yes\" WHERE ID =\"{iid}\""
 
       try:
         cursor.execute(update)
