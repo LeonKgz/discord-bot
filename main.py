@@ -138,7 +138,7 @@ async def on_ready():
 @bot.command(name="средство")
 async def remedy(ctx, issue):
 
-  url = f"http://albenz.xyz:8083/remedy?issue={issue}"
+  url = f"http://albenz.xyz:6969/remedy?issue={issue}"
 
   response = requests.get(url)
   data = response.json()["files"]
@@ -160,7 +160,7 @@ async def remedy(ctx, issue):
 
 @bot.command(name="средства")
 async def remedies(ctx):
-  url = f"http://albenz.xyz:8083/remedies"
+  url = f"http://albenz.xyz:6969/remedies"
 
   response = requests.get(url)
   data = response.json()["remedies"]
