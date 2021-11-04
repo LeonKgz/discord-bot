@@ -152,10 +152,22 @@ async def remedy(ctx, issue):
   data = data["content"]
 
   data = data.split("\n\n")[1]
-  #data = data.replace("\\n", "\n")
   data = data.replace("  ", " ")
   data = data.strip()
-  
+
+  size = len(data)
+  if (size > 2000):
+    # For now there is a limit on number of characters that the bot can send on server. 
+    # Manually make sure that paragraphs are less than 2000 chars and send them seperately
+    splits = data.split("\n \n")
+    await ctx.send(f"—\n\n*{title}. {author}.*\n\n\t{splits[0]}\n—")
+    for e in splits[1:-1]:
+      await ctx.send(f"\n{e}\n—")
+    
+    await ctx.send(f"{splits[-1]}\n\n—")
+    return
+
+  #data = data.replace("\\n", "\n")
   await ctx.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
 
 @bot.command(name="средства")
