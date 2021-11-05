@@ -1297,14 +1297,19 @@ async def remove_points(ctx, target_id, points):
 
 @bot.command(name="add")
 async def add_points(ctx, target_id, points, reason):
-  if (not await check_rights_dm(ctx)):
+  #if (not await check_rights_dm(ctx)):
+  #  return
+
+  #if (ctx.guild):
+      #msg_id = ctx.message.id
+      #await ctx.message.delete()
+      # await ctx.send(f"<@!{ctx.message.author.id}>, ваше сообщение было удалено!")
+  #else:
+
+  if (not await check_rights(ctx, ['СовНарМод'])):
     return
 
-  if (ctx.guild):
-      msg_id = ctx.message.id
-      await ctx.message.delete()
-      # await ctx.send(f"<@!{ctx.message.author.id}>, ваше сообщение было удалено!")
-  else:
+  if True:
 
       try:
         points = int(points)
@@ -1317,33 +1322,51 @@ async def add_points(ctx, target_id, points, reason):
           return
 
       db, cursor = get_db_cursor()
-      row = get_db_row("raiting", target_id)
-      if (not row):
-        await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка соединения! Попробуйте ещё раз.")
+      
+      # Check if a group role is mentioned in
+      if ("<@&" in target_id):
+        send_to = get_id(target_id)
+        for r in ctx.guild.roles:
+          if (r.id == send_to):
+            every = ", ".join([f"<@!{m.id}>" for m in r.members])
+            res = f"Модераторы начисляют **[ 5 ]** очков социального рейтинга гражданам {every}!\n\n\t\t Причина — *{reason}*\n\n----------------------------------------------------------------------"
 
-      curr = row["Points"]
-      end = curr + points
+            guild = bot.get_guild(GUILD)
+            for ch in guild.channels:
+              if "гласность" in ch.name:
+                await ch.send(res)
+                return
 
-      db, cursor = get_db_cursor()
 
-      sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
+      # Otherwise it's one person
+      else:
+        row = get_db_row("raiting", target_id)
+        if (not row):
+          await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка соединения! Попробуйте ещё раз.")
 
-      try:
-        cursor.execute(sql)
-        db.commit()
-      except Exception as e:
-        print(e)
-        await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+        curr = row["Points"]
+        end = curr + points
 
-        db.rollback()
+        db, cursor = get_db_cursor()
 
-      db.close()
-      await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
+        sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
 
-      guild = bot.get_guild(GUILD)
-      for ch in guild.channels:
-        if "гласность" in ch.name:
-          await ch.send(f"Модераторы начисляют **[ {points} ]** очков социального рейтинга гражданину <@!{target_id}>!\n\n\t\t Причина — *{reason}*\n\n---------------------------------------------------------------------- ")
+        try:
+          cursor.execute(sql)
+          db.commit()
+        except Exception as e:
+          print(e)
+          await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+
+          db.rollback()
+
+        db.close()
+        await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
+
+        guild = bot.get_guild(GUILD)
+        for ch in guild.channels:
+          if "гласность" in ch.name:
+            await ch.send(f"Модераторы начисляют **[ {points} ]** очков социального рейтинга гражданину <@!{target_id}>!\n\n\t\t Причина — *{reason}*\n\n---------------------------------------------------------------------- ")
 
 #db, cursor = get_db_cursor()
 #
