@@ -1296,7 +1296,9 @@ async def remove_points(ctx, target_id, points):
         await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
 
 @bot.command(name="add")
-async def add_points(ctx, target_id, points, reason):
+async def add_points(ctx, target_id, points):
+#async def add_points(ctx, target_id, points, reason):
+
   #if (not await check_rights_dm(ctx)):
   #  return
 
@@ -1317,7 +1319,7 @@ async def add_points(ctx, target_id, points, reason):
           await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
           return
 
-      if (points < 1 or points > 15):
+      if (points < 1 or points > 1500):
           await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
           return
 
@@ -1363,10 +1365,10 @@ async def add_points(ctx, target_id, points, reason):
         db.close()
         await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
 
-        guild = bot.get_guild(GUILD)
-        for ch in guild.channels:
-          if "гласность" in ch.name:
-            await ch.send(f"Модераторы начисляют **[ {points} ]** очков социального рейтинга гражданину <@!{target_id}>!\n\n\t\t Причина — *{reason}*\n\n---------------------------------------------------------------------- ")
+        #guild = bot.get_guild(GUILD)
+        #for ch in guild.channels:
+        #  if "гласность" in ch.name:
+        #    await ch.send(f"Модераторы начисляют **[ {points} ]** очков социального рейтинга гражданину <@!{target_id}>!\n\n\t\t Причина — *{reason}*\n\n---------------------------------------------------------------------- ")
 
 #db, cursor = get_db_cursor()
 #
@@ -1481,18 +1483,6 @@ async def donos(ctx, *, args=None):
     #  quotes = ",\n\t".join([(str(j) + ") \t" + str(i)) for j, i in enumerate(spiski)])
     #  await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшую неделю: \n\n\t{quotes}")
 
-
-
-
-
-
-
-
-
-
-    
-
-
     #id_author = ctx.author.id
     #id_to_search = get_id(mem)
     #mem = bot.get_user(id_to_search)
@@ -1540,7 +1530,8 @@ async def approve_donos(ctx, donos_id, priority, evidence):
     if status == "TBD":
 
       await add_points_quick(row["Source"], priority)
-      await remove_points_quick(row["Target"], priority)
+      # TODO For now don't remove points from the target. 
+      #await remove_points_quick(row["Target"], priority)
 
       try:
         update = f"UPDATE tellings SET Status = \"Approved\" WHERE ID =\"{donos_id}\""
