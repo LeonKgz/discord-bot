@@ -195,7 +195,7 @@ async def include(ctx, *, actor):
   actor_ids = str(actor).split()
   actor_ids = [int(i[3:-1]) for i in actor_ids]
 
-  for mem in ctx.guild.embers:
+  for mem in ctx.guild.members:
     if (mem.id in actor_ids):
       truppa = discord.utils.get(ctx.guild.roles, name='Драматическая Труппа')
       actor_zapasa = discord.utils.get(ctx.guild.roles, name='Актёр Запаса')
@@ -1979,7 +1979,6 @@ async def confess(ctx, *, args=None):
     db.close()
 
 from status import Status
-
 #guild = bot.get_guild(GUILD)
 bot.add_cog(Status(bot))
 bot.run(TOKEN)
