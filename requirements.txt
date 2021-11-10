@@ -5,4 +5,4 @@ requests
 ffmpeg
 discord-timers
 numpy
-wikipediaapi
+wikipedia-api
