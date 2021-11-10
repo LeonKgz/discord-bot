@@ -960,9 +960,126 @@ async def start_records():
     except Exception as e:
       print("oof")
 
-#start_records.start()
- 
+import wikipediaapi
+import datetime
+import random
 
+@tasks.loop(seconds=86400.0)
+async def deaths():
+  wiki_wiki = wikipediaapi.Wikipedia('en')
+
+  today = datetime.datetime.now()
+  month = today.strftime("%B")
+  day = today.day
+
+  page = wiki_wiki.page(f'{day} {month}')
+  deaths = page.text.split("Deaths")[1].split("Holidays")[0].split("\n")
+  found_valid_page = False
+  
+  while not found_valid_page:
+    case = deaths[random.randint(0, len(deaths) - 1)]
+    
+    try:
+      case = case.split("–")[1].split(",")[0]
+    except Exception as e:
+      continue
+    
+    page = wiki_wiki.page(f'{case}')
+    #print([str(s.title) for s in page.sections])
+    found_valid_page = "Death" in [str(s.title) for s in page.sections]
+
+  ss = [s.title for s in page.sections]
+  idx = ss.index('Death')
+  section = page.sections[idx]
+  
+  guild = bot.get_guild(GUILD)
+  if (guild):
+    for ch in guild.channels:
+      if ("өлүм" in ch.name):
+        await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
+
+
+@tasks.loop(seconds=86400.0)
+async def births():
+  wiki_wiki = wikipediaapi.Wikipedia('en')
+
+  today = datetime.datetime.now()
+  month = today.strftime("%B")
+  day = today.day
+
+  page = wiki_wiki.page(f'{day} {month}')
+  deaths = page.text.split("Births")[1].split("Holidays")[0].split("\n")
+  found_valid_page = False
+  
+  while not found_valid_page:
+    case = deaths[random.randint(0, len(deaths) - 1)]
+    
+    try:
+      case = case.split("–")[1].split(",")[0]
+    except Exception as e:
+      continue
+    
+    page = wiki_wiki.page(f'{case}')
+    #print([str(s.title) for s in page.sections])
+    # TODO some pages have 'Early life and education' or something similar. Add an extension to accomodate these
+    found_valid_page = "Early life" in [str(s.title) for s in page.sections]
+
+  ss = [s.title for s in page.sections]
+  idx = ss.index('Early life')
+  section = page.sections[idx]
+  
+  guild = bot.get_guild(GUILD)
+  if (guild):
+    for ch in guild.channels:
+      if ("туулган" in ch.name):
+        await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
+
+@tasks.loop(seconds=86400.0)
+async def meditations():
+
+  guild = bot.get_guild(GUILD)
+  if (guild):
+    for ch in guild.channels:
+      if ("meditations" in ch.name):
+        channel = ch
+  else:
+    return
+
+  url = f"http://albenz.xyz:6969/remedy?issue=Random"
+
+  response = requests.get(url)
+  data = response.json()["files"]
+  data = data[random.randint(0, len(data) - 1)]
+  
+  author = data["author"]
+  title = data["title"]
+  data = data["content"]
+
+  data = data.split("\n\n")[1]
+  data = data.replace("  ", " ")
+  data = data.strip()
+
+  size = len(data)
+
+  if (size > 2000):
+    # For now there is a limit on number of characters that the bot can send on server. 
+    # Manually make sure that paragraphs are less than 2000 chars and send them seperately
+    splits = data.split("\n \n")
+    await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{splits[0]}\n—")
+    for e in splits[1:-1]:
+      await channel.send(f"\n{e}\n—")
+    
+    await channel.send(f"{splits[-1]}\n\n—")
+    return
+
+  #data = data.replace("\\n", "\n")
+  await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
+
+deaths.start()
+births.start()
+meditations.start()
+
+#start_records.start()
 #looop.start()
 scan.start()
 #dinner.start()
