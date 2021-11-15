@@ -66,7 +66,7 @@ async def looop():
                 text = quote + " — " + author
                 await ch.send(text)
 
-@tasks.loop(seconds=3600.0)
+@tasks.loop(seconds=100000000000000000.0)
 async def news_alert():
   return
   guild = bot.get_guild(GUILD) 
@@ -74,12 +74,12 @@ async def news_alert():
 
   hour = int(datetime.datetime.now().hour)
 
-  if (guild and hour == 16):
+  if (guild):
 
     counter = None
 
     try:
-      sql = f"SELECT COUNT(*) FROM timers"
+      sql = f"SELECT COUNT(*) FROM verses"
       cursor.execute(sql)
       counter = int(cursor.fetchone()['COUNT(*)'])
     except Exception as e:
@@ -135,6 +135,73 @@ async def on_ready():
 #  response = "Ромео и Джульетта — Уильям Шекспир"
 #  await ctx.send(response)
 
+import sys
+
+@bot.command(name="bible")
+async def bible(ctx, *, args=None):
+  args = str(args)  
+  args = args.split(" ")
+  passage = args[1]
+  version = args[0]
+  #numbers = ",%20".join(args[1:])
+  numbers = ";".join(args[2:])
+
+  url = f"https://getbible.net/json?passage={passage}%20{numbers}&version={version}"
+
+  response = requests.get(url)
+  try: #try parsing to dict
+    dataform = str(response.text).strip("'<>() ").replace('\'', '\"')
+  #  print(dataform[:-2])
+    dataform = dataform[:-2]
+    struct = json.loads(dataform)
+    
+    if (struct["type"] == "verse"):
+      name = struct["book"][0]["book_name"]
+
+      ret = f"{name}"
+      curr_chapter = "None"
+
+      for b in struct["book"]:
+        chapter = b["chapter_nr"]
+        if (curr_chapter != chapter):
+          ret += "\n"
+        curr_chapter = chapter
+        
+        for key in list(b["chapter"].keys()):
+          verse = key
+          content = b["chapter"][key]["verse"]
+          ret += f"\t{chapter}:{verse}\t{content}"
+
+      await ctx.channel.send(f"{ret}")
+    elif struct["type"] == "chapter":
+      name = struct["book_name"]
+
+      rets = [f"{name}"]
+      total_size = len(rets[0])
+
+      chapter = struct["chapter_nr"]
+      for key in list(struct["chapter"].keys()):
+        verse = key
+        content = struct["chapter"][key]["verse"]
+
+        size = len(f"\t{chapter}:{verse}\t{content}")
+
+        if total_size + size >= 2000:
+          total_size = 0
+          rets.append("") 
+
+        total_size += size
+
+        rets[-1] += f"\t{chapter}:{verse}\t{content}"
+      
+      for r in rets: 
+        print(len(r))
+        await ctx.channel.send(f"{r}")
+
+  except Exception as e:
+    print(e)
+
+
 @bot.command(name="средство")
 async def remedy(ctx, issue):
 
@@ -150,17 +217,32 @@ async def remedy(ctx, issue):
   author = data["author"]
   title = data["title"]
   data = data["content"]
+  
+  # TODO for meditations I dont need duplicate of title in the data field, Fix on server side. Then just remove empty spaces before new lines and stuff like that. Look out for anoimalies with repr()
+  print(repr(data))
 
+
+  if (author == "None"):
+    head = f"{title}."
+  else:
+    head = f"{title}. {author}."
+    
+  # TODO Figure out one system to parse all the text files
+  # Possibly fix new lines in meditations, and maybe scan all md files together to clean off weird spaces and
+  # tabs
+    
   data = data.split("\n\n")[1]
   data = data.replace("  ", " ")
   data = data.strip()
 
   size = len(data)
+
   if (size > 2000):
     # For now there is a limit on number of characters that the bot can send on server. 
     # Manually make sure that paragraphs are less than 2000 chars and send them seperately
     splits = data.split("\n \n")
-    await ctx.send(f"—\n\n*{title}. {author}.*\n\n\t{splits[0]}\n—")
+
+    await ctx.send(f"—\n\n*{head}*\n\n\t{splits[0]}\n—")
     for e in splits[1:-1]:
       await ctx.send(f"\n{e}\n—")
     
@@ -168,7 +250,7 @@ async def remedy(ctx, issue):
     return
 
   #data = data.replace("\\n", "\n")
-  await ctx.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
+  await ctx.send(f"—\n\n*{head}*\n\n\t{data}\n\n—")
 
 @bot.command(name="средства")
 async def remedies(ctx):
@@ -964,116 +1046,139 @@ import wikipediaapi
 import datetime
 import random
 
-@tasks.loop(seconds=86400.0)
+@tasks.loop(seconds=3600.0)
 async def deaths():
-  wiki_wiki = wikipediaapi.Wikipedia('en')
 
-  today = datetime.datetime.now()
-  month = today.strftime("%B")
-  day = today.day
 
-  page = wiki_wiki.page(f'{day} {month}')
-  deaths = page.text.split("Deaths")[1].split("Holidays")[0].split("\n")
-  found_valid_page = False
-  
-  while not found_valid_page:
-    case = deaths[random.randint(0, len(deaths) - 1)]
-    
-    try:
-      case = case.split("–")[1].split(",")[0]
-    except Exception as e:
-      continue
-    
-    page = wiki_wiki.page(f'{case}')
-    #print([str(s.title) for s in page.sections])
-    found_valid_page = "Death" in [str(s.title) for s in page.sections]
-
-  ss = [s.title for s in page.sections]
-  idx = ss.index('Death')
-  section = page.sections[idx]
-  
+  hour = int(datetime.datetime.now().hour)
   guild = bot.get_guild(GUILD)
-  if (guild):
-    for ch in guild.channels:
-      if ("өлүм" in ch.name):
-        await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
+
+  if hour == 9 and guild:
+
+    wiki_wiki = wikipediaapi.Wikipedia('en')
+
+    today = datetime.datetime.now()
+    month = today.strftime("%B")
+    day = today.day
+
+    page = wiki_wiki.page(f'{day} {month}')
+    deaths = page.text.split("Deaths")[1].split("Holidays")[0].split("\n")
+    found_valid_page = False
+    
+    while not found_valid_page:
+      case = deaths[random.randint(0, len(deaths) - 1)]
+      
+      try:
+        case = case.split("–")[1].split(",")[0]
+      except Exception as e:
+        continue
+      
+      page = wiki_wiki.page(f'{case}')
+      #print([str(s.title) for s in page.sections])
+      found_valid_page = "Death" in [str(s.title) for s in page.sections]
 
 
-@tasks.loop(seconds=86400.0)
+      if (found_valid_page):
+        ss = [s.title for s in page.sections]
+        idx = ss.index('Death')
+        section = page.sections[idx]
+        content = f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**"
+        found_valid_page = len(content) <= 2000
+      
+    guild = bot.get_guild(GUILD)
+    if (guild):
+      for ch in guild.channels:
+        if ("өлүм" in ch.name):
+          await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
+
+@tasks.loop(seconds=3600.0)
 async def births():
-  wiki_wiki = wikipediaapi.Wikipedia('en')
 
-  today = datetime.datetime.now()
-  month = today.strftime("%B")
-  day = today.day
-
-  page = wiki_wiki.page(f'{day} {month}')
-  deaths = page.text.split("Births")[1].split("Holidays")[0].split("\n")
-  found_valid_page = False
-  
-  while not found_valid_page:
-    case = deaths[random.randint(0, len(deaths) - 1)]
-    
-    try:
-      case = case.split("–")[1].split(",")[0]
-    except Exception as e:
-      continue
-    
-    page = wiki_wiki.page(f'{case}')
-    #print([str(s.title) for s in page.sections])
-    # TODO some pages have 'Early life and education' or something similar. Add an extension to accomodate these
-    found_valid_page = "Early life" in [str(s.title) for s in page.sections]
-
-  ss = [s.title for s in page.sections]
-  idx = ss.index('Early life')
-  section = page.sections[idx]
-  
+  hour = int(datetime.datetime.now().hour)
   guild = bot.get_guild(GUILD)
-  if (guild):
-    for ch in guild.channels:
-      if ("туулган" in ch.name):
-        await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
 
-@tasks.loop(seconds=86400.0)
+  if hour == 9 and guild:
+
+    wiki_wiki = wikipediaapi.Wikipedia('en')
+
+    today = datetime.datetime.now()
+    month = today.strftime("%B")
+    day = today.day
+
+    page = wiki_wiki.page(f'{day} {month}')
+    deaths = page.text.split("Births")[1].split("Holidays")[0].split("\n")
+    found_valid_page = False
+    
+    while not found_valid_page:
+      case = deaths[random.randint(0, len(deaths) - 1)]
+      
+      try:
+        case = case.split("–")[1].split(",")[0]
+      except Exception as e:
+        continue
+      
+      page = wiki_wiki.page(f'{case}')
+      #print([str(s.title) for s in page.sections])
+      # TODO some pages have 'Early life and education' or something similar. Add an extension to accomodate these
+
+      if ("Early life" in [str(s.title) for s in page.sections]):
+        ss = [s.title for s in page.sections]
+        idx = ss.index('Early life')
+        section = page.sections[idx]
+        content = f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**"
+        found_valid_page = len(content) <= 2000
+        
+    guild = bot.get_guild(GUILD)
+    if (guild):
+      for ch in guild.channels:
+        if ("туулган" in ch.name):
+          await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
+
+@tasks.loop(seconds=3600.0)
 async def meditations():
 
+  hour = int(datetime.datetime.now().hour)
   guild = bot.get_guild(GUILD)
-  if (guild):
-    for ch in guild.channels:
-      if ("meditations" in ch.name):
-        channel = ch
-  else:
-    return
 
-  url = f"http://albenz.xyz:6969/remedy?issue=Random"
+  if hour == 9 and guild:
 
-  response = requests.get(url)
-  data = response.json()["files"]
-  data = data[random.randint(0, len(data) - 1)]
-  
-  author = data["author"]
-  title = data["title"]
-  data = data["content"]
+    guild = bot.get_guild(GUILD)
+    if (guild):
+      for ch in guild.channels:
+        if ("meditations" in ch.name):
+          channel = ch
+    else:
+      return
 
-  data = data.split("\n\n")[1]
-  data = data.replace("  ", " ")
-  data = data.strip()
+    url = f"http://albenz.xyz:6969/remedy?issue=Random"
 
-  size = len(data)
-
-  if (size > 2000):
-    # For now there is a limit on number of characters that the bot can send on server. 
-    # Manually make sure that paragraphs are less than 2000 chars and send them seperately
-    splits = data.split("\n \n")
-    await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{splits[0]}\n—")
-    for e in splits[1:-1]:
-      await channel.send(f"\n{e}\n—")
+    response = requests.get(url)
+    data = response.json()["files"]
+    data = data[random.randint(0, len(data) - 1)]
     
-    await channel.send(f"{splits[-1]}\n\n—")
-    return
+    author = data["author"]
+    title = data["title"]
+    data = data["content"]
 
-  #data = data.replace("\\n", "\n")
-  await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
+    data = data.split("\n\n")[1]
+    data = data.replace("  ", " ")
+    data = data.strip()
+
+    size = len(data)
+
+    if (size > 2000):
+      # For now there is a limit on number of characters that the bot can send on server. 
+      # Manually make sure that paragraphs are less than 2000 chars and send them seperately
+      splits = data.split("\n \n")
+      await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{splits[0]}\n—")
+      for e in splits[1:-1]:
+        await channel.send(f"\n{e}\n—")
+      
+      await channel.send(f"{splits[-1]}\n\n—")
+      return
+
+    #data = data.replace("\\n", "\n")
+    await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
 
 deaths.start()
 births.start()
