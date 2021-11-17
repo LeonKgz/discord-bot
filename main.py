@@ -230,8 +230,10 @@ async def remedy(ctx, issue):
   # TODO Figure out one system to parse all the text files
   # Possibly fix new lines in meditations, and maybe scan all md files together to clean off weird spaces and
   # tabs
+
+  print(repr(data))
     
-  data = data.split("\n\n")[1]
+  data = "\n\n".join(data.split("\n\n")[1:])
   data = data.replace("  ", " ")
   data = data.strip()
 
