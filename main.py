@@ -137,6 +137,20 @@ async def on_ready():
 
 import sys
 
+
+@bot.command(name="st")
+async def st(ctx, status):
+  user = bot.get_user(249503118885257216)
+  activity = discord.Game(name="Netflix", type=3)
+
+  proletariat = discord.utils.get(ctx.guild.roles, name='Апатрид')
+  for m in proletariat.members:
+    if (str(m.id) == str(249503118885257216)):
+      await m.change_presence(status=discord.Status.dle, activity=activity)
+
+  await ctx.send("Done!")
+
+
 @bot.command(name="bible")
 async def bible(ctx, *, args=None):
   args = str(args)  
@@ -201,6 +215,41 @@ async def bible(ctx, *, args=None):
   except Exception as e:
     print(e)
 
+import os
+import base64
+
+@bot.command(name="долг")
+async def duty(ctx, issue):
+  url = f"http://albenz.xyz:6969/duty?issue={issue}"
+  
+  ret = await ctx.send("*Подождите...*")
+  response = requests.get(url)
+  response = response.json()
+
+  imgdata = response["data"]
+  author = response["author"]
+  title = response["title"]
+  number= response["number"]
+
+  imgdata = base64.b64decode(imgdata.encode("ascii"))
+
+  filename = 'temporary_holder'  # I assume you have a way of picking unique filenames
+  with open(filename, 'wb') as f:
+    f.write(imgdata)
+
+    embed = discord.Embed(title=f"{title}", description=f"{number}", color=0xa87f32) #creates embed
+    dfile = discord.File(filename, filename="image.png")
+    embed.set_image(url="attachment://image.png")
+    embed.set_footer(text=f"перевод: {author}")
+    await ret.delete()
+    await ctx.send(file=dfile, embed=embed)
+
+    f.close()
+    os.remove(filename)
+
+  #print("?????????")
+  #print(repr(response.text[:100]))
+
 
 @bot.command(name="средство")
 async def remedy(ctx, issue):
@@ -263,6 +312,19 @@ async def remedies(ctx):
 
   if not data:
     await ctx.send(f"<@!{ctx.author.id}>, средства не найдены!")
+
+  ret_str = ", ".join(data)
+  await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
+
+@bot.command(name="долги")
+async def duties(ctx):
+  url = f"http://albenz.xyz:6969/duties"
+
+  response = requests.get(url)
+  data = response.json()["duties"]
+
+  if not data:
+    await ctx.send(f"<@!{ctx.author.id}>, долги не найдены!")
 
   ret_str = ", ".join(data)
   await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
