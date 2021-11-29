@@ -16,6 +16,8 @@ import datetime
 from discord.ext.commands import Bot
 #from discord.ext import timers
 from discord import FFmpegPCMAudio
+from youtube_dl import YoutubeDL
+from requests import get
 # test comment
 
 
@@ -1270,6 +1272,37 @@ async def play(ctx, number):
     elif number == 2:  
       # Детское радио
       player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/detskoe128'))
+
+#Get videos from links or from youtube search
+def search(arg):
+    with YoutubeDL({'format': 'bestaudio', 'noplaylist':'True'}) as ydl:
+        try: requests.get(arg)
+        except: info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
+        else: info = ydl.extract_info(arg, download=False)
+    return (info, info['formats'][0]['url'])
+
+from discord import FFmpegPCMAudio
+from discord.ext import commands
+from discord.utils import get
+
+
+@bot.command(name='yt')
+async def play(ctx, *, query):
+    #Solves a problem I'll explain later
+    FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+
+    video, source = search(query)
+    channel = ctx.author.voice.channel
+    voice = await channel.connect() 
+    title = video['title']
+    await ctx.send(f"Now playing {title}.")
+
+    voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
+    voice.is_playing()
+
+
+
+
 
 # @bot.command(name='31')
 # async def kaligula1(ctx):
