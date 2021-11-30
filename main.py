@@ -1316,7 +1316,7 @@ async def play(ctx, *, query):
       title = video['title']
       await ctx.send(f"Now playing {title}.")
 
-      voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
+      await voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
       await voice.disconnect() 
       voice.is_playing()
 
