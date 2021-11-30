@@ -1302,10 +1302,11 @@ async def play(ctx, *, query):
 #    video, source = search(query)
     video_sources = search(query)
     channel = ctx.author.voice.channel
-    voice = await channel.connect() 
 
     curr = 0
     while True:
+
+      voice = await channel.connect() 
       video, source = video_sources[curr]
       curr += 1
       
@@ -1316,6 +1317,7 @@ async def play(ctx, *, query):
       await ctx.send(f"Now playing {title}.")
 
       voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
+      await voice.disconnect() 
       voice.is_playing()
 
 # @bot.command(name='31')
