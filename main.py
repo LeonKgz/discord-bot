@@ -68,7 +68,7 @@ async def looop():
                 text = quote + " — " + author
                 await ch.send(text)
 
-@tasks.loop(seconds=100000000000000000.0)
+@tasks.loop(seconds=100000000.0)
 async def news_alert():
   return
   guild = bot.get_guild(GUILD) 
@@ -1275,34 +1275,48 @@ async def play(ctx, number):
 
 #Get videos from links or from youtube search
 def search(arg):
-    with YoutubeDL({'format': 'bestaudio', 'noplaylist':'True'}) as ydl:
+    with YoutubeDL({'format': 'bestaudio', 'noplaylist':'False', 'ignoreerrors': 'True'}) as ydl:
         try: requests.get(arg)
-        except: info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
+        except: info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries']
         else: info = ydl.extract_info(arg, download=False)
-    return (info, info['formats'][0]['url'])
+
+    es = [dict(i) for i in info["entries"]]
+    ret = []
+    for i in es:
+      url = i["formats"][0]['url']
+      ret.append((i, url))
+    print(ret)
+    return ret
+    #return (info, info['formats'][0]['url'])
 
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from discord.utils import get
 
-
 @bot.command(name='yt')
 async def play(ctx, *, query):
     #Solves a problem I'll explain later
     FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
-
-    video, source = search(query)
+    
+    # query should be a link to the playlist (not ay video within the playlist!)
+#    video, source = search(query)
+    video_sources = search(query)
     channel = ctx.author.voice.channel
     voice = await channel.connect() 
-    title = video['title']
-    await ctx.send(f"Now playing {title}.")
 
-    voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
-    voice.is_playing()
+    curr = 0
+    while True:
+      video, source = video_sources[curr]
+      curr += 1
+      
+      if (curr >= len(video_sources)):
+        curr = 0
+      
+      title = video['title']
+      await ctx.send(f"Now playing {title}.")
 
-
-
-
+      voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
+      voice.is_playing()
 
 # @bot.command(name='31')
 # async def kaligula1(ctx):
