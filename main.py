@@ -1285,7 +1285,6 @@ def search(arg):
     for i in es:
       url = i["formats"][0]['url']
       ret.append((i, url))
-    print(ret)
     return ret
     #return (info, info['formats'][0]['url'])
 
