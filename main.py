@@ -1317,6 +1317,7 @@ async def play(ctx, *, query):
 
       voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
       while(voice.is_playing()):
+        await asyncio.sleep(10)
         continue
 
 # @bot.command(name='31')
