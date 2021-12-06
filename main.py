@@ -227,6 +227,9 @@ async def parse_zettel_json(ctx, data):
     title = data["title"]
     data = data["content"]
     
+    if (not title ):
+      raise Exception("JSON is empty")
+    
     # TODO for meditations I dont need duplicate of title in the data field, Fix on server side. Then just remove empty spaces before new lines and stuff like that. Look out for anoimalies with repr()
     #print(repr(data))
 
@@ -297,7 +300,11 @@ async def duty(ctx, issue):
   #ret = await ctx.send("*Подождите...*")
   response = requests.get(url)
   response = response.json()
-  await parse_zettel_json(ctx, response)
+  try:
+    await parse_zettel_json(ctx, response)
+  except Exception as e:
+    await ctx.send(f"<@!{ctx.author.id}>, долг для *«{issue}»* не найден! « !долги », чтобы посмотреть все ключевые слова.")
+    
 
 @bot.command(name="средство")
 async def remedy(ctx, issue):
@@ -306,8 +313,11 @@ async def remedy(ctx, issue):
 
   response = requests.get(url)
   data = response.json()
-  await parse_zettel_json(ctx, data)
-  return
+  
+  try:
+    await parse_zettel_json(ctx, data)
+  except Exception as e:
+    await ctx.send(f"<@!{ctx.author.id}>, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.")
 
 @bot.command(name="средства")
 async def remedies(ctx):
