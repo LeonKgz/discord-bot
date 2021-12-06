@@ -227,7 +227,7 @@ async def parse_zettel_json(ctx, data):
     title = data["title"]
     data = data["content"]
     
-    if (not title ):
+    if (not title):
       raise Exception("JSON is empty")
     
     # TODO for meditations I dont need duplicate of title in the data field, Fix on server side. Then just remove empty spaces before new lines and stuff like that. Look out for anoimalies with repr()
@@ -263,7 +263,7 @@ async def parse_zettel_json(ctx, data):
       return
     #data = data.replace("\\n", "\n")
 
-    await ctx.send(f"—\n\n*{head}*\n\n\t{data}\n\n—")
+    await ctx.send(f"—\n\n*{head}*\n\n{data}\n\n—")
 
     #embed = discord.Embed(title=f"{title}. {author}", description=f"\n\n\t{data}\n\n", color=0xa87f32) #creates embed
     #embed.set_footer(text=f"перевод: Переводчик")
@@ -277,6 +277,9 @@ async def parse_zettel_json(ctx, data):
     author = data["author"]
     title = data["title"]
     number= data["number"]
+    
+    if (not title):
+      raise Exception("JSON is empty")
 
     imgdata = base64.b64decode(imgdata.encode("ascii"))
 
