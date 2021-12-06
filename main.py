@@ -220,38 +220,84 @@ async def bible(ctx, *, args=None):
 import os
 import base64
 
+async def parse_zettel_json(ctx, data):
+  if not data["files"]:
+ 
+    author = data["author"]
+    title = data["title"]
+    data = data["content"]
+    
+    # TODO for meditations I dont need duplicate of title in the data field, Fix on server side. Then just remove empty spaces before new lines and stuff like that. Look out for anoimalies with repr()
+    #print(repr(data))
+
+    if (author == "None"):
+      head = f"{title}."
+    else:
+      head = f"{title}. {author}."
+      
+    # TODO Figure out one system to parse all the text files
+    # Possibly fix new lines in meditations, and maybe scan all md files together to clean off weird spaces and
+    # tabs
+
+    #print(repr(data))
+      
+    data = "\n\n".join(data.split("\n\n")[1:])
+    data = data.replace("  ", " ")
+    data = data.strip()
+
+    size = len(data)
+
+    if (size > 2000):
+      # For now there is a limit on number of characters that the bot can send on server. 
+      # Manually make sure that paragraphs are less than 2000 chars and send them seperately
+      splits = data.split("\n \n")
+
+      await ctx.send(f"—\n\n*{head}*\n\n\t{splits[0]}\n—")
+      for e in splits[1:-1]:
+        await ctx.send(f"\n{e}\n—")
+      
+      await ctx.send(f"{splits[-1]}\n\n—")
+      return
+    #data = data.replace("\\n", "\n")
+
+    await ctx.send(f"—\n\n*{head}*\n\n\t{data}\n\n—")
+
+    #embed = discord.Embed(title=f"{title}. {author}", description=f"\n\n\t{data}\n\n", color=0xa87f32) #creates embed
+    #embed.set_footer(text=f"перевод: Переводчик")
+    #await ctx.send(embed=embed)
+  
+  else:
+    
+    content = data["content"]
+    # TODO Solve multiple attachments
+    imgdata = data["files"][0]
+    author = data["author"]
+    title = data["title"]
+    number= data["number"]
+
+    imgdata = base64.b64decode(imgdata.encode("ascii"))
+
+    filename = 'temporary_holder'  # I assume you have a way of picking unique filenames
+    with open(filename, 'wb') as f:
+      f.write(imgdata)
+
+      embed = discord.Embed(title=f"{title}", description=f"{number}", color=0xa87f32) #creates embed
+      dfile = discord.File(filename, filename="image.png")
+      embed.set_image(url="attachment://image.png")
+      embed.set_footer(text=f"перевод: {author}")
+      await ctx.send(file=dfile, embed=embed)
+
+      f.close()
+      os.remove(filename)
+
 @bot.command(name="долг")
 async def duty(ctx, issue):
   url = f"http://albenz.xyz:6969/duty?issue={issue}"
   
-  ret = await ctx.send("*Подождите...*")
+  #ret = await ctx.send("*Подождите...*")
   response = requests.get(url)
   response = response.json()
-
-  imgdata = response["data"]
-  author = response["author"]
-  title = response["title"]
-  number= response["number"]
-
-  imgdata = base64.b64decode(imgdata.encode("ascii"))
-
-  filename = 'temporary_holder'  # I assume you have a way of picking unique filenames
-  with open(filename, 'wb') as f:
-    f.write(imgdata)
-
-    embed = discord.Embed(title=f"{title}", description=f"{number}", color=0xa87f32) #creates embed
-    dfile = discord.File(filename, filename="image.png")
-    embed.set_image(url="attachment://image.png")
-    embed.set_footer(text=f"перевод: {author}")
-    await ret.delete()
-    await ctx.send(file=dfile, embed=embed)
-
-    f.close()
-    os.remove(filename)
-
-  #print("?????????")
-  #print(repr(response.text[:100]))
-
+  await parse_zettel_json(ctx, response)
 
 @bot.command(name="средство")
 async def remedy(ctx, issue):
@@ -259,51 +305,9 @@ async def remedy(ctx, issue):
   url = f"http://albenz.xyz:6969/remedy?issue={issue}"
 
   response = requests.get(url)
-  data = response.json()["files"]
-  if not data:
-    await ctx.send(f"<@!{ctx.author.id}>, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.")
-
-  data = data[random.randint(0, len(data) - 1)]
-  
-  author = data["author"]
-  title = data["title"]
-  data = data["content"]
-  
-  # TODO for meditations I dont need duplicate of title in the data field, Fix on server side. Then just remove empty spaces before new lines and stuff like that. Look out for anoimalies with repr()
-  print(repr(data))
-
-
-  if (author == "None"):
-    head = f"{title}."
-  else:
-    head = f"{title}. {author}."
-    
-  # TODO Figure out one system to parse all the text files
-  # Possibly fix new lines in meditations, and maybe scan all md files together to clean off weird spaces and
-  # tabs
-
-  print(repr(data))
-    
-  data = "\n\n".join(data.split("\n\n")[1:])
-  data = data.replace("  ", " ")
-  data = data.strip()
-
-  size = len(data)
-
-  if (size > 2000):
-    # For now there is a limit on number of characters that the bot can send on server. 
-    # Manually make sure that paragraphs are less than 2000 chars and send them seperately
-    splits = data.split("\n \n")
-
-    await ctx.send(f"—\n\n*{head}*\n\n\t{splits[0]}\n—")
-    for e in splits[1:-1]:
-      await ctx.send(f"\n{e}\n—")
-    
-    await ctx.send(f"{splits[-1]}\n\n—")
-    return
-
-  #data = data.replace("\\n", "\n")
-  await ctx.send(f"—\n\n*{head}*\n\n\t{data}\n\n—")
+  data = response.json()
+  await parse_zettel_json(ctx, data)
+  return
 
 @bot.command(name="средства")
 async def remedies(ctx):
