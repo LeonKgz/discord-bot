@@ -899,7 +899,6 @@ async def scan():
   if (guild):
     super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
 
-
     proletariat = discord.utils.get(guild.roles, name='Пролетарий')
     politzek= discord.utils.get(guild.roles, name='Апатрид')
     sovnarmod = discord.utils.get(guild.roles, name='СовНарМод')
@@ -1077,7 +1076,8 @@ async def important_info():
     m = ps[random.randint(0, len(ps) - 1)]
 
     for ch in guild.channels:
-      if ("колхоз" in ch.name or "погран" in ch.name):
+      #if ("колхоз" in ch.name or "погран" in ch.name):
+      if ("погран" in ch.name):
 
         db, cursor = get_db_cursor()
 
