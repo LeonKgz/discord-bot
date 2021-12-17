@@ -1370,6 +1370,37 @@ async def kaligula1(ctx):
            player = await channel.connect()
            player.play(FFmpegPCMAudio('files/lakki1.mp3'))
 
+@bot.command(name='2')
+async def kaligula2(ctx):
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
+
+    for x in bot.voice_clients:
+       if (x.is_connected()):
+           x.stop()
+           x.play(FFmpegPCMAudio('files/lakki2.mp3'))
+
+       else:
+           channel = ctx.message.author.voice.channel
+           player = await channel.connect()
+           player.play(FFmpegPCMAudio('files/lakki2.mp3'))
+
+@bot.command(name='3')
+async def kaligula2(ctx):
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
+
+    for x in bot.voice_clients:
+       if (x.is_connected()):
+           x.stop()
+           x.play(FFmpegPCMAudio('files/nicksex.mp3'))
+
+       else:
+           channel = ctx.message.author.voice.channel
+           player = await channel.connect()
+           player.play(FFmpegPCMAudio('files/nicksex.mp3'))
+
+
 @bot.command(name='off', pass_context = True)
 async def leavevoice(ctx):
     for x in bot.voice_clients:
