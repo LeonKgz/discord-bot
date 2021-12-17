@@ -1355,6 +1355,21 @@ async def play(ctx, *, query):
 #            while (True):
 #                player.play(FFmpegPCMAudio('files/gong.mp3'))
 
+@bot.command(name='1')
+async def kaligula1(ctx):
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
+
+    for x in bot.voice_clients:
+       if (x.is_connected()):
+           x.stop()
+           x.play(FFmpegPCMAudio('files/lakki1.mp3'))
+
+       else:
+           channel = ctx.message.author.voice.channel
+           player = await channel.connect()
+           player.play(FFmpegPCMAudio('files/lakki1.mp3'))
+
 @bot.command(name='off', pass_context = True)
 async def leavevoice(ctx):
     for x in bot.voice_clients:
