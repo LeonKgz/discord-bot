@@ -1364,12 +1364,19 @@ async def kaligula1(ctx):
        if (x.is_connected()):
            x.stop()
            x.play(FFmpegPCMAudio('files/lakki1.mp3'))
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
            await x.disconnect()
 
        else:
            channel = ctx.message.author.voice.channel
            player = await channel.connect()
            player.play(FFmpegPCMAudio('files/lakki1.mp3'))
+
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
            await x.disconnect()
 
 @bot.command(name='2')
@@ -1381,12 +1388,19 @@ async def kaligula2(ctx):
        if (x.is_connected()):
            x.stop()
            x.play(FFmpegPCMAudio('files/lakki2.mp3'))
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
+
            await x.disconnect()
 
        else:
            channel = ctx.message.author.voice.channel
            player = await channel.connect()
            player.play(FFmpegPCMAudio('files/lakki2.mp3'))
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
            await x.disconnect()
 
 @bot.command(name='3')
@@ -1398,12 +1412,18 @@ async def kaligula2(ctx):
        if (x.is_connected()):
            x.stop()
            x.play(FFmpegPCMAudio('files/nicksex.mp3'))
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
            await x.disconnect()
 
        else:
            channel = ctx.message.author.voice.channel
            player = await channel.connect()
            player.play(FFmpegPCMAudio('files/nicksex.mp3'))
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
            await x.disconnect()
 
 @bot.command(name='off', pass_context = True)
