@@ -1217,13 +1217,15 @@ async def births():
         if ("туулган" in ch.name):
           await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
 
-@tasks.loop(seconds=3600.0)
+#@tasks.loop(seconds=3600.0)
+@tasks.loop(seconds=5.0)
 async def meditations():
 
   hour = int(datetime.datetime.now().hour)
   guild = bot.get_guild(GUILD)
 
-  if hour == 9 and guild:
+  #if hour == 9 and guild:
+  if guild:
 
     guild = bot.get_guild(GUILD)
     if (guild):
@@ -1236,32 +1238,41 @@ async def meditations():
     url = f"http://albenz.xyz:6969/remedy?issue=Random"
 
     response = requests.get(url)
-    data = response.json()["files"]
-    data = data[random.randint(0, len(data) - 1)]
-    
-    author = data["author"]
-    title = data["title"]
-    data = data["content"]
 
-    data = data.split("\n\n")[1]
-    data = data.replace("  ", " ")
-    data = data.strip()
+    data = response.json()
+  
+    try:
+      await parse_zettel_json(channel, data)
 
-    size = len(data)
+    except Exception as e:
+      await channel.send(f"Произошла ошибка вызова API")
 
-    if (size > 2000):
-      # For now there is a limit on number of characters that the bot can send on server. 
-      # Manually make sure that paragraphs are less than 2000 chars and send them seperately
-      splits = data.split("\n \n")
-      await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{splits[0]}\n—")
-      for e in splits[1:-1]:
-        await channel.send(f"\n{e}\n—")
-      
-      await channel.send(f"{splits[-1]}\n\n—")
-      return
+ #   data = response.json()["files"]
+ #   data = data[random.randint(0, len(data) - 1)]
+ #   
+ #   author = data["author"]
+ #   title = data["title"]
+ #   data = data["content"]
 
-    #data = data.replace("\\n", "\n")
-    await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
+ #   data = data.split("\n\n")[1]
+ #   data = data.replace("  ", " ")
+ #   data = data.strip()
+
+ #   size = len(data)
+
+ #   if (size > 2000):
+ #     # For now there is a limit on number of characters that the bot can send on server. 
+ #     # Manually make sure that paragraphs are less than 2000 chars and send them seperately
+ #     splits = data.split("\n \n")
+ #     await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{splits[0]}\n—")
+ #     for e in splits[1:-1]:
+ #       await channel.send(f"\n{e}\n—")
+ #     
+ #     await channel.send(f"{splits[-1]}\n\n—")
+ #     return
+
+ #   #data = data.replace("\\n", "\n")
+ #   await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
 
 deaths.start()
 births.start()
@@ -1718,9 +1729,9 @@ async def remove_points(ctx, target_id, points):
         print(e)
         await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
 
+#async def add_points(ctx, target_id, points):
 @bot.command(name="add")
-async def add_points(ctx, target_id, points):
-#async def add_points(ctx, target_id, points, reason):
+async def add_points(ctx, target_id, points, reason):
 
   #if (not await check_rights_dm(ctx)):
   #  return
@@ -1754,7 +1765,7 @@ async def add_points(ctx, target_id, points):
         for r in ctx.guild.roles:
           if (r.id == send_to):
             every = ", ".join([f"<@!{m.id}>" for m in r.members])
-            res = f"Модераторы начисляют **[ 5 ]** очков социального рейтинга гражданам {every}!\n\n\t\t Причина — *{reason}*\n\n----------------------------------------------------------------------"
+            res = f"Модераторы начисляют **[ {points} ]** очков социального рейтинга гражданам {every}!\n\n\t\t Причина — *{reason}*\n\n----------------------------------------------------------------------"
 
             guild = bot.get_guild(GUILD)
             for ch in guild.channels:
