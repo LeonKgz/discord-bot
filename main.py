@@ -1217,15 +1217,13 @@ async def births():
         if ("туулган" in ch.name):
           await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
 
-#@tasks.loop(seconds=3600.0)
-@tasks.loop(seconds=5.0)
+@tasks.loop(seconds=3600.0)
 async def meditations():
 
   hour = int(datetime.datetime.now().hour)
   guild = bot.get_guild(GUILD)
 
-  #if hour == 9 and guild:
-  if guild:
+  if hour == 9 and guild:
 
     guild = bot.get_guild(GUILD)
     if (guild):
