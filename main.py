@@ -322,6 +322,35 @@ async def remedy(ctx, issue):
   except Exception as e:
     await ctx.send(f"<@!{ctx.author.id}>, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.")
 
+
+@bot.command(name="стих")
+async def remedy(ctx, issue):
+
+  url = f"http://albenz.xyz:6969/poem?issue={issue}"
+
+  response = requests.get(url)
+  data = response.json()
+  
+  try:
+    await parse_zettel_json(ctx, data)
+  except Exception as e:
+    await ctx.send(f"<@!{ctx.author.id}>, стих для *«{issue}»* не найдено! « !стихи », чтобы посмотреть все ключевые слова.")
+
+
+@bot.command(name="стихи")
+async def remedies(ctx):
+  url = f"http://albenz.xyz:6969/poems"
+
+  response = requests.get(url)
+  data = response.json()["poems"]
+
+  if not data:
+    await ctx.send(f"<@!{ctx.author.id}>, стихи не найдены!")
+
+  ret_str = ", ".join(data)
+  await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
+
+
 @bot.command(name="средства")
 async def remedies(ctx):
   url = f"http://albenz.xyz:6969/remedies"
