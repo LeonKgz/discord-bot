@@ -275,6 +275,7 @@ async def parse_zettel_json(ctx, data):
     # TODO Solve multiple attachments
     imgdata = data["files"][0]
     author = data["author"]
+    interpreter = data["interpreter"]
     title = data["title"]
     number= data["number"]
     
@@ -286,11 +287,18 @@ async def parse_zettel_json(ctx, data):
     filename = 'temporary_holder'  # I assume you have a way of picking unique filenames
     with open(filename, 'wb') as f:
       f.write(imgdata)
-
-      embed = discord.Embed(title=f"{title}", description=f"{number}", color=0xa87f32) #creates embed
+      
+      if author:
+        embed = discord.Embed(title=f"{title}. {author}", description=f"{number}", color=0xa87f32) #creates embed
+      else:
+        embed = discord.Embed(title=f"{title}", description=f"{number}", color=0xa87f32) #creates embed
+      
       dfile = discord.File(filename, filename="image.png")
       embed.set_image(url="attachment://image.png")
-      embed.set_footer(text=f"перевод: {author}")
+
+      if interpreter: 
+        embed.set_footer(text=f"перевод: {interpreter}")
+      
       await ctx.send(file=dfile, embed=embed)
 
       f.close()
