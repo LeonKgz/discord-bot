@@ -233,7 +233,7 @@ async def parse_zettel_json(ctx, data):
     # TODO for meditations I dont need duplicate of title in the data field, Fix on server side. Then just remove empty spaces before new lines and stuff like that. Look out for anoimalies with repr()
     #print(repr(data))
 
-    if (author == "None"):
+    if (author == ""):
       head = f"{title}."
     else:
       head = f"{title}. {author}."
