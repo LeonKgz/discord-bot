@@ -222,11 +222,11 @@ import base64
 
 async def parse_zettel_json(ctx, data):
   if not data["files"]:
- 
     author = data["author"]
     title = data["title"]
+    links = data["links"]
     data = data["content"]
-    
+
     if (not title):
       raise Exception("JSON is empty")
     
@@ -248,6 +248,10 @@ async def parse_zettel_json(ctx, data):
     data = data.replace("  ", " ")
     data = data.strip()
 
+    if len(links) > 0:
+      ls = "\n".join(links)
+      data += f"\n\n{ls}"
+
     size = len(data)
 
     if (size > 2000):
@@ -262,7 +266,7 @@ async def parse_zettel_json(ctx, data):
       await ctx.send(f"{splits[-1]}\n\n—")
       return
     #data = data.replace("\\n", "\n")
-
+ 
     await ctx.send(f"—\n\n*{head}*\n\n{data}\n\n—")
 
     #embed = discord.Embed(title=f"{title}. {author}", description=f"\n\n\t{data}\n\n", color=0xa87f32) #creates embed
