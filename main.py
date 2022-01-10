@@ -68,20 +68,19 @@ async def looop():
                 text = quote + " — " + author
                 await ch.send(text)
 
-@tasks.loop(seconds=100000000.0)
+@tasks.loop(seconds=3600.0)
 async def news_alert():
-  return
   guild = bot.get_guild(GUILD) 
   db, cursor = get_db_cursor()
 
   hour = int(datetime.datetime.now().hour)
 
-  if (guild):
+  if (guild and hour == 12):
 
     counter = None
 
     try:
-      sql = f"SELECT COUNT(*) FROM verses"
+      sql = f"SELECT COUNT(*) FROM timers"
       cursor.execute(sql)
       counter = int(cursor.fetchone()['COUNT(*)'])
     except Exception as e:
@@ -92,18 +91,47 @@ async def news_alert():
     if (counter == 0):
       return
 
-    with open('counter.txt', 'r+') as f:
-      current_offset = int(f.readlines()[0])
-      
-      f.seek(0)
-      if (current_offset >= counter - 1):
-        f.write("0")
-      else:
-        f.write(f"{current_offset + 1}")
+    limit = counter
 
-      f.truncate()
+    try:
+      sql = f"SELECT * FROM counters WHERE ID = \"timers\""
+      cursor.execute(sql)
+      counter = int(cursor.fetchone()['Value'])
+      current_offset = counter
+      counter += 1
+      if (counter > limit - 1):
+        counter = 0
+    except Exception as e:
+      print(e)
+      db.rollback()
+      return
 
-      f.close()
+    db, cursor = get_db_cursor()
+    try:
+      sql = f"REPLACE INTO counters(ID, Value) VALUES(\"timers\", {counter})"
+      cursor.execute(sql)
+      db.commit()
+
+    except Exception as e:
+      print(e)
+      db.rollback()
+      return
+
+    #db.close()
+
+
+ #   with open('counter.txt', 'r+') as f:
+ #     current_offset = int(f.readlines()[0])
+ #     
+ #     f.seek(0)
+ #     if (current_offset >= counter - 1):
+ #       f.write("0")
+ #     else:
+ #       f.write(f"{current_offset + 1}")
+
+ #     f.truncate()
+
+ #     f.close()
     
     try:
       sql = f"SELECT * FROM timers ORDER By Name LIMIT 1 OFFSET {current_offset}"
