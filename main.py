@@ -536,6 +536,46 @@ async def ebmed(ctx, user):
 #  embed.add_field(name="Валюта", value="Шанырак - 12", inline=True)
   await ctx.send(embed=embed)
 
+async def activity_log(id_to_search):
+  mem = bot.get_user(id_to_search)
+  embed = discord.Embed(title=f"+15 Кремлебот") 
+  embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
+  embed.set_thumbnail(url="https://thumbs.gfycat.com/CoordinatedBareAgouti-max-1mb.gif")
+  # light green, same as СовНарМод
+  embed.color = 0x2ecc71
+  embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает очки оставаясь активным!", inline=False)
+
+  db, cursor = get_db_cursor()
+  sql = f"SET @row_number = 0; SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC"
+
+  guild = bot.get_guild(GUILD)
+  try:
+    #cursor.execute(sql)
+    cursor.execute("SET @row_number = 0;")
+    cursor.execute(f"SELECT num, ID, Name, Points FROM (SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC) a WHERE ID = {id_to_search}")
+
+    res = cursor.fetchone()
+    num = res["num"]
+    points = res["Points"]
+    #db.commit()
+  except Exception as e:
+    print(e)
+    db.rollback()
+    for ch in guild.channels:
+      if ("технический" in ch.name):
+        await ch.send(f"Cant display activity log for **{mem.display_name}** !")
+        return 
+
+  db.close()
+
+  embed.set_footer(text="Смотрите как зарабатывать очки в Манифесте")
+  main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
+  embed.add_field(name=main_field, value="⠀", inline=False)
+
+  for ch in guild.channels:
+    if ("гласность" in ch.name):
+      await ch.send(embed=embed)
+
 # depending on the number returns the currect russian analogue of «times» i.e. раза/раза
 def get_times_str(num):
   mod = num % 10
@@ -545,8 +585,6 @@ def get_times_str(num):
     counter_str = "раза"
 
   return counter_str
-
-
 
 @bot.command(name="манифест")
 async def website(ctx):
@@ -972,9 +1010,11 @@ async def on_message(message):
     # Check if this is the first message of the week for someone who wasnt sent to pogran-zastava on that monday; then +1 point
     if not row:
       status = await add_points_quick(iid, 1)
+      await activity_log(iid)
       if not status:
         await ctx.send(f"<@!{ME}>, произошла ошибка корректировки социального рейтинга для {message.author.name}!")
 
+			
 
     sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
 
@@ -1007,7 +1047,7 @@ def get_guild():
     if (guild.name == GUILD):
       return guild
 
-async def check_rights(ctx, acceptable_roles):
+async def check_rights(ctx, acceptable_roles, tell=True):
   #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
   super_roles = acceptable_roles
 
@@ -1019,8 +1059,9 @@ async def check_rights(ctx, acceptable_roles):
   for role in list(map(str, res_roles)):
     if (role in super_roles):
       return True
-  response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(get(bot.emojis, name='peepoClown'))
-  await ctx.send(response)
+  if tell:
+    response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(get(bot.emojis, name='peepoClown'))
+    await ctx.send(response)
   return False
 
 async def check_rights_dm(ctx):
@@ -1161,6 +1202,7 @@ async def let_free(ctx):
       await ctx.send(res)
       # 1 point for activity
       await add_points_quick(iid, 1)
+      await activity_log(iid)
       await ctx.author.add_roles(proletariat)
       await ctx.author.remove_roles(politzek)
 
@@ -2686,9 +2728,14 @@ async def confess(ctx, *, args=None):
 
           #author = bot.get_user(ctx.author.id)
           author = guild.get_member(ctx.author.id) 
+					
+					
           # add 1 point for activity (can only update descriptio once a week already so cant spam)
           # doesnt matter how bad the descriptino is, this is still activity on sever
-          await add_points_quick(ctx.author.id, 1)
+          
+          if (await check_rights(ctx, ['Апатрид'], tell=False)):
+            await add_points_quick(ctx.author.id, 1)
+            await activity_log(ctx.author.id)
 
           await author.add_roles(proletariat)
           await author.remove_roles(politzek)
