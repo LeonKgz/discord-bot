@@ -968,6 +968,14 @@ async def on_message(message):
     time = message.created_at
 
     db, cursor = get_db_cursor()
+    row = get_db_row("cache", iid)
+    # Check if this is the first message of the week for someone who wasnt sent to pogran-zastava on that monday; then +1 point
+    if not row:
+      status = await add_points_quick(iid, 1)
+      if not status:
+        await ctx.send(f"<@!{ME}>, произошла ошибка корректировки социального рейтинга для {message.author.name}!")
+
+
     sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
 
     try:
@@ -1151,6 +1159,8 @@ async def let_free(ctx):
 
       res = f"Гражданин <@!{iid}>, проходите!"
       await ctx.send(res)
+      # 1 point for activity
+      await add_points_quick(iid, 1)
       await ctx.author.add_roles(proletariat)
       await ctx.author.remove_roles(politzek)
 
@@ -2676,6 +2686,9 @@ async def confess(ctx, *, args=None):
 
           #author = bot.get_user(ctx.author.id)
           author = guild.get_member(ctx.author.id) 
+          # add 1 point for activity (can only update descriptio once a week already so cant spam)
+          # doesnt matter how bad the descriptino is, this is still activity on sever
+          await add_points_quick(ctx.author.id, 1)
 
           await author.add_roles(proletariat)
           await author.remove_roles(politzek)
