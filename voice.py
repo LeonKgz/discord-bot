@@ -110,7 +110,7 @@ class Voice(commands.Cog):
       channel = ctx.message.author.voice.channel
       player = await channel.connect()
 
-      for x in bot.voice_clients:
+      for x in self.bot.voice_clients:
         if (x.is_connected()):
             x.stop()
             x.play(FFmpegPCMAudio('files/lakki1.mp3'))
@@ -134,7 +134,7 @@ class Voice(commands.Cog):
       channel = ctx.message.author.voice.channel
       player = await channel.connect()
 
-      for x in bot.voice_clients:
+      for x in self.bot.voice_clients:
         if (x.is_connected()):
             x.stop()
             x.play(FFmpegPCMAudio('files/lakki2.mp3'))
@@ -158,7 +158,7 @@ class Voice(commands.Cog):
       channel = ctx.message.author.voice.channel
       player = await channel.connect()
 
-      for x in bot.voice_clients:
+      for x in self.bot.voice_clients:
         if (x.is_connected()):
             x.stop()
             x.play(FFmpegPCMAudio('files/nicksex.mp3'))
@@ -178,7 +178,7 @@ class Voice(commands.Cog):
 
   @commands.command(name='off', pass_context = True)
   async def off(self, ctx):
-      for x in bot.voice_clients:
+      for x in self.bot.voice_clients:
           if(x.guild == ctx.message.guild):
               return await x.disconnect()
 
