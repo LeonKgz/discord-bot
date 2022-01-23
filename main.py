@@ -1,6 +1,6 @@
 #! /usr/bin/python
+
 # vim: set fileencoding=utf-8:
-# coding=utf-8
 
 import asyncio
 import os
@@ -18,8 +18,8 @@ from discord.ext.commands import Bot
 from discord import FFmpegPCMAudio
 from youtube_dl import YoutubeDL
 from requests import get
-from utils import *
 # test comment
+
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
@@ -34,18 +34,124 @@ DB = str(os.getenv('DB_DATABASE'))
 QUOTES = str(os.getenv('QUOTES_KEY'))
 FOOD_KEY = str(os.getenv('FOOD_KEY'))
 
-# def get_db_cursor():
-#   db = pymysql.connect(host=HOST,
-#                        user=USER,
-#                        password=PASSWORD,
-#                        db=DB,
-#                        charset='utf8mb4',
-#                        cursorclass=pymysql.cursors.DictCursor)
-#   return db, db.cursor()
+def get_db_cursor():
+  db = pymysql.connect(host=HOST,
+                       user=USER,
+                       password=PASSWORD,
+                       db=DB,
+                       charset='utf8mb4',
+                       cursorclass=pymysql.cursors.DictCursor)
+  return db, db.cursor()
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
 #bot.timer_manager = timers.TimerManager(bot)
+
+
+@tasks.loop(seconds=5.0)
+async def looop():
+    guild = bot.get_guild(GUILD) 
+    if (guild):
+        for ch in guild.channels:
+            if ("технический" in ch.name):
+                       
+                url = 'https://quotes.rest/quote/random.json?maxlength=150'
+                api_token = QUOTES
+                headers = {'content-type': 'application/json',
+                               'X-TheySaidSo-Api-Secret': format(api_token)}
+
+                response = requests.get(url, headers=headers)
+                response = response.json()['contents']['quotes'][0]
+
+                quote = response['quote']
+                author = response['author']
+                text = quote + " — " + author
+                await ch.send(text)
+
+@tasks.loop(seconds=3600.0)
+async def news_alert():
+  guild = bot.get_guild(GUILD) 
+  db, cursor = get_db_cursor()
+
+  hour = int(datetime.datetime.now().hour)
+
+  if (guild and hour == 12):
+
+    counter = None
+
+    try:
+      sql = f"SELECT COUNT(*) FROM timers"
+      cursor.execute(sql)
+      counter = int(cursor.fetchone()['COUNT(*)'])
+    except Exception as e:
+      print(e)
+      db.rollback()
+      return
+
+    if (counter == 0):
+      return
+
+    limit = counter
+
+    try:
+      sql = f"SELECT * FROM counters WHERE ID = \"timers\""
+      cursor.execute(sql)
+      counter = int(cursor.fetchone()['Value'])
+      current_offset = counter
+      counter += 1
+      if (counter > limit - 1):
+        counter = 0
+    except Exception as e:
+      print(e)
+      db.rollback()
+      return
+
+    db, cursor = get_db_cursor()
+    try:
+      sql = f"REPLACE INTO counters(ID, Value) VALUES(\"timers\", {counter})"
+      cursor.execute(sql)
+      db.commit()
+
+    except Exception as e:
+      print(e)
+      db.rollback()
+      return
+
+    #db.close()
+
+
+ #   with open('counter.txt', 'r+') as f:
+ #     current_offset = int(f.readlines()[0])
+ #     
+ #     f.seek(0)
+ #     if (current_offset >= counter - 1):
+ #       f.write("0")
+ #     else:
+ #       f.write(f"{current_offset + 1}")
+
+ #     f.truncate()
+
+ #     f.close()
+    
+    try:
+      sql = f"SELECT * FROM timers ORDER By Name LIMIT 1 OFFSET {current_offset}"
+      cursor.execute(sql)
+      content = cursor.fetchone()['Content']
+    except Exception as e:
+      print(e)
+      try:
+        db.rollback()
+      except Exception as e:
+        print(re)
+      return
+
+    db.close()
+
+    for ch in guild.channels:
+      if ("колхоз" in ch.name or "погран-застава" in ch.name):
+        await ch.send(content)
+
+news_alert.start()
 
 @bot.event
 async def on_ready():
@@ -57,8 +163,10 @@ async def on_ready():
 #)
 #async def play(ctx):
 #  response = "Ромео и Джульетта — Уильям Шекспир"
+#  await ctx.send(response)
 
 import sys
+
 
 @bot.command(name="st")
 async def st(ctx, status):
@@ -140,12 +248,292 @@ async def bible(ctx, *, args=None):
 import os
 import base64
 
+async def parse_zettel_json(ctx, data):
+  if not data["files"]:
+    author = data["author"]
+    title = data["title"]
+    links = data["links"]
+    data = data["content"]
+
+    if (not title):
+      raise Exception("JSON is empty")
+    
+    # TODO for meditations I dont need duplicate of title in the data field, Fix on server side. Then just remove empty spaces before new lines and stuff like that. Look out for anoimalies with repr()
+    #print(repr(data))
+
+    if (author == ""):
+      head = f"{title}."
+    else:
+      head = f"{title}. {author}."
+      
+    # TODO Figure out one system to parse all the text files
+    # Possibly fix new lines in meditations, and maybe scan all md files together to clean off weird spaces and
+    # tabs
+
+    #print(repr(data))
+      
+    data = "\n\n".join(data.split("\n\n")[1:])
+    data = data.replace("  ", " ")
+    data = data.strip()
+
+    if len(links) > 0:
+      ls = "\n".join(links)
+      data += f"\n\n{ls}"
+
+    size = len(data)
+
+    if (size > 2000):
+      # For now there is a limit on number of characters that the bot can send on server. 
+      # Manually make sure that paragraphs are less than 2000 chars and send them seperately
+      splits = data.split("\n \n")
+
+      await ctx.send(f"—\n\n*{head}*\n\n\t{splits[0]}\n—")
+      for e in splits[1:-1]:
+        await ctx.send(f"\n{e}\n—")
+      
+      await ctx.send(f"{splits[-1]}\n\n—")
+      return
+    #data = data.replace("\\n", "\n")
+ 
+    await ctx.send(f"—\n\n*{head}*\n\n{data}\n\n—")
+
+    #embed = discord.Embed(title=f"{title}. {author}", description=f"\n\n\t{data}\n\n", color=0xa87f32) #creates embed
+    #embed.set_footer(text=f"перевод: Переводчик")
+    #await ctx.send(embed=embed)
+  
+  else:
+    
+    content = data["content"]
+    # TODO Solve multiple attachments
+    imgdata = data["files"][0]
+    author = data["author"]
+    interpreter = data["interpreter"]
+    title = data["title"]
+    number= data["number"]
+    
+    if (not title):
+      raise Exception("JSON is empty")
+
+    imgdata = base64.b64decode(imgdata.encode("ascii"))
+
+    filename = 'temporary_holder'  # I assume you have a way of picking unique filenames
+    with open(filename, 'wb') as f:
+      f.write(imgdata)
+      
+      if author:
+        embed = discord.Embed(title=f"{title}. {author}", description=f"{number}", color=0xa87f32) #creates embed
+      else:
+        embed = discord.Embed(title=f"{title}", description=f"{number}", color=0xa87f32) #creates embed
+      
+      dfile = discord.File(filename, filename="image.png")
+      embed.set_image(url="attachment://image.png")
+
+      if interpreter: 
+        embed.set_footer(text=f"перевод: {interpreter}")
+      
+      await ctx.send(file=dfile, embed=embed)
+
+      f.close()
+      os.remove(filename)
+
 @bot.command(name="file")
 async def ebmed(ctx, user):
 
   id_to_search = get_id(user)
   mem = bot.get_user(id_to_search)
-  embed = get_file(bot, mem)
+
+  embed = discord.Embed(title=f"Досье") 
+  embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
+
+  #description = get_description(id_to_search)
+  row = get_db_row("confessions", id_to_search)
+  
+  mean_str = "⠀\n"
+
+  if row:
+    #points = row["Points"]
+    description = row["Confession"]
+
+    if (row["Points"] is None):
+      data = {}
+      
+    else:
+      data = json.loads(row["Points"])
+      #data[f"{id_author}"] = points
+
+    vals = list(data.values())
+
+    if len(vals) == 0:
+      curr_mean = False
+      mean_str = "⠀\nОписание пока не было оценено\n\n"
+    else:
+      curr_mean = int(np.mean(vals))
+      mean_str = f"⠀\nСредняя оценка описания — *{curr_mean} / 10*\n\n"
+      # TODO in the future we can also check the respective entry in the unmarked_confessions to make it clear
+      # whether the current mark is final or there are still moderators who have yet to mark it
+
+  else:
+    #mean_str = f"Средняя оценка описания — *{curr_mean} / 10*"
+    description = False
+    print("here")
+
+  if not description:
+    description = f"{mem.display_name} пока не предоставил(а) своё описание."
+
+  if (len(description) > 1024):
+    description = description[:1019] + "..."
+
+  embed.add_field(name="⠀", value=f"*{description}*", inline=False)
+
+
+
+
+  thumbs = {
+    "zek": "https://i.ibb.co/fqsc4TP/image.jpg",
+    "shiz": "https://i.ibb.co/Vvsc71q/shiz.jpg",
+    "polit_buro": "https://i.ibb.co/JBr8jVj/image.png",
+    "sovnarmod": "https://i.ibb.co/mR5ZxHK/zacon.jpg",
+    "vchk": "https://i.ibb.co/KXDLLsr/vchk.jpg",
+    "truppa": "https://i.ibb.co/2KCYPQZ/hands-hold-a-theater-mask-dot-technique-of-drawing-change-of-role-in-ather-Theater-Actor-tattoo-Hypo.jpg",
+    "narod_artist": "https://i.ibb.co/6mbXrJq/narod-artist-tmg.png",
+    "blatnoi": "https://i.ibb.co/s1Q7gwc/blatnoi.jpg",
+    "onizuka": "https://i.ibb.co/wwJPFYR/onizuka.jpg",
+    "chtets": "https://i.ibb.co/5K5hGjH/chtets.jpg",
+    "actor_zapasa": "https://i.ibb.co/vPk10R5/actor-zapasa.jpg",
+    "proletariat": "https://i.ibb.co/VQtxxPj/proletariat.jpg",
+    "apatrid": "https://i.ibb.co/DwsbRGY/apatrid.jpg",
+  }
+ 
+  colours = {
+    "zek": 0x9b59b6,
+    "shiz": 0xe67e22,
+    "polit_buro": 0xf30101,
+    "sovnarmod": 0x2ecc71,
+    "vchk": 0xf1c40f,
+    "truppa": 0x1abc9c,
+    "narod_artist": 0x3498db,
+    "blatnoi": 0xe91e63,
+    "onizuka": 0xe67e22,
+    "chtets": 0xe67e22,
+    "actor_zapasa": 0x1abc9c,
+    "proletariat": 0x99aab5,
+    "apatrid": 0x2f3136,
+  }
+  
+  
+  #embed = discord.Embed(title=f"Досье", description=f"", color=0xa87f32, url="https://albenz.xyz", footer="Переводчик — модолец!") #creates embed
+  #embed.set_author(name=mem.display_name, url="https://twitter.com/RealDrewData", icon_url=mem.avatar_url)
+
+  # thumbnail has an icon for different roles, i.e. Proletari, SovNarMod
+  #embed.set_thumbnail(url=thumb)
+  
+  roles_names_list = [
+    "Апатрид",
+    "Политзаключённый",
+    "Шиз",
+    "Политбюро ЦКТМГ",
+    "СовНарМод",
+    "ВЧК",
+    "Драматическая Труппа",
+    "Народный Артист ТМГ",
+    "Блатной",
+    "Востоковед",
+    "Чтец",
+    "Актёр Запаса",
+    "Пролетарий",
+  ]
+  
+  roles_names_to_code = {
+    "Политзаключённый": "zek",
+    "Шиз": "shiz",
+    "Политбюро ЦКТМГ": "polit_buro",
+    "СовНарМод": "sovnarmod",
+    "ВЧК": "vchk",
+    "Драматическая Труппа": "truppa",
+    "Народный Артист ТМГ": "narod_artist",
+    "Блатной": "blatnoi",
+    "Востоковед": "onizuka",
+    "Чтец": "chtets",
+    "Актёр Запаса": "actor_zapasa",
+    "Пролетарий": "proletariat",
+    "Апатрид": "apatrid",
+  }
+
+
+  guild = bot.get_guild(GUILD) 
+  for member in guild.members:
+    if (member.id == id_to_search):
+      mem_roles = list(map(str, member.roles))
+      for role in roles_names_list:
+        if role in mem_roles:
+          embed.set_thumbnail(url=thumbs[roles_names_to_code[role]])
+          embed.color = colours[roles_names_to_code[role]]
+
+          dominating_role = role
+          #embed.set_footer(text="СовНарМод ТМГ")
+          embed.set_footer(text=dominating_role)
+          
+          break
+
+  # SET @row_number = 0; 
+  # SELECT num, ID, NAME, Points 
+  # FROM (SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points 
+  # FROM raiting ORDER BY Points DESC) a
+  # WHERE ID = '696405991876722718'
+
+  db, cursor = get_db_cursor()
+  sql = f"SET @row_number = 0; SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC"
+
+  try:
+    #cursor.execute(sql)
+    cursor.execute("SET @row_number = 0;")
+    cursor.execute(f"SELECT num, ID, Name, Points FROM (SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC) a WHERE ID = {id_to_search}")
+
+    res = cursor.fetchone()
+    num = res["num"]
+    points = res["Points"]
+    #db.commit()
+  except Exception as e:
+    print(e)
+    db.rollback()
+  db.close()
+
+
+	# Counting the number of tellings on the target member
+  counter = 0
+  
+  db, cursor = get_db_cursor()
+  try:
+    sql = f"SELECT COUNT(*) FROM tellings WHERE Target = {id_to_search}"
+    cursor.execute(sql)
+    counter = int(cursor.fetchone()['COUNT(*)'])
+  except Exception as e:
+    print(e)
+    db.rollback()
+  
+  db.close()
+  #mod = counter % 10
+  #counter_str = "раз"
+  #if mod > 1 and mod < 5:
+  #  counter_str = "раза"
+
+  # get the number of times a person has been imprisoned
+  imprisoned = 0
+  row = get_db_row("prisoners", id_to_search)
+  if row:
+    imprisoned = int(row["Counter"])
+    
+  main_field = f"Социальный Рейтинг — *{points} ( {num}-е место )*\n\nНа гражданина донесено *{counter} {get_times_str(counter)}*\n\nЗаключён в ГУЛАГ *{imprisoned} {get_times_str(imprisoned)}*" 
+
+  if description:
+    main_field = mean_str + main_field
+  else: 
+    main_field = "⠀\n" + main_field
+
+  embed.add_field(name=main_field, value="⠀", inline=False)
+
+  # attach moshna печать
+#  embed.add_field(name="Валюта", value="Шанырак - 12", inline=True)
   await ctx.send(embed=embed)
 
 async def activity_log(id_to_search):
@@ -188,6 +576,16 @@ async def activity_log(id_to_search):
     if ("гласность" in ch.name):
       await ch.send(embed=embed)
 
+# depending on the number returns the currect russian analogue of «times» i.e. раза/раза
+def get_times_str(num):
+  mod = num % 10
+  counter_str = "раз"
+  
+  if mod > 1 and mod < 5:
+    counter_str = "раза"
+
+  return counter_str
+
 @bot.command(name="манифест")
 async def website(ctx):
   await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => https://albenz.xyz/files/tractatus.pdf")
@@ -222,9 +620,9 @@ async def duty(ctx, issue):
   try:
     await parse_zettel_json(ctx, response)
   except Exception as e:
-    print(e)
     await ctx.send(f"<@!{ctx.author.id}>, долг для *«{issue}»* не найден! « !долги », чтобы посмотреть все ключевые слова.")
     
+
 @bot.command(name="средство")
 async def remedy(ctx, issue):
 
@@ -674,6 +1072,7 @@ async def check_rights_dm(ctx):
   await ctx.send(response)
   return False
 
+
 def convert_brief(message):
   # REPLACE BAD PRACTISE
   total = 61
@@ -860,6 +1259,577 @@ async def vse(ctx):
       res = f"Граждане {mentions}! \n\nМы не можем установить вашу личность! Вам нужно зарекомендовать себя! \n\n\t\tЭто можно сделать с помощью команды **« !рассказать »**\n\n\t\t Например: !рассказать \"Привет, я Албанец. Мне 22 года, по образованию программист. Устраиваю читки пьес в дискорде, пытаюсь собрать народ на групповые чтения поэзии и просмотры японских мультиков. В свободное время люблю почитать что-то по философии или религии. Могу сыграть на гитаре твой реквест. В видео-игры не играю. Играю в Го. Энтузиаст Высокой Мошны.\"\n\n\t Не забудьте про **кавычки**! Боту можно написать и в личку. Соответственно рекомендации пользователя можно узнать с помощью команды **« !кто »**, например: !кто @Albanec69 . Учтите, что **записи о себе можно править только один раз в 7 дней!**"
       await ch.send(res)
       break
+
+@tasks.loop(seconds=86400.0)
+async def scan():
+
+  db, cursor = get_db_cursor()
+  guild = bot.get_guild(GUILD) 
+  day = int(datetime.datetime.today().weekday())
+
+  if (guild):
+    super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Апатрид')
+    sovnarmod = discord.utils.get(guild.roles, name='СовНарМод')
+
+    # Scan through all the unmarked descriptions and remind SovNarMod members to mark them immediately
+    snm_dict = {}
+    for m in sovnarmod.members:
+      snm_dict[str(m.id)] = []
+    
+    select = "SELECT * FROM unmarked_confessions"
+    try:
+      cursor.execute(select)
+      entries = cursor.fetchall()
+      for e in entries:
+        to_remind = [i.strip() for i in e["Markers"].split(",")]
+        for i in to_remind:
+          snm_dict[i].append(e["ID"])
+
+    except Exception as e:
+      print(e)
+      db.rollback()
+   
+    for sovok, spiski in snm_dict.items():
+      sovok = bot.get_user(int(sovok))
+      await sovok.create_dm()
+      quotes = ",\n\t".join([(str(j) + ") \t" + str(i)) for j, i in enumerate(spiski)])
+      if(len(spiski) > 0):
+        await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшие сутки: \n\n\t{quotes}")
+
+  if (guild and day == 0):
+
+    super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Апатрид')
+    sovnarmod = discord.utils.get(guild.roles, name='СовНарМод')
+
+    # Scan through all the Proletariat and put to Pogran-Zastava channel all who are not in the «cache» database
+    ms = []
+    for m in proletariat.members:
+      done = False
+      for role in list(map(str, m.roles)):
+        if (role in super_roles):
+         done = True
+         break
+      if (done):
+        continue
+
+      iid = m.id
+      sql = f"SELECT * from cache WHERE `ID` = \"{iid}\""
+      try:
+        cursor.execute(sql)
+        res = cursor.fetchone()
+      
+        if (res is None):
+          ms.append(m)
+          await m.add_roles(politzek)
+          await m.remove_roles(proletariat)
+
+      except Exception as e:
+        print(e)
+
+    for ch in guild.channels:
+      if ("погран" in ch.name):
+        mentions = ""
+        for m in ms:
+          mentions += f"<@!{m.id}> "
+        
+        res = f"Граждане {mentions}! \n\nВы были неактивны более 7 дней и нам нужно убедиться, что вы ещё живы! « **!пропуск** » чтобы пересечь границу Мошны!"
+        await ch.send(res)
+        break
+
+    sql = f"DELETE FROM cache"
+
+    try:
+      cursor.execute(sql)
+      db.commit()
+    
+  #    if (res is None):
+  #
+  #      await m.add_roles(politzek)
+  #      await m.remove_roles(proletariat)
+
+    except Exception as e:
+      db.rollback()
+      print(e)
+
+    try:      
+      db.close()
+    except:
+      print("Already closed")
+
+def linkFetch():
+    key = FOOD_KEY
+    url = f"https://api.unsplash.com/photos/random/?query=meal&client_id={key}"
+
+    response = requests.get(url)
+    data = response.json()["urls"]["raw"]
+    return data
+
+@tasks.loop(seconds=3600.0)
+async def breakfast():
+
+  guild = bot.get_guild(GUILD) 
+  
+  hour = int(datetime.datetime.now().hour)
+  if (guild and hour == 5):
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Политзаключённый')
+
+    for ch in guild.channels:
+      if ("колхоз" in ch.name):
+        url = linkFetch()
+        res = f"{politzek.mention}! Завтрак! \n\n {url}"
+        res = f"Завтрак! \n\n {url}"
+        await ch.send(res)
+
+@tasks.loop(seconds=3600.0)
+async def dinner():
+
+  guild = bot.get_guild(GUILD) 
+  
+  hour = int(datetime.datetime.now().hour)
+  
+  if (guild and hour == 15):
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Политзаключённый')
+
+    for ch in guild.channels:
+      if ("колхоз" in ch.name):
+        url = linkFetch()
+        res = f"{politzek.mention}! Ужин! \n\n {url}"
+        res = f"Ужин! \n\n {url}"
+        await ch.send(res)
+
+@tasks.loop(seconds=3600.0)
+async def lunch():
+
+  guild = bot.get_guild(GUILD) 
+  
+  hour = int(datetime.datetime.now().hour)
+  if (guild and hour == 10):
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    politzek= discord.utils.get(guild.roles, name='Политзаключённый')
+
+    for ch in guild.channels:
+      if ("колхоз" in ch.name):
+        url = linkFetch()
+        res = f"{politzek.mention}! Обед! \n\n {url}"
+        res = f"Обед! \n\n {url}"
+        await ch.send(res)
+
+@tasks.loop(seconds=3600.0)
+async def important_info():
+
+  guild = bot.get_guild(GUILD) 
+  
+  hour = int(datetime.datetime.now().hour)
+
+  if (guild and hour == 9):
+
+    proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+    npc = discord.utils.get(guild.roles, name='NPC can\'t meme')
+
+    ps = proletariat.members 
+    ns = npc.members
+    ps = [p for p in ps if p not in ns]
+
+    bl = [351749038497988621, 249503118885257216, 486137719647633408, 376990474466099201, 355781240479023115, 347757889210810369]
+
+    ps = [item for item in ps if item.id not in bl]      
+    m = ps[random.randint(0, len(ps) - 1)]
+
+    for ch in guild.channels:
+      #if ("колхоз" in ch.name or "погран" in ch.name):
+      if ("погран" in ch.name):
+
+        db, cursor = get_db_cursor()
+
+        select = f"SELECT * from confessions WHERE ID={m.id};"
+
+        try:
+          cursor.execute(select)
+          confession = cursor.fetchone()['Confession']
+          res = f"Товарищи! А знали ли вы что-нибудь о {m.name}? Вот что {m.name} говорит о себе: \n\n\t*{confession}*\n\nНе забывайте, что можно обновить своё описание (« **!рассказать** ») максимум один раз в 7 дней."
+          await ch.send(res)
+           
+        except Exception as e:
+          print(e)
+          db.rollback()
+          
+        db.close()
+
+@tasks.loop(seconds=30000000.0)
+async def start_records():
+    try:
+      guild = bot.get_guild(GUILD) 
+      proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+      politzek= discord.utils.get(guild.roles, name='Апатрид')
+      print(guild.members)
+
+      db, cursor = get_db_cursor()
+      points = 0
+      
+      for m in guild.members:
+        name = m.name
+        id_to_search = m.id
+
+        replace = f"REPLACE INTO rating(ID, Name, Points) VALUES(\"{id_to_search}\", \"{name}\", \"{points}\")"
+
+        try:
+          cursor.execute(replace)
+          db.commit()
+          
+        except Exception as e:
+          print(e)
+          db.rollback()
+      db.close()
+      exit(0)
+
+    except Exception as e:
+      print("oof")
+
+import wikipediaapi
+import datetime
+import random
+
+@tasks.loop(seconds=3600.0)
+async def deaths():
+
+
+  hour = int(datetime.datetime.now().hour)
+  guild = bot.get_guild(GUILD)
+
+  if hour == 9 and guild:
+
+    wiki_wiki = wikipediaapi.Wikipedia('en')
+
+    today = datetime.datetime.now()
+    month = today.strftime("%B")
+    day = today.day
+
+    page = wiki_wiki.page(f'{day} {month}')
+    deaths = page.text.split("Deaths")[1].split("Holidays")[0].split("\n")
+    found_valid_page = False
+    
+    while not found_valid_page:
+      case = deaths[random.randint(0, len(deaths) - 1)]
+      
+      try:
+        case = case.split("–")[1].split(",")[0]
+      except Exception as e:
+        continue
+      
+      page = wiki_wiki.page(f'{case}')
+      #print([str(s.title) for s in page.sections])
+      found_valid_page = "Death" in [str(s.title) for s in page.sections]
+
+
+      if (found_valid_page):
+        ss = [s.title for s in page.sections]
+        idx = ss.index('Death')
+        section = page.sections[idx]
+        content = f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**"
+        found_valid_page = len(content) <= 2000
+      
+    guild = bot.get_guild(GUILD)
+    if (guild):
+      for ch in guild.channels:
+        if ("өлүм" in ch.name):
+          await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
+
+@tasks.loop(seconds=3600.0)
+async def births():
+
+  hour = int(datetime.datetime.now().hour)
+  guild = bot.get_guild(GUILD)
+
+  if hour == 9 and guild:
+
+    wiki_wiki = wikipediaapi.Wikipedia('en')
+
+    today = datetime.datetime.now()
+    month = today.strftime("%B")
+    day = today.day
+
+    page = wiki_wiki.page(f'{day} {month}')
+    deaths = page.text.split("Births")[1].split("Holidays")[0].split("\n")
+    found_valid_page = False
+    
+    while not found_valid_page:
+      case = deaths[random.randint(0, len(deaths) - 1)]
+      
+      try:
+        case = case.split("–")[1].split(",")[0]
+      except Exception as e:
+        continue
+      
+      page = wiki_wiki.page(f'{case}')
+      #print([str(s.title) for s in page.sections])
+      # TODO some pages have 'Early life and education' or something similar. Add an extension to accomodate these
+
+      if ("Early life" in [str(s.title) for s in page.sections]):
+        ss = [s.title for s in page.sections]
+        idx = ss.index('Early life')
+        section = page.sections[idx]
+        content = f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**"
+        found_valid_page = len(content) <= 2000
+        
+    guild = bot.get_guild(GUILD)
+    if (guild):
+      for ch in guild.channels:
+        if ("туулган" in ch.name):
+          await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
+
+@tasks.loop(seconds=3600.0)
+async def meditations():
+
+  hour = int(datetime.datetime.now().hour)
+  guild = bot.get_guild(GUILD)
+
+  if hour == 9 and guild:
+
+    guild = bot.get_guild(GUILD)
+    if (guild):
+      for ch in guild.channels:
+        if ("meditations" in ch.name):
+          channel = ch
+    else:
+      return
+
+    url = f"http://albenz.xyz:6969/remedy?issue=Random"
+
+    response = requests.get(url)
+
+    data = response.json()
+  
+    try:
+      await parse_zettel_json(channel, data)
+
+    except Exception as e:
+      await channel.send(f"Произошла ошибка вызова API")
+
+ #   data = response.json()["files"]
+ #   data = data[random.randint(0, len(data) - 1)]
+ #   
+ #   author = data["author"]
+ #   title = data["title"]
+ #   data = data["content"]
+
+ #   data = data.split("\n\n")[1]
+ #   data = data.replace("  ", " ")
+ #   data = data.strip()
+
+ #   size = len(data)
+
+ #   if (size > 2000):
+ #     # For now there is a limit on number of characters that the bot can send on server. 
+ #     # Manually make sure that paragraphs are less than 2000 chars and send them seperately
+ #     splits = data.split("\n \n")
+ #     await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{splits[0]}\n—")
+ #     for e in splits[1:-1]:
+ #       await channel.send(f"\n{e}\n—")
+ #     
+ #     await channel.send(f"{splits[-1]}\n\n—")
+ #     return
+
+ #   #data = data.replace("\\n", "\n")
+ #   await channel.send(f"—\n\n*{title}. {author}.*\n\n\t{data}\n\n—")
+
+deaths.start()
+births.start()
+meditations.start()
+
+#start_records.start()
+#looop.start()
+scan.start()
+#dinner.start()
+#lunch.start()
+important_info.start()
+#breakfast.start()
+
+@bot.command(name='on')
+async def play(ctx, number):
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
+    number = int(number)
+    if (number == 0):
+      # Музыка
+      player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/music128'))
+    elif number == 1:  
+      # Старое радио
+      player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/ices128'))
+    elif number == 2:  
+      # Детское радио
+      player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/detskoe128'))
+
+#Get videos from links or from youtube search
+def search(arg):
+    with YoutubeDL({'format': 'bestaudio', 'noplaylist':'False', 'ignoreerrors': 'True'}) as ydl:
+        try: requests.get(arg)
+        except: info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries']
+        else: info = ydl.extract_info(arg, download=False)
+
+    es = [dict(i) for i in info["entries"]]
+    ret = []
+    for i in es:
+      url = i["formats"][0]['url']
+      ret.append((i, url))
+    return ret
+    #return (info, info['formats'][0]['url'])
+
+from discord import FFmpegPCMAudio
+from discord.ext import commands
+from discord.utils import get
+
+@bot.command(name='yt')
+async def play(ctx, *, query):
+    #Solves a problem I'll explain later
+    FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+    
+    # query should be a link to the playlist (not ay video within the playlist!)
+#    video, source = search(query)
+    video_sources = search(query)
+    channel = ctx.author.voice.channel
+    voice = await channel.connect() 
+
+    curr = 0
+    while True:
+
+      video, source = video_sources[curr]
+      curr += 1
+      
+      if (curr >= len(video_sources)):
+        curr = 0
+      
+      title = video['title']
+      await ctx.send(f"Now playing {title}.")
+
+      voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
+      while(voice.is_playing()):
+        await asyncio.sleep(10)
+        continue
+
+# @bot.command(name='31')
+# async def kaligula1(ctx):
+#     channel = ctx.message.author.voice.channel
+#     player = await channel.connect()
+#
+#     for x in bot.voice_clients:
+#
+#        if (x.is_connected()):
+#            x.stop()
+#            while (True):
+#                x.play(FFmpegPCMAudio('files/gong.mp3'))
+#        else:
+#
+#            channel = ctx.message.author.voice.channel
+#            player = await channel.connect()
+#            while (True):
+#                player.play(FFmpegPCMAudio('files/gong.mp3'))
+
+@bot.command(name='1')
+async def kaligula1(ctx):
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
+
+    for x in bot.voice_clients:
+       if (x.is_connected()):
+           x.stop()
+           x.play(FFmpegPCMAudio('files/lakki1.mp3'))
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
+           await x.disconnect()
+
+       else:
+           channel = ctx.message.author.voice.channel
+           player = await channel.connect()
+           player.play(FFmpegPCMAudio('files/lakki1.mp3'))
+
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
+           await x.disconnect()
+
+@bot.command(name='2')
+async def kaligula2(ctx):
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
+
+    for x in bot.voice_clients:
+       if (x.is_connected()):
+           x.stop()
+           x.play(FFmpegPCMAudio('files/lakki2.mp3'))
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
+
+           await x.disconnect()
+
+       else:
+           channel = ctx.message.author.voice.channel
+           player = await channel.connect()
+           player.play(FFmpegPCMAudio('files/lakki2.mp3'))
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
+           await x.disconnect()
+
+@bot.command(name='3')
+async def kaligula2(ctx):
+    channel = ctx.message.author.voice.channel
+    player = await channel.connect()
+
+    for x in bot.voice_clients:
+       if (x.is_connected()):
+           x.stop()
+           x.play(FFmpegPCMAudio('files/nicksex.mp3'))
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
+           await x.disconnect()
+
+       else:
+           channel = ctx.message.author.voice.channel
+           player = await channel.connect()
+           player.play(FFmpegPCMAudio('files/nicksex.mp3'))
+           while(player.is_playing()):
+               await asyncio.sleep(1)
+               continue
+           await x.disconnect()
+
+@bot.command(name='off', pass_context = True)
+async def leavevoice(ctx):
+    for x in bot.voice_clients:
+        if(x.guild == ctx.message.guild):
+            return await x.disconnect()
+
+    return await ctx.send("I am not connected to any voice channel on this server!")
+
+def get_db_row(db_name, id_to_search):
+
+    db, cursor = get_db_cursor()
+
+    select = f"SELECT * from {db_name} WHERE ID={id_to_search};"
+
+    try:
+      cursor.execute(select)
+      row = cursor.fetchone()
+      return row
+      
+    except Exception as e:
+      print(e)
+      db.rollback()
+      db.close()
+      return False
 
 import json
 import numpy as np
@@ -1835,11 +2805,6 @@ async def confess(ctx, *, args=None):
     db.close()
 
 from status import Status
-from loops import Loops
-from voice import Voice 
-
+#guild = bot.get_guild(GUILD)
 bot.add_cog(Status(bot))
-bot.add_cog(Loops(bot))
-bot.add_cog(Voice(bot))
-
 bot.run(TOKEN)
