@@ -31,6 +31,7 @@ FOOD_KEY = str(os.getenv('FOOD_KEY'))
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
+#bot.timer_manager = timers.TimerManager(bot)
 
 @bot.event
 async def on_ready():
