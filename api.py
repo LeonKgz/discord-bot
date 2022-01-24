@@ -1,4 +1,4 @@
-tmport requests
+import requests
 import json
 import sys
 
