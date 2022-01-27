@@ -5,6 +5,7 @@ import pymysql.cursors
 import datetime
 import wikipediaapi
 import random
+import requests
 from utils import *
 
 # retrieving JAWSDB credentials
@@ -25,8 +26,8 @@ class Loops(commands.Cog):
     self.news_alert.start()
     self.scan.start()
     self.important_info.start()
-    self.deaths.start()
-    self.births.start()
+    # self.deaths.start()
+    # self.births.start()
     self.meditations.start()
   
   def get_db_cursor(self):
@@ -333,7 +334,6 @@ class Loops(commands.Cog):
 
     hour = int(datetime.datetime.now().hour)
     guild = self.bot.get_guild(GUILD)
-
     if hour == 9 and guild:
 
       channel = self.get_channel(guild, "meditations")
