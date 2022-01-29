@@ -25,7 +25,6 @@ ME = int(os.getenv('ME'))
 HOST = str(os.getenv('DB_HOST'))
 USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
-DB = str(os.getenv('DB_DATABASE'))
 QUOTES = str(os.getenv('QUOTES_KEY'))
 FOOD_KEY = str(os.getenv('FOOD_KEY'))
 
@@ -1501,13 +1500,12 @@ async def blacklist_donos(ctx, donos_id):
 def get_description(id_to_search):
 
     db, cursor = get_db_cursor()
-
     select = f"SELECT * from confessions WHERE ID={id_to_search};"
 
     try:
       cursor.execute(select)
       confession = cursor.fetchone()['Confession']
-      
+      return confession
     except Exception as e:
       print(e)
       db.rollback()
@@ -1536,7 +1534,6 @@ async def who(ctx, mem):
     #  await ctx.send(f"<@!{id_author}>, к сожалению эта команда не работает в мобильном приложении. \nВсе вопросы к дикорду!")
     #  return
 
-    db, cursor = get_db_cursor()
     confession = get_description(id_to_search)
     if (confession):
       await ctx.send(f"<@!{id_author}>, вот что {mem.name} говорит о себе: \n\n\t*{confession}*")
