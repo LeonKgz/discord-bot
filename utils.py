@@ -330,7 +330,11 @@ def get_file(bot, mem):
   if row:
     imprisoned = int(row["Counter"])
     
-  main_field = f"Социальный Рейтинг — *{points} ( {num}-е место )*\n\nНа гражданина донесено *{counter} {get_times_str(counter)}*\n\nЗаключён в ГУЛАГ *{imprisoned} {get_times_str(imprisoned)}*" 
+  main_field = f"Социальный Рейтинг — *{points} ( {num}-е место )*" 
+  if counter > 0:
+    main_field += f"\n\nНа гражданина донесено *{counter} {get_times_str(counter)}*"
+  if imprisoned > 0:
+    main_field += f"\n\nЗаключён в ГУЛАГ *{imprisoned} {get_times_str(imprisoned)}*"
 
   if description:
     main_field = mean_str + main_field
