@@ -121,6 +121,10 @@ async def ebmed(ctx, user):
   await ctx.send(embed=embed)
 
 async def activity_log(id_to_search):
+  if str(id_to_search) == str(ME):
+    print("Tis the owner!")
+    return
+
   mem = bot.get_user(id_to_search)
   embed = discord.Embed(title=f"+15 Кремлебот") 
   embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
