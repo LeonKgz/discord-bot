@@ -527,15 +527,7 @@ async def record_log(ctx):
 
 @bot.command(name="logs")
 async def logs(ctx, mem):
-
-  if (ctx.guild):
-    try:
-      holder = int(mem)
-      msg_id = ctx.message.id
-      await ctx.message.delete()
-      return
-    except Exception as e: 
-      print(e)
+  return
 
   id_author = ctx.author.id
   id_to_search = get_id(mem)
@@ -554,7 +546,8 @@ async def logs(ctx, mem):
       time = r['Timestamp'].strftime('%d-%m-%Y')
       # num = sign + str(r['Amount'])
 
-      res += f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\tпо причине:\t*{r['Description']}*\n"
+      res += f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\t*{r['Description']}*\n"
+      # res += f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\tпо причине:\t*{r['Description']}*\n"
     
     if len(res) == 0:
       await ctx.send(f"<@!{id_author}>, no logs found for ***{mem.name}*** !")
