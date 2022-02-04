@@ -285,6 +285,291 @@ async def include(ctx, *, actor):
       await mem.add_roles(truppa)
       await mem.remove_roles(actor_zapasa)
       await ctx.send(f"{mem.name} благополучно включён в Драматическую Труппу")
+  
+import datetime as d
+class Actor:
+  def __init__(self, name, id, times, descs):
+    self.book = {
+      "times": [d.datetime(t[0], t[1], t[2], 18) for t in times],
+      "id": id,
+      "descs": [f"За участив в пьесе {d}" for d in descs]
+    }
+
+# async def record_log(ctx, source_id, target_id, type, sign, amount, desc):
+@bot.command(name="abc")
+async def record_log(ctx):
+  return
+  if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
+    return
+
+  # time = d.datetime.now()
+  # time = d.datetime(2021, 11, 5, 2, 34)
+  # time =  d.datetime(2021, 11, 5, 2, 34)
+  actor = discord.utils.get(ctx.guild.roles, name="Актёр Запаса")
+
+  source_id = ***REMOVED***
+  type = "Play"
+  sign = "Positive"
+  amount = "10"
+
+  gamlet_date = (2020, 8, 21)
+  gamlet_actors = [
+    "ellanta", 
+    "SlowLadin",
+    "Albanec69",
+    "kucher",
+    "MadDudeUnstoppable"
+  ]
+
+  bottom_date = (2020, 9, 5)
+  bottom_actors = [
+    "Albanec",
+    "mrkimster",
+    "Ellanta",
+    "hitary",
+    "kaleeida",
+    "kucher",
+    "SlowLadin",
+    "olya",
+    "MadDudeUnstoppable",
+    # "nimferna",
+  ]
+
+  gore_date = (2020, 9, 22)
+  gore_actors = [
+    "hitary",
+    "MadDudeUnstoppable",
+    "SlowLadin",
+    "krabick",
+    # "nimferna",
+    "ellanta",
+    "ramona",
+    "kalaboque",
+    "Albanec",
+    "vccttu"
+  ]
+
+  maskarad_date = (2020, 10, 2)
+  maskarad_actors = [
+    "SlowLadin",
+    "Albanec",
+    "MadDudeUnstoppable",
+    "Ellanta",
+    "Фролов",
+    "1Torba",
+    "NickSEX",
+    "kaleeida",
+    "Unuasha",
+    "KoItsy",
+    # "Nimferna",
+    "MrHarper",
+  ]
+
+  sisters_date = (2020, 10, 18)
+  sisters_actors = [
+    "NickSEX",
+    "hitary",
+    "Cockenz",
+    "Albanec69",
+    "sosaaaaaaaad",
+    "Фролов",
+    "kaleeida",
+    "SlowLadin",
+    "MrHarper",
+    "Dude",
+    "Kalaboque",
+  ]
+
+  dom_date = (2020, 11, 8)
+  dom_actors = [
+    "Unuasha",
+    "SleXy",
+    "Albanec69",
+    "1Torba",
+    "Dude",
+    "NickSEX",
+    "Shizov",
+    "Hyomushka",
+    "SlowLadin",
+    "sosaaaaaaaad",
+    "Фролов",
+  ]
+  
+  eugene_date = (2020, 11, 20)
+  eugene_actors = [
+    "Alice_Nespit",
+    "Albanec69",
+    "1Torba",
+    "SlowLadin",
+    "Hitary",
+    "MrHarper",
+    "NickSEX",
+    "Ramona",
+    "Ellanta",
+  ]
+  
+  podolsk_date = (2021, 7, 26)
+  podolsk_actors = [
+    "NickSEX",
+    "Psijicus",
+    "Albanec69",
+    "Фролов",
+    "Ellanta",
+    "MrKimster",
+  ]
+  
+  rnj_date = (2021, 2, 3)
+  rnj_actors = [
+    "Ellanta",
+    "Funnybone",
+    "Albanec69",
+  ]
+  
+  piter_date = (2021, 8, 1)
+  piter_actors = [
+    "Albanec",
+    "Hitary",
+    "Ellanta",
+    "SleXy",
+    "sosaaaaaaaad",
+    "мякушка",
+    "SlowLadin",
+  ]
+  
+  kaligula_date = (2021, 9, 21)
+  kaligula_actors = [
+    "Nightingale",
+    "Hitary",
+    "MrHarper",
+    "Фролов",
+    "Albanec69",
+    "WELOVEWELOVEGAMES",
+    "sosaaaaaaaad",
+  ]
+  
+  cherry_date = (2021, 9, 11)
+  cherry_actors = [
+    "WELOVEWELOVEGAMES",
+    "MrHarper",
+    "Ellanta",
+    "Sekyshka",
+    "Kucher",
+    "Alice_Nespit",
+    "Albanec69",
+  ]
+  
+  bog_date = (2021, 10, 31)
+  bog_actors = [
+    "Alice_Nespit",
+    "WELOVEWELOVEGAMES",
+    "Фролов",
+    "Unuasha",
+    "Albanec69", 
+  ]
+
+  godot_date = (2021, 12, 18)
+  godot_actors = [
+    "Nightingale",
+    "Albanec69",
+    "Unuasha",
+    "TomasX",
+    "NickSEX",
+    "Фролов",
+  ]
+
+  theatre = [
+    (gamlet_date, gamlet_actors, "Гамлет"),
+    (bottom_date, bottom_actors, "На дне"),
+    (gore_date, gore_actors, "Горе от ума"),
+    (maskarad_date, maskarad_actors, "Маскарад"),
+    (sisters_date, sisters_actors, "Три сестры"),
+    (dom_date, dom_actors, "Дом, где разбиваются сердца"),
+    (eugene_date, eugene_actors, "Евгений Онегин"),
+    (podolsk_date, podolsk_actors, "Человек из Подольска"),
+    (rnj_date, rnj_actors, "Ромео и Джульетта"),
+    (piter_date, piter_actors, "Жиды города Питера"),
+    (kaligula_date, kaligula_actors, "Калигула"),
+    (cherry_date, cherry_actors, "Вишнёвый сад"),
+    (bog_date, bog_actors, "Бог резни"),
+    (godot_date, godot_actors, "В ожидании Годо"),
+  ]
+
+  actor_names = []
+  actor_ids = {}
+
+  for m in actor.members:
+    actor_names.append(m.name)
+    actor_ids[m.name] = m.id
+    # print(m.name)
+
+  for date, actors, desc in theatre:
+    for a in actors:
+      for j in actor_names:
+        if (a.lower() in j.lower()):
+          target_id = actor_ids[j]
+          time = d.datetime(date[0], date[1], date[2], 22)
+          db, cursor = get_db_cursor()
+          # target_id = m.id
+          disc = f'Участие в пьесе \"{desc}\"'
+          sql = f"INSERT INTO logs(Timestamp, Source, Target, Type, Sign, Amount, Description) VALUES(\"{time}\", \"{source_id}\", \"{target_id}\", \"{type}\", \"{sign}\", \"{amount}\", \'{disc}\')"
+          # print(sql)
+          try:
+            cursor.execute(sql)
+            db.commit()
+          except Exception as e:
+            print(e)
+            db.rollback()
+          db.close()
+          break
+
+    print(f"{disc} is done!")
+    print("------------------------------")
+
+@bot.command(name="logs")
+async def logs(ctx, mem):
+
+  if (ctx.guild):
+    try:
+      holder = int(mem)
+      msg_id = ctx.message.id
+      await ctx.message.delete()
+      return
+    except Exception as e: 
+      print(e)
+
+  id_author = ctx.author.id
+  id_to_search = get_id(mem)
+  mem = bot.get_user(id_to_search)
+  db, cursor = get_db_cursor()
+  sql = f"SELECT * FROM logs WHERE Target = \"{id_to_search}\" ORDER BY Timestamp ASC"
+  
+  try:
+
+    cursor.execute(sql)
+    ret = cursor.fetchall()
+    res = ""
+    for r in ret:
+      sign = "+" if r['Sign'] == "Positive" else "-"
+      
+      time = r['Timestamp'].strftime('%d-%m-%Y')
+      # num = sign + str(r['Amount'])
+
+      res += f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\tпо причине:\t*{r['Description']}*\n"
+    
+    if len(res) == 0:
+      await ctx.send(f"<@!{id_author}>, no logs found for ***{mem.name}*** !")
+    else:
+      await ctx.send(res)
+
+  except Exception as e:
+
+    print(e)
+    db.rollback()
+
+  db.close()
+
+
+
 
 def get_id(ref):
 
