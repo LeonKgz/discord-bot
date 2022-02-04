@@ -120,7 +120,7 @@ async def ebmed(ctx, user):
   embed = get_file(bot, mem)
   await ctx.send(embed=embed)
 
-async def activity_log(id_to_search):
+async def weekly_activity_notification(id_to_search):
   if str(id_to_search) == str(ME):
     print("Tis the owner!")
     return
@@ -296,11 +296,53 @@ class Actor:
     }
 
 # async def record_log(ctx, source_id, target_id, type, sign, amount, desc):
-@bot.command(name="abc")
+@bot.command(name="ab213123213123123213c")
 async def record_log(ctx):
   return
   if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
     return
+
+  db, cursor = get_db_cursor()
+  sql = "SELECT * from confessions"
+  try:
+    cursor.execute(sql)
+    ret = cursor.fetchall()
+    for r in ret:
+      time = r['Timestamp']
+      source_id = ME
+      target_id = r['ID']
+      type = 'Description'
+      sign = 'Positive'
+      name = r['Name']
+      data = json.loads(r["Points"])
+      if (len(data) == 0):
+        mean = 0
+      else:
+        mean = int(np.mean(list(data.values())))
+
+      amount = mean
+
+      disc = "Обновление описания"
+
+      dbb, cursorr = get_db_cursor()
+      sql = f"INSERT INTO logs(Timestamp, Source, Target, Type, Sign, Amount, Description) VALUES(\"{time}\", \"{source_id}\", \"{target_id}\", \"{type}\", \"{sign}\", \"{amount}\", \'{disc}\')"
+
+      try:
+        cursorr.execute(sql)
+        dbb.commit()
+      except Exception as e:
+        print(e)
+        print(f"problem with {name}")
+        dbb.rollback()
+      dbb.close()
+
+  except Exception as e:
+    print(e)
+    print('Larger problem')
+    db.rollback()
+  db.close()
+
+  return
 
   # time = d.datetime.now()
   # time = d.datetime(2021, 11, 5, 2, 34)
@@ -524,10 +566,20 @@ async def record_log(ctx):
 
     print(f"{disc} is done!")
     print("------------------------------")
-
+34578379852793
 @bot.command(name="logs")
 async def logs(ctx, mem):
-  return
+
+  if ctx.guild:
+    try:
+      holder = int(mem)
+      msg_id = ctx.message.id
+      await ctx.message.delete()
+      return
+    except Exception as e: 
+      print(e)
+
+
 
   id_author = ctx.author.id
   id_to_search = get_id(mem)
@@ -840,10 +892,10 @@ async def on_message(message):
     row = get_db_row("cache", iid)
     # Check if this is the first message of the week for someone who wasnt sent to pogran-zastava on that monday; then +1 point
     if not row:
-      status = await add_points_quick(iid, 1)
-      await activity_log(iid)
+      status = await add_points_quick(source=ME, target=iid, type="Activity", amount=1, description="Недельная активность")
+      await weekly_activity_notification(iid)
       if not status:
-        await ctx.send(f"<@!{ME}>, произошла ошибка корректировки социального рейтинга для {message.author.name}!")
+        await message.channel.send(f"<@!{ME}>, произошла ошибка корректировки социального рейтинга для {message.author.name}!")
 
 			
 
@@ -1008,8 +1060,8 @@ async def let_free(ctx):
       res = f"Гражданин <@!{iid}>, проходите!"
       await ctx.send(res)
       # 1 point for activity
-      await add_points_quick(iid, 1)
-      await activity_log(iid)
+      await add_points_quick(source=ME, target=iid, type="Activity", amount=1, description="Недельная активность")
+      await weekly_activity_notification(iid)
       await ctx.author.add_roles(proletariat)
       await ctx.author.remove_roles(politzek)
 
@@ -1101,12 +1153,16 @@ async def evaluate(ctx, mem, points):
       data[f"{id_author}"] = points
       curr_mean = np.mean(list(data.values()))
 
-      status1 = await remove_points_quick(id_to_search, prev_mean)
-      status2 = await add_points_quick(id_to_search, curr_mean)
 
-      if (not(status1 and status2)):
-        await ctx.send(f"<@!{id_author}>, произошла ошибка корректировки социального рейтинга!")
-        return
+      # not adding points yet until all moderators have marked it
+
+      # status1 = await remove_points_quick(id_to_search, prev_mean)
+      # status2 = await add_points_quick(source=ME, target=id_to_search, type="Description", amount=curr_mean, description="Обновление описания")
+      # status2 = await add_points_quick(id_to_search, curr_mean)
+
+      # if (not(status1 and status2)):
+      #   await ctx.send(f"<@!{id_author}>, произошла ошибка корректировки социального рейтинга!")
+      #   return
       
       data = json.dumps(data)
       data = data.replace("\"", "\\\"")
@@ -1155,6 +1211,9 @@ async def evaluate(ctx, mem, points):
       for ch in guild.channels:
         if ("гласность" in ch.name):
           await ch.send(f"Все Модераторы оценили описание гражданина <@!{mem.id}>!\n\n\t\t Окончательная оценка — **{int(curr_mean)}**\n\n----------------------------------------------------------------------")
+
+      # Once all mods marked the description. record the result into logs table and add the points 
+      await add_points_quick(source=ME, target=mem.id, type="Description", amount=curr_mean, description="Обновление описания")
 
     
     else:  
@@ -1242,13 +1301,16 @@ async def remove_points_quick(target_id, points):
 
   return True
 
-async def add_points_quick(target_id, points):
+async def add_points_quick(source, target, type, amount, description):
+
+  timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  sign = "Positive"
 
   try:
-      points = int(points)
+      amount = int(amount)
 
       db, cursor = get_db_cursor()
-      row = get_db_row("raiting", target_id)
+      row = get_db_row("raiting", target)
 
       if (not row):
         #return False
@@ -1256,13 +1318,13 @@ async def add_points_quick(target_id, points):
       else:
         curr = row["Points"]
 
-      end = curr + points
+      end = curr + amount
 
       if (end < 0):
         end = 0
 
       db, cursor = get_db_cursor()
-      sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
+      sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target}\""
 
       try:
         cursor.execute(sql)
@@ -1272,6 +1334,8 @@ async def add_points_quick(target_id, points):
         db.rollback()
         db.close()
         return False
+      
+      record_logs(timestamp, source, target, type, sign, amount, description)     
 
       db.close()
   
@@ -1333,7 +1397,9 @@ async def remove_points(ctx, target_id, points):
 
 #async def add_points(ctx, target_id, points):
 @bot.command(name="add")
-async def add_points(ctx, target_id, points, reason):
+async def add_points(ctx, target, type, amount, description):
+
+  source = ctx.author.id
 
   #if (not await check_rights_dm(ctx)):
   #  return
@@ -1350,24 +1416,28 @@ async def add_points(ctx, target_id, points, reason):
   if True:
 
       try:
-        points = int(points)
+        amount = int(amount)
       except Exception as e:
           await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
           return
 
-      if (points < 1 or points > 1500):
+      if (amount < 1 or amount > 1500):
           await ctx.send(f"<@!{ctx.message.author.id}>, второй аргумент должен быть положительным количеством очков от 0 до 15 включительно!")
           return
 
       db, cursor = get_db_cursor()
       
       # Check if a group role is mentioned in
-      if ("<@&" in target_id):
-        send_to = get_id(target_id)
+      if ("<@&" in target):
+        send_to = get_id(target)
         for r in ctx.guild.roles:
           if (r.id == send_to):
             every = ", ".join([f"<@!{m.id}>" for m in r.members])
-            res = f"Модераторы начисляют **[ {points} ]** очков социального рейтинга гражданам {every}!\n\n\t\t Причина — *{reason}*\n\n----------------------------------------------------------------------"
+            
+            for m in r.members:
+              await add_points_quick(source, m.id, type, amount, description)
+            
+            res = f"Модераторы начисляют **[ {amount} ]** очков социального рейтинга гражданам {every}!\n\n\t\t Причина — *{description}*\n\n----------------------------------------------------------------------"
 
             guild = bot.get_guild(GUILD)
             for ch in guild.channels:
@@ -1375,28 +1445,29 @@ async def add_points(ctx, target_id, points, reason):
                 await ch.send(res)
                 return
 
-
       # Otherwise it's one person
       else:
-        row = get_db_row("raiting", target_id)
+        row = get_db_row("raiting", target)
         if (not row):
           await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка соединения! Попробуйте ещё раз.")
 
         curr = row["Points"]
-        end = curr + points
+        end = curr + amount
 
-        db, cursor = get_db_cursor()
+        await add_points_quick(source, target, type, amount, description)
 
-        sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
+        # db, cursor = get_db_cursor()
 
-        try:
-          cursor.execute(sql)
-          db.commit()
-        except Exception as e:
-          print(e)
-          await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+        # sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target}\""
 
-          db.rollback()
+        # try:
+        #   cursor.execute(sql)
+        #   db.commit()
+        # except Exception as e:
+        #   print(e)
+        #   await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
+
+        #   db.rollback()
 
         db.close()
         await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
@@ -1404,7 +1475,7 @@ async def add_points(ctx, target_id, points, reason):
         guild = bot.get_guild(GUILD)
         for ch in guild.channels:
          if "гласность" in ch.name:
-           await ch.send(f"Модераторы начисляют **[ {points} ]** очков социального рейтинга гражданину <@!{target_id}>!\n\n\t\t Причина — *{reason}*\n\n---------------------------------------------------------------------- ")
+           await ch.send(f"Модераторы начисляют **[ {amount} ]** очков социального рейтинга гражданину <@!{target}>!\n\n\t\t Причина — *{description}*\n\n---------------------------------------------------------------------- ")
 
 #db, cursor = get_db_cursor()
 #
@@ -1564,8 +1635,9 @@ async def approve_donos(ctx, donos_id, priority, evidence):
     status = row["Status"]
 
     if status == "TBD":
-
-      await add_points_quick(row["Source"], priority)
+      
+      # For now dont add points for tellings as they are too easy to write and not serious at this point
+      # await add_points_quick(row["Source"], priority)
       # TODO For now don't remove points from the target. 
       #await remove_points_quick(row["Target"], priority)
 
@@ -1923,7 +1995,18 @@ async def confess(ctx, *, args=None):
 
     try:
       cursor.execute(select)
-      timestamp = cursor.fetchone()['Timestamp']
+      ret = cursor.fetchone()
+
+      # we are getting current mean to save it for the update section of the code below; we are going to subtract curr mean from rating score.
+      data = json.loads(ret["Points"])
+      vals = list(data.values())
+
+      if len(vals) == 0:
+        curr_mean = 0
+      else:
+        curr_mean = int(np.mean(vals))
+
+      timestamp = ret['Timestamp']
       period = datetime.datetime.now() - timestamp
       days_passed = period.days
 
@@ -1964,8 +2047,8 @@ async def confess(ctx, *, args=None):
           # doesnt matter how bad the descriptino is, this is still activity on sever
           
           if (await check_rights(ctx, ['Апатрид'], tell=False)):
-            await add_points_quick(ctx.author.id, 1)
-            await activity_log(ctx.author.id)
+            await add_points_quick(source=ME, target=ctx.author.id, type="Activity", amount=1, description="Недельная активность")
+            await weekly_activity_notification(ctx.author.id)
 
           await author.add_roles(proletariat)
           await author.remove_roles(politzek)
@@ -2007,7 +2090,13 @@ async def confess(ctx, *, args=None):
         db.rollback()
 
     # If description was updated successfully need to reinsert user into the unmarked_confessions table and update Confession status in raiting databse
+
     if updated:
+
+      # if there are no entries unmarked tables i.e. points for the previous description were already added to the overall score, we need to subtract them now
+      row = get_db_row("unmarked_confessions", iid)
+      if not row:
+        await remove_points_quick(iid, curr_mean)
 
       update = f"UPDATE raiting SET Confession = \"Yes\" WHERE ID =\"{iid}\""
 

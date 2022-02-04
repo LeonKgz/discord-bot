@@ -192,9 +192,6 @@ def get_file(bot, mem):
 
   embed.add_field(name="⠀", value=f"*{description}*", inline=False)
 
-
-
-
   thumbs = {
     "zek": "https://i.ibb.co/fqsc4TP/image.jpg",
     "shiz": "https://i.ibb.co/Vvsc71q/shiz.jpg",
@@ -226,7 +223,6 @@ def get_file(bot, mem):
     "proletariat": 0x99aab5,
     "apatrid": 0x2f3136,
   }
-  
   
   #embed = discord.Embed(title=f"Досье", description=f"", color=0xa87f32, url="https://albenz.xyz", footer="Переводчик — модолец!") #creates embed
   #embed.set_author(name=mem.display_name, url="https://twitter.com/RealDrewData", icon_url=mem.avatar_url)
@@ -266,7 +262,6 @@ def get_file(bot, mem):
     "Апатрид": "apatrid",
   }
 
-
   guild = bot.get_guild(GUILD) 
   for member in guild.members:
     if (member.id == id_to_search):
@@ -278,7 +273,8 @@ def get_file(bot, mem):
 
           dominating_role = role
           #embed.set_footer(text="СовНарМод ТМГ")
-          embed.set_footer(text=dominating_role)
+          # embed.set_footer(text=dominating_role)
+          embed.set_footer(text="   ||   ".join([dominating_role] + [m for m in mem_roles if m != "@everyone" and m != dominating_role]))
           
           break
 
@@ -330,19 +326,85 @@ def get_file(bot, mem):
   if row:
     imprisoned = int(row["Counter"])
     
-  main_field = f"Социальный Рейтинг — *{points} ( {num}-е место )*" 
+  nn = ""
+  main_field = "" 
   if counter > 0:
-    main_field += f"\n\nНа гражданина донесено *{counter} {get_times_str(counter)}*"
+    main_field += f"На гражданина донесено *{counter} {get_times_str(counter)}*"
   if imprisoned > 0:
-    main_field += f"\n\nЗаключён в ГУЛАГ *{imprisoned} {get_times_str(imprisoned)}*"
+    nn = "\n\n" if main_field else ""
+    main_field += f"{nn} Заключён в ГУЛАГ *{imprisoned} {get_times_str(imprisoned)}*"
+  
+  nn = "\n\n" if main_field else ""
+  main_field += f"{nn}Социальный Рейтинг — *{points} ( {num}-е место )*" 
 
   if description:
     main_field = mean_str + main_field
   else: 
     main_field = "⠀\n" + main_field
 
-  embed.add_field(name=main_field, value="⠀", inline=False)
+
+  logs = get_logs(id_to_search)
+  if logs:
+    main_field += f"\n\nАктивность:"
+    embed.add_field(name=main_field, value=f"⠀\n{logs}\n⠀", inline=False)
+  else:
+    embed.add_field(name=main_field, value="⠀", inline=False)
+  
+  # if logs:
+  # embed.add_field(name=main_field, value="⠀", inline=False)
+    # main_field += f"⠀\n{logs}"
+    # embed.add_field(name="Logs", value=logs, inline=False)
+  # embed.add_field(name=main_field, value="⠀", inline=False)
 
   # attach moshna печать
 #  embed.add_field(name="Валюта", value="Шанырак - 12", inline=True)
   return embed
+
+def record_logs(timestamp, source, target, type, sign, amount, description):
+  db, cursor = get_db_cursor()
+  sql = f"INSERT INTO logs(Timestamp, Source, Target, Type, Sign, Amount, Description) VALUES(\"{timestamp}\",\"{source}\", \"{target}\", \"{type}\", \"{sign}\", \"{amount}\", \"{description}\")"
+
+  try: 
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    print(e)
+    entry = "INSERT INTO logs(" + (", ".join([timestamp, source, target, type, sign, amount, description])) + ")"
+    print(f"Failed to record logs for this entry: {entry}")
+
+def get_logs(id_to_search):
+
+  # id_author = ctx.author.id
+  # id_to_search = get_id(mem)
+  # mem = bot.get_user(id_to_search)
+  db, cursor = get_db_cursor()
+  sql = f"SELECT * FROM logs WHERE Target = \"{id_to_search}\" ORDER BY Timestamp ASC"
+  
+  try:
+
+    cursor.execute(sql)
+    ret = cursor.fetchall()
+    res = ""
+    for r in ret:
+      sign = "+" if r['Sign'] == "Positive" else "-"
+      
+      time = r['Timestamp'].strftime('%d-%m-%Y')
+      # num = sign + str(r['Amount'])
+
+      res += f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\t*{r['Description']}*\n"
+    
+    # if len(res) == 0:
+    #   await ctx.send(f"<@!{id_author}>, no logs found for ***{mem.name}*** !")
+    # else:
+    #   await ctx.send(res)
+    return res
+
+  except Exception as e:
+
+    print(e)
+    db.rollback()
+
+  db.close()
+
+  return False
+
