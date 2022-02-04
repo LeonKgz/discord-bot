@@ -115,6 +115,15 @@ async def bible(ctx, *, args=None):
 @bot.command(name="file")
 async def ebmed(ctx, user):
 
+  if ctx.guild:
+    try:
+      holder = int(user)
+      msg_id = ctx.message.id
+      await ctx.message.delete()
+      return
+    except Exception as e: 
+      print(e)
+  
   id_to_search = get_id(user)
   mem = bot.get_user(id_to_search)
   embed = get_file(bot, mem)
