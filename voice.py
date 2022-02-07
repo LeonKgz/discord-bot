@@ -31,6 +31,12 @@ class Voice(commands.Cog):
         # Детское радио
         player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/detskoe128'))
 
+  @commands.command(name='rec')
+  async def rec(self, ctx: commands.Context):
+        channel = ctx.message.author.voice.channel
+        channel.start_recording()
+        print("Recording...")
+
   #Get videos from links or from youtube search
   def search(self, arg):
       with YoutubeDL({'format': 'bestaudio', 'noplaylist':'False', 'ignoreerrors': 'True'}) as ydl:

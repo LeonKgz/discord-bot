@@ -2138,6 +2138,5 @@ from voice import Voice
 
 bot.add_cog(Status(bot))
 bot.add_cog(Loops(bot))
-bot.add_cog(Voice(bot))
 
 bot.run(TOKEN)
