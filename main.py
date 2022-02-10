@@ -20,6 +20,7 @@ import numpy as np
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
 GUILD = int(str(os.getenv('DISCORD_GUILD')))
 ME = int(os.getenv('ME'))
+MANASCHI = int(os.getenv('MANASCHI'))
 
 # retrieving JAWSDB credentials
 HOST = str(os.getenv('DB_HOST'))
@@ -130,8 +131,8 @@ async def ebmed(ctx, user):
   await ctx.send(embed=embed)
 
 async def weekly_activity_notification(id_to_search):
-  if str(id_to_search) == str(ME):
-    print("Tis the owner!")
+  if str(id_to_search) == str(ME) or str(id_to_search) == str(MANASCHI):
+    print("Tis the owner or the music bot!")
     return
 
   mem = bot.get_user(id_to_search)
