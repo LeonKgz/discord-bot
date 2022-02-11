@@ -901,13 +901,11 @@ async def on_message(message):
     db, cursor = get_db_cursor()
     row = get_db_row("cache", iid)
     # Check if this is the first message of the week for someone who wasnt sent to pogran-zastava on that monday; then +1 point
-    if not row:
+    if not row and (not iid == ME):
       status = await add_points_quick(source=ME, target=iid, type="Activity", amount=1, description="Недельная активность")
       await weekly_activity_notification(iid)
       if not status:
         await message.channel.send(f"<@!{ME}>, произошла ошибка корректировки социального рейтинга для {message.author.name}!")
-
-			
 
     sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
 
