@@ -344,9 +344,13 @@ def get_file(bot, mem):
 
 
   logs = get_logs(id_to_search)
-  if logs:
+  if logs[-1]:
     main_field += f"\n\nАктивность:"
-    embed.add_field(name=main_field, value=f"⠀\n{logs}\n⠀", inline=False)
+    embed.add_field(name=main_field, value=f"⠀\n{logs[0]}\n⠀", inline=False)
+    print(len(logs[0]))
+    for l in logs[1:]:
+      embed.add_field(name="⠀", value=f"⠀\n{l}\n⠀", inline=False)
+
   else:
     embed.add_field(name=main_field, value="⠀", inline=False)
   
@@ -379,19 +383,28 @@ def get_logs(id_to_search):
   # mem = bot.get_user(id_to_search)
   db, cursor = get_db_cursor()
   sql = f"SELECT * FROM logs WHERE Target = \"{id_to_search}\" ORDER BY Timestamp ASC"
-  
+  field_content_limit = 1020
+
   try:
 
     cursor.execute(sql)
     ret = cursor.fetchall()
-    res = ""
+    res = [""]
+    size = 0
+
     for r in ret:
       sign = "+" if r['Sign'] == "Positive" else "-"
       
       time = r['Timestamp'].strftime('%d-%m-%Y')
       # num = sign + str(r['Amount'])
+      to_add = f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\t*{r['Description']}*\n"
 
-      res += f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\t*{r['Description']}*\n"
+      if len(to_add) + size > field_content_limit:
+        res.append("") 
+        size = 0
+
+      res[-1] += to_add 
+      size += len(to_add)
     
     # if len(res) == 0:
     #   await ctx.send(f"<@!{id_author}>, no logs found for ***{mem.name}*** !")
