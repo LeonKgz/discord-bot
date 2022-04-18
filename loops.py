@@ -149,7 +149,7 @@ class Loops(commands.Cog):
         quotes = ",\n\t".join([(str(j) + ") \t" + str(i)) for j, i in enumerate(spiski)])
         if(len(spiski) > 0):
           await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшие сутки: \n\n\t{quotes}")
-
+      
     if (guild and day == 0):
 
       super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
@@ -212,6 +212,8 @@ class Loops(commands.Cog):
         db.close()
       except:
         print("Already closed")
+
+      print("DONE NOW")
 
   @tasks.loop(seconds=HOUR)
   async def important_info(self):
