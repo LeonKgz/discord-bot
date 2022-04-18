@@ -3,13 +3,14 @@
 # coding=utf-8
 
 import asyncio
-import os
-import discord
-import pymysql.cursors
-import json
-import os
 import base64
+import discord
+import json
 import numpy as np
+import os
+import pymysql.cursors
+import urllib.request
+import urllib.request
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
@@ -421,3 +422,131 @@ def get_logs(id_to_search):
 
   return False
 
+def request(action, **params):
+    return {'action': action, 'params': params, 'version': 6}
+
+def invoke(action, **params):
+    requestJson = json.dumps(request(action, **params)).encode('utf-8')
+    response = json.load(urllib.request.urlopen(urllib.request.Request('http://localhost:8765', requestJson)))
+
+    if len(response) != 2:
+        raise Exception('response has an unexpected number of fields')
+    if 'error' not in response:
+        raise Exception('response is missing required error field')
+    if 'result' not in response:
+        raise Exception('response is missing required result field')
+    if response['error'] is not None:
+        raise Exception(response['error'])
+    return response['result']
+
+def get_kanji_info(kanji):
+    # open a connection to a URL using urllib
+    jisho_url_prefix = "https://jisho.org/search/"
+    jisho_url_postfix = "%20%23kanji"
+
+    # kanji = sys.argv[1][0]
+    val = urllib.parse.quote(kanji.encode('utf-8'))
+    webUrl = urllib.request.urlopen(f'{jisho_url_prefix}{val}{jisho_url_postfix}')
+
+    #get the result code and print it
+    code = str(webUrl.getcode())
+
+    # read the data from the URL and print it
+    data = (webUrl.read())
+    data = data.decode('Utf-8')
+
+    temp = data.split("<div class=\"kanji details\">")[1]
+    temp = temp.split("<div class=\"row\">")
+    temp = temp[2]
+
+    # Getting meanings
+    meaning = temp.split("<div class=\"kanji-details__main-meanings\">")[1].split("</div>")[0]
+    meaning = meaning.replace("\\n", "")
+    meaning = meaning.replace("\n", "")
+    meaning = meaning.replace(" ", "")
+    meanings = meaning.split(",")
+    meanings = ", ".join(meanings)
+
+    # Get kun yomi
+    try:
+        kun = temp.split("<dl class=\"dictionary_entry kun_yomi\">")
+        mumble_jumble = kun[1].split("</dl>")[0]
+        kun = ", ".join([v.split(">")[1].split("</a")[0] for v in mumble_jumble.split("a href")[1:]])
+    except IndexError as e:
+        print(e)
+        kun = ""
+
+    # Get on yomi
+    try:
+        on = temp.split("<dl class=\"dictionary_entry on_yomi\">")
+        mumble_jumble = on[-1].split("</dl>")[0]
+        on = ", ".join([v.split(">")[1].split("</a")[0] for v in mumble_jumble.split("a href")[1:]])
+    except IndexError as e:
+        print(e)
+        on = ""
+
+    # with open(f'{kanji}.txt', 'w', encoding='utf-8') as file:
+    #     res = f"{meanings}\n{kun}\n{on}"
+    #     file.write(res)
+    #     file.close()
+
+    return on, kun, meanings
+
+def get_word_info(word):
+    # open a connection to a URL using urllib
+    jisho_url_prefix = "https://jisho.org/word/"
+    # jisho_url_postfix = "%20%23kanji"
+
+    # kanji = sys.argv[1][0]
+    val = urllib.parse.quote(word.encode('utf-8'))
+    try:
+      webUrl = urllib.request.urlopen(f'{jisho_url_prefix}{val}')
+    except Exception as e:
+      print(e)
+      return None, None, str(e)
+
+    #get the result code and print it
+    code = str(webUrl.getcode())
+
+    # TODO: Get furigana separately; get meanings (first one for now)
+
+    # read the data from the URL and print it
+    data = (webUrl.read())
+    data = data.decode('Utf-8')
+    temp = data.split("<div class=\"concept_light clearfix\">")[1]
+    temp = temp.split("<h3>Discussions")[0].split("<div class=\"concept_light-meanings")
+    # furigana1 = temp[0].split("-up kanji\">")[1].split("</span>")[0]
+    furigana1s = temp[0].split("-up kanji\">")
+    # subparts = int(furigana1s[0][-1])
+    subparts = temp[0].count("-up kanji\">") 
+    furigana1 = ""
+    for i in range(subparts):
+      furigana1 += furigana1s[i+1].split("</span>")[0]
+
+    furigana2 = temp[0].split("<span class=\"text\">")[1].split("</div")[0].replace("<span>", "").replace("</span>", "").strip()
+    
+    # If kanji present at all (could be just kana)
+    if (len(temp[0].split("<span class=\"text\">")[1].split("<span>")[0].strip()) > 0):
+      try:
+        # furigana3 = temp[0].split("<span class=\"text\">")[1].split("</div")[0].replace("<span>", "").replace("</span>", "").strip()
+        furigana3 = "".join(temp[0].split("<span class=\"text\">")[1].split("</div")[0].split("<span>")[1:]).replace("</span>", "").strip()
+      except Exception as e:
+        furigana3 = ""
+    else:
+      furigana3 = ""
+
+    meanings = temp[1]
+    meaning1 = meanings.split('1. </span><span class="meaning-meaning">')[1].split("</span><span>")[0]
+    # print(furigana1)
+
+    # this is normal way of writing mixture of kanji and kana
+    mixed = furigana2
+
+    # this is full furigana reading 
+    furigana = furigana1 + furigana3
+
+    # TODO meanings now!
+    meaning = meaning1
+
+    return mixed, furigana, meaning
+    

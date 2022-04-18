@@ -6,10 +6,11 @@ import asyncio
 import os
 import discord
 from discord.ext import commands
-from discord.utils import get
+from discord.utils import get as du_get
 import json
 import random
 import requests
+import secrets
 import datetime
 from requests import get
 from utils import *
@@ -28,6 +29,8 @@ USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
 QUOTES = str(os.getenv('QUOTES_KEY'))
 FOOD_KEY = str(os.getenv('FOOD_KEY'))
+
+seneca_api = str(os.getenv('SENECA_API_TOKEN'))
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
@@ -112,6 +115,42 @@ async def bible(ctx, *, args=None):
 
   except Exception as e:
     print(e)
+
+# Command to connect a telegram account
+@bot.command(name="telegram")
+async def ebmed(ctx):
+  if ctx.guild:
+    try:
+      msg_id = ctx.message.id
+      await ctx.message.delete()
+      await ctx.send(f"<@!{ctx.author.id}>, эту команду можно написать только в личку боту!")
+      return
+    except Exception as e: 
+      print(e)
+  
+  id_to_search = ctx.author.id
+  mem = bot.get_user(id_to_search)
+  iid = mem.id
+  
+  auth_code = str(secrets.token_hex(16))
+
+  db, cursor = get_db_cursor()
+  # For now it's okay if an entry already exists in the cache. 
+  # This means that the previous code was redeemed yet.
+  # Potentially this accomodates for users who got a new telegram account.
+  replace = f"REPLACE INTO telegram_registration(ID, Discord_User_ID) VALUES(\"{auth_code}\", \"{iid}\")"
+
+  try:
+    cursor.execute(replace)
+    db.commit()
+  except Exception as e:
+    print(e)
+    db.rollback()
+    await ctx.send(f"Произошла ошибка! ` {e} `")
+    return
+
+  await ctx.send(f"Ваш токен: ` {auth_code} `\nОтправьте его боту в телеграме (https://t.me/seneca69_bot) в личном сообщении таким образом: ` !discord {auth_code} `\nТокеном можно воспользоваться только один раз!")
+
 
 @bot.command(name="file")
 async def ebmed(ctx, user):
@@ -262,6 +301,189 @@ async def remedies(ctx):
 
   ret_str = ", ".join(data)
   await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
+
+@bot.command(name="kanji")
+async def kanji(ctx, *, args=None):
+
+    if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
+      return
+    name = ctx.author.name
+    iid = ctx.author.id
+    confession = str(args)
+    confession = confession.strip()
+    kanjis = confession.split()
+    for kanji in kanjis:
+      on, kun, meanings = get_kanji_info(kanji)
+      note = {
+            "deckName": "__________Kanji",
+            "modelName": "Основная",
+            # "modelName": "Основная (+ обратные карточки)",
+            "fields": {
+               "вопрос": f"{kanji}",
+               "ответ": f"{on}<br><br>{kun}<br><br>{meanings}"
+            },
+            "options": {
+                "allowDuplicate": True,
+            },
+            "tags": [],
+        }
+
+      success = False
+      errmsg = ""
+      try:
+        invoke('addNote', note=note)
+        success = True
+      except Exception as e:
+        errmsg = f"{e}"
+
+      if not success:
+        ret = f"There was an error with {kanji}! ` {errmsg} `"
+        await ctx.send(ret)
+
+    await ctx.send("Processsing of new kanji is finished! Anki updated. Don't forget to synchronize!")
+
+import configparser
+import json
+import re
+from telethon.errors import SessionPasswordNeededError
+from telethon import TelegramClient, events, sync
+from telethon.tl.functions.messages import (GetHistoryRequest)
+from telethon.tl.types import (
+PeerChannel
+)
+
+from telethon.tl.types import MessageEntityTextUrl
+
+@bot.command(name="tg")
+async def telegram(ctx, *, args=None):
+  msg = str(args)
+
+  app_id = "9484926"
+  api_hash = "e020eb88569836935aae12df295e2955"
+  title = "Seneca Praemeditatio"
+  short = "meditations"
+
+  seneca_api = "***REMOVED***"
+
+  user_input_channel = 'https://t.me/albenz'
+  user_input_channel = 'https://t.me/denys_aleksin'
+
+  client = TelegramClient('anon', app_id, api_hash).start(bot_token=seneca_api)
+  print("Attempt!")
+  await client.forward_messages(entity="albanec69", messages=msg)
+  print("Done!")
+
+@bot.command(name="words")
+async def words(ctx, *, args=None):
+
+    if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
+      return
+    name = ctx.author.name
+    iid = ctx.author.id
+    confession = str(args)
+    confession = confession.strip()
+    words = confession.split()
+
+    for word in words:
+      success = False
+      original, furigana, meaning = get_word_info(word)
+      errmsg = meaning
+
+      if original:
+
+        # brackets = f" ({furigana})" if furigana else ""
+        note = {
+              "deckName": "__________Kotoba",
+              # "modelName": "Основная",
+              "modelName": "Основная (+ обратные карточки)",
+              "fields": {
+                "вопрос": original,
+                # "вопрос": original + brackets,
+                "ответ": meaning
+              },
+              "options": {
+                  "allowDuplicate": True,
+              },
+              "tags": [],
+          }
+
+        errmsg = ""
+        try:
+          invoke('addNote', note=note)
+          success = True
+        except Exception as e:
+          errmsg = f"{e}"
+
+        if furigana:
+          note = {
+                "deckName": "__________Reading",
+                "modelName": "Основная",
+                # "modelName": "Основная (+ обратные карточки)",
+                "fields": {
+                  "вопрос": original,
+                  # "вопрос": original + brackets,
+                  "ответ": furigana,
+                },
+                "options": {
+                    "allowDuplicate": True,
+                },
+                "tags": [],
+            }
+
+          errmsg = ""
+          try:
+            invoke('addNote', note=note)
+            success = True
+          except Exception as e:
+            errmsg = f"{e}"
+
+      if not success:
+        ret = f"There was an error with {word}! ` {errmsg} `"
+        await ctx.send(ret)
+
+    await ctx.send("Processsing of new words is finished! Anki updated. Don't forget to synchronize!")
+
+@bot.command(name="grammar")
+async def grammar(ctx, *, args=None):
+
+    if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
+      return
+
+    confession = str(args)
+    confession = confession.strip()
+    ss = [s.strip() for s in confession.split("\n")]
+
+    for s in ss:
+      original = s.split("(")[0]
+      interpret = s.split("(")[1].split(")")[0].strip()
+
+      note = {
+            "deckName": "__________Bunpou",
+            "modelName": "Основная",
+            "modelName": "Основная (+ обратные карточки)",
+            "fields": {
+               "вопрос": original,
+               "ответ": interpret,
+            },
+            "options": {
+                "allowDuplicate": True,
+            },
+            "tags": [],
+        }
+
+      success = False
+      errmsg = ""
+      try:
+        invoke('addNote', note=note)
+        success = True
+      except Exception as e:
+        errmsg = f"{e}"
+
+      if not success:
+        ret = f"There was an error with {s}! ` {errmsg} `"
+        await ctx.send(ret)
+
+    await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
 
 @bot.command(name="долги")
 async def duties(ctx):
@@ -851,6 +1073,14 @@ async def mems(ctx, role, text):
         try:  
             await member.create_dm()
             await member.dm_channel.send("--------------------------------------------------------------------------\n*Сообщение от* **" + str(ctx.author.name) + "**!\n\n\t" + text + "\n\n[*Сообщения боту автоматически пересылаются Албанцу*]\n--------------------------------------------------------------------------")
+            msg = "--------------------------------------------------------------------------\nСообщение от " + str(ctx.author.name) + "!\n\n\t" + text + "\n\n--------------------------------------------------------------------------"
+            print(member.id)
+            row = get_db_row("telegram_integration", str(member.id))
+            if row:
+              chat_id = row["Telegram_Chat_ID"]
+              request = f"https://api.telegram.org/bot{seneca_api}/sendMessage?chat_id={chat_id}&text={msg}"
+              print(request)
+              ret = requests.get(request)
         except Exception as e:
             print(e)
 
@@ -951,7 +1181,7 @@ async def check_rights(ctx, acceptable_roles, tell=True):
     if (role in super_roles):
       return True
   if tell:
-    response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(get(bot.emojis, name='peepoClown'))
+    response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(du_get(bot.emojis, name='peepoClown'))
     await ctx.send(response)
   return False
 
@@ -959,7 +1189,7 @@ async def check_rights_dm(ctx):
   super_roles = [214320783357378560, 696405991876722718, ***REMOVED***, 498264068415553537]
   if ctx.author.id in super_roles:
       return True
-  response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(get(bot.emojis, name='peepoClown'))
+  response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(du_get(bot.emojis, name='peepoClown'))
   await ctx.send(response)
   return False
 
