@@ -177,7 +177,7 @@ async def ebmed(ctx, user):
   await ctx.send(embed=embed)
 
 async def weekly_activity_notification(id_to_search):
-  print(bot.get_iser(id_to_search.bot))
+  # print(bot.get_user(id_to_search.bot))
   if str(id_to_search) == str(ME) or str(id_to_search) == str(MANASCHI) or bot.get_user(id_to_search).bot:
     print("Tis the owner or the music bot!")
     return
