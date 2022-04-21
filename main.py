@@ -3,12 +3,12 @@
 # coding=utf-8
 
 import asyncio
+from http.client import REQUEST_URI_TOO_LONG
 import os
 import discord
 from discord.ext import commands
 from discord.utils import get as du_get
 import json
-import random
 import requests
 import secrets
 import datetime
@@ -128,9 +128,16 @@ async def ebmed(ctx):
     except Exception as e: 
       print(e)
   
-  id_to_search = ctx.author.id
-  mem = bot.get_user(id_to_search)
-  iid = mem.id
+  iid = ctx.author.id
+
+  # First check if an account is already registered
+  row = get_db_row("telegram_integration", iid)
+  if row:
+    await ctx.send(f"<@!{ctx.author.id}>, к вашему дискорду уже привязан телеграм аккаунт!")
+    return
+
+  # mem = bot.get_user(id_to_search)
+  # iid = mem.id
   
   auth_code = str(secrets.token_hex(16))
 
@@ -149,7 +156,7 @@ async def ebmed(ctx):
     await ctx.send(f"Произошла ошибка! ` {e} `")
     return
 
-  await ctx.send(f"Ваш токен: ` {auth_code} `\nОтправьте его боту в телеграме (https://t.me/seneca69_bot) в личном сообщении таким образом: ` !discord {auth_code} `\nТокеном можно воспользоваться только один раз!")
+  await ctx.send(f"Ваш токен: ` {auth_code} `\nОтправьте его боту в телеграме (https://t.me/seneca69_bot) в личном сообщении таким образом: \n\n\t\t\t` !discord {auth_code} `\n\nТокеном можно воспользоваться только один раз!")
 
 
 @bot.command(name="file")
@@ -210,6 +217,51 @@ async def weekly_activity_notification(id_to_search):
   embed.add_field(name=main_field, value="⠀", inline=False)
 
   for ch in guild.channels:
+    if ("гласность" in ch.name):
+      await ch.send(embed=embed)
+
+async def telegram_registration_notification(id_to_search):
+  # if str(id_to_search) == str(ME) or str(id_to_search) == str(MANASCHI):
+  #   print("Tis the owner or the music bot!")
+  #   return
+
+  mem = bot.get_user(int(id_to_search))
+  embed = discord.Embed(title=f"Роскомнадзор хочет знать ваше местоположение") 
+  embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
+  embed.set_thumbnail(url="https://sun9-19.userapi.com/s/v1/if1/dFyFjrD1QetbjHomAaHQvt_SxGIOuuykqptAyKBFVIzyZ8p07QXbB2Lp22_1-JkFm2Xcj_7A.jpg?size=200x200&quality=96&crop=47,0,764,764&ava=1")
+  # light green, same as СовНарМод
+  embed.color = 0x039be5
+  embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает очки подключив телеграм!\n(Удобная альтернатива рассылке в дискорде)", inline=False)
+
+  db, cursor = get_db_cursor()
+  sql = f"SET @row_number = 0; SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC"
+
+  guild = bot.get_guild(GUILD)
+  try:
+    #cursor.execute(sql)
+    cursor.execute("SET @row_number = 0;")
+    cursor.execute(f"SELECT num, ID, Name, Points FROM (SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC) a WHERE ID = {id_to_search}")
+
+    res = cursor.fetchone()
+    num = res["num"]
+    points = res["Points"]
+    #db.commit()
+  except Exception as e:
+    print(e)
+    db.rollback()
+    for ch in guild.channels:
+      if ("технический" in ch.name):
+        await ch.send(f"Cant display activity log for **{mem.display_name}** !")
+        return 
+
+  db.close()
+
+  embed.set_footer(text="Смотрите как зарабатывать очки в Манифесте")
+  main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
+  embed.add_field(name=main_field, value="⠀", inline=False)
+
+  for ch in guild.channels:
+    # if ("технический" in ch.name):
     if ("гласность" in ch.name):
       await ch.send(embed=embed)
 
@@ -342,36 +394,15 @@ async def kanji(ctx, *, args=None):
 
     await ctx.send("Processsing of new kanji is finished! Anki updated. Don't forget to synchronize!")
 
-import configparser
-import json
-import re
-from telethon.errors import SessionPasswordNeededError
-from telethon import TelegramClient, events, sync
-from telethon.tl.functions.messages import (GetHistoryRequest)
-from telethon.tl.types import (
-PeerChannel
-)
-
-from telethon.tl.types import MessageEntityTextUrl
-
-@bot.command(name="tg")
-async def telegram(ctx, *, args=None):
-  msg = str(args)
-
-  app_id = "9484926"
-  api_hash = "e020eb88569836935aae12df295e2955"
-  title = "Seneca Praemeditatio"
-  short = "meditations"
-
-  seneca_api = "5341436760:AAEg3XVn5cRVFNSQUjOg2jrhThF8TJZ5gr8"
-
-  user_input_channel = 'https://t.me/albenz'
-  user_input_channel = 'https://t.me/denys_aleksin'
-
-  client = TelegramClient('anon', app_id, api_hash).start(bot_token=seneca_api)
-  print("Attempt!")
-  await client.forward_messages(entity="albanec69", messages=msg)
-  print("Done!")
+# import configparser
+# import re
+# from telethon.errors import SessionPasswordNeededError
+# from telethon import TelegramClient, events, sync
+# from telethon.tl.functions.messages import (GetHistoryRequest)
+# from telethon.tl.types import (
+# PeerChannel
+# )
+# from telethon.tl.types import MessageEntityTextUrl
 
 @bot.command(name="words")
 async def words(ctx, *, args=None):
@@ -1078,6 +1109,8 @@ async def mems(ctx, role, text):
             row = get_db_row("telegram_integration", str(member.id))
             if row:
               chat_id = row["Telegram_Chat_ID"]
+              msg = msg.replace("*", "")
+              msg = msg.replace("`", "")
               request = f"https://api.telegram.org/bot{seneca_api}/sendMessage?chat_id={chat_id}&text={msg}"
               print(request)
               ret = requests.get(request)
@@ -1103,12 +1136,17 @@ async def spisok(ctx, role):
 
 @bot.event
 async def on_message(message):
-
   if message.author == bot.user:
   #if message.author == bot.user and "!кто" not in str(message.content):
     return
 
   me = bot.get_user(ME)
+  if (message.author.bot):
+    if ('!confirmed_telegram' in message.content):
+      iid = message.content.split(" ")[1].strip()
+      await add_points_quick(source=me.id, target=iid, amount=5, type='Telegram Integration', description='Подключение телеграм аккаунта')
+      await telegram_registration_notification(iid)
+    return
 
   # For now if the bot is on some other server, do nothing!
   if (message.guild):
@@ -1540,7 +1578,7 @@ async def remove_points_quick(target_id, points):
   return True
 
 async def add_points_quick(source, target, type, amount, description):
-
+  
   timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
   sign = "Positive"
 
