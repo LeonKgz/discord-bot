@@ -188,7 +188,7 @@ async def weekly_activity_notification(id_to_search):
   embed.set_thumbnail(url="https://thumbs.gfycat.com/CoordinatedBareAgouti-max-1mb.gif")
   # light green, same as СовНарМод
   embed.color = 0x2ecc71
-  embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает очки оставаясь активным!", inline=False)
+  embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает очко оставаясь активным!", inline=False)
 
   db, cursor = get_db_cursor()
   sql = f"SET @row_number = 0; SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC"
@@ -1500,10 +1500,20 @@ async def evaluate(ctx, mem, points):
       "https://cdn.betterttv.net/emote/5aea37908f767c42ce1e0293/3x",
     ]
 
-    embed.set_thumbnail(url=pepes[int(curr_mean)])
+    amount = int(curr_mean)
+    
+    embed.set_thumbnail(url=pepes[amount])
+
+    if amount == 0 or (amount >= 5 and amount <= 10):
+      points_word = "очков"
+    elif amount == 1:
+      points_word = "очко"
+    else:
+      points_word = "очка"
+
     # light green, same as СовНарМод
     embed.color = 0xff0000 
-    embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает очки обновив описание!", inline=False)
+    embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает **{amount} {points_word}** обновив описание!", inline=False)
 
     db, cursor = get_db_cursor()
     sql = f"SET @row_number = 0; SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC"
