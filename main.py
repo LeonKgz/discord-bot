@@ -1526,8 +1526,6 @@ async def evaluate(ctx, mem, points):
           await ch.send(f"Cant display activity log for **{mem.display_name}** !")
           return 
 
-    db.close()
-
     embed.set_footer(text="Смотрите как зарабатывать очки в Манифесте")
     main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
     embed.add_field(name=main_field, value="⠀", inline=False)
@@ -1541,6 +1539,9 @@ async def evaluate(ctx, mem, points):
           await ch.send(embed=embed)
 
       # Once all mods marked the description. record the result into logs table and add the points 
+
+      # await remove_points_quick(id_to_search, prev_mean)
+      await remove_points_quick(source=ME, target=mem.id, type="Description", amount=prev_mean, description="Корректировка оценки описания")
       await add_points_quick(source=ME, target=mem.id, type="Description", amount=curr_mean, description="Обновление описания")
     
     else:  
@@ -1591,25 +1592,28 @@ async def populate_raiting(ctx):
 
   db.close()
 
-async def remove_points_quick(target_id, points):
+async def remove_points_quick(source, target, type, amount, description):
+
+  timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  sign = "Negative"
 
   try:
-      points = int(points)
+      amount = int(amount)
 
       db, cursor = get_db_cursor()
-      row = get_db_row("raiting", target_id)
+      row = get_db_row("raiting", target)
       if (not row):
         #return False
         curr = 0
       else:
         curr = row["Points"]
 
-      end = curr - points
+      end = curr - amount
       if (end < 0):
         end = 0
 
       db, cursor = get_db_cursor()
-      sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
+      sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target}\""
 
       try:
         cursor.execute(sql)
@@ -1619,6 +1623,8 @@ async def remove_points_quick(target_id, points):
         db.rollback()
         db.close()
         return False
+
+      record_logs(timestamp, source, target, type, sign, amount, description)     
 
       db.close()
   
