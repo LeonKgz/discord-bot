@@ -1770,7 +1770,7 @@ async def add_points(ctx, target, type, amount, description):
 
       db, cursor = get_db_cursor()
       
-      # Check if a group role is mentioned in
+      # Check if a group role is mentioned
       if ("<@&" in target):
         send_to = get_id(target)
         for r in ctx.guild.roles:
@@ -1799,49 +1799,20 @@ async def add_points(ctx, target, type, amount, description):
 
         await add_points_quick(source, target, type, amount, description)
 
-        # db, cursor = get_db_cursor()
-
-        # sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target}\""
-
-        # try:
-        #   cursor.execute(sql)
-        #   db.commit()
-        # except Exception as e:
-        #   print(e)
-        #   await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка: {str(e)}")
-
-        #   db.rollback()
-
         db.close()
         await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
 
         guild = bot.get_guild(GUILD)
         for ch in guild.channels:
-         if "гласность" in ch.name:
-           await ch.send(f"Модераторы начисляют **[ {amount} ]** очков социального рейтинга гражданину <@!{target}>!\n\n\t\t Причина — *{description}*\n\n---------------------------------------------------------------------- ")
-
-#db, cursor = get_db_cursor()
-#
-#select = f"SELECT * from confessions"
-#markers = "384492518043287555, 696405991876722718, 214320783357378560"
-#try:
-#  cursor.execute(select)
-#  confession = cursor.fetchall()
-#  for i, c in enumerate(confession):
-#    iid = c["ID"]
-#    name = c["Name"]
-#    replace = f"REPLACE INTO unmarked_confessions(ID, Name, Markers) VALUES(\"{iid}\", \"{name}\",\"{markers}\")"
-#    cursor.execute(replace)
-#    db.commit()
-#    print(f"{i}) Done for {iid}")
-#  
-#except Exception as e:
-#  print(e)
-#  db.rollback()
-#  
-#db.close()
-#
-#exit(1)
+          if "гласность" in ch.name:
+            member = bot.get_user(get_id(target))
+            embed = await get_simple_embed(bot=bot, 
+                                    member=member, 
+                                    title="За заслуги перед Мошной", 
+                                    message=f"Модераторы начисляют **{amount}** очков социального рейтинга гражданину {member.display_name} за *\"{description}\"*.", 
+                                    thumbnail_url="", 
+                                    color_hex_code=0x7621b8)
+            await ch.send(embed=embed)
 
 @bot.command(name="донести")
 async def donos(ctx, *, args=None):
