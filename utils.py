@@ -147,6 +147,40 @@ def get_times_str(num):
 
   return counter_str
 
+# simple beacause it has one field, to convey one message
+async def get_simple_embed(bot, member, title, message, thumbnail_url, color_hex_code):
+  embed = discord.Embed(title=title) 
+  embed.set_author(name=member.display_name, icon_url=member.avatar_url)
+  embed.set_thumbnail(url=thumbnail_url)
+
+  # light green, same as СовНарМод
+  embed.color = color_hex_code 
+  embed.add_field(name="⠀", value=message, inline=False)
+
+  db, cursor = get_db_cursor()
+  guild = bot.get_guild(GUILD)
+  try:
+    #cursor.execute(sql)
+    cursor.execute("SET @row_number = 0;")
+    cursor.execute(f"SELECT num, ID, Name, Points FROM (SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC) a WHERE ID = {member.id}")
+
+    res = cursor.fetchone()
+    num = res["num"]
+    points = res["Points"]
+  except Exception as e:
+    print(e)
+    db.rollback()
+    for ch in guild.channels:
+      if ("технический" in ch.name):
+        await ch.send(f"Problems displaying \"{title}\" embed for server member \"{member.display_name}\"")
+        return 
+
+  embed.set_footer(text="Смотрите как зарабатывать очки в Манифесте")
+  main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
+  embed.add_field(name=main_field, value="⠀", inline=False)
+
+  return embed
+
 # Досье
 def get_file(bot, mem):
   id_to_search = mem.id
