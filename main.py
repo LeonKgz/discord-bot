@@ -1482,16 +1482,66 @@ async def evaluate(ctx, mem, points):
     except Exception as e:
       print(e)
 
+    ############################################################################################################ 
+    embed = discord.Embed(title=f"Модераторы рассмотрели новое описание") 
+    embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
+
+    pepes = [
+      "https://cdn.betterttv.net/emote/5d324913ff6ed36801311fd2/3x",
+      "https://cdn.betterttv.net/emote/57850b9df1bf2c1003a88644/3x",
+      "https://cdn.betterttv.net/emote/59f27b3f4ebd8047f54dee29/3x",
+      "https://cdn.betterttv.net/emote/5ec39a9db289582eef76f733/3x",
+      "https://cdn.betterttv.net/emote/5aa16eb65d4a424654d7e3e5/3x",
+      "https://cdn.betterttv.net/emote/5c0e1a3c6c146e7be4ff5c0c/3x",
+      "https://cdn.betterttv.net/emote/5baa5b59f17b9f6ab0f3e84f/3x",
+      "https://cdn.betterttv.net/emote/5590b223b344e2c42a9e28e3/3x",
+      "https://cdn.betterttv.net/emote/5ec059009af1ea16863b2dec/3x",
+      "https://cdn.betterttv.net/emote/58ae8407ff7b7276f8e594f2/2x",
+      "https://cdn.betterttv.net/emote/5aea37908f767c42ce1e0293/3x",
+    ]
+
+    embed.set_thumbnail(url=pepes[int(curr_mean)])
+    # light green, same as СовНарМод
+    embed.color = 0xff0000 
+    embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает очки обновив описание!", inline=False)
+
+    db, cursor = get_db_cursor()
+    sql = f"SET @row_number = 0; SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC"
+
+    guild = bot.get_guild(GUILD)
+    try:
+      #cursor.execute(sql)
+      cursor.execute("SET @row_number = 0;")
+      cursor.execute(f"SELECT num, ID, Name, Points FROM (SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC) a WHERE ID = {id_to_search}")
+
+      res = cursor.fetchone()
+      num = res["num"]
+      points = res["Points"]
+      #db.commit()
+    except Exception as e:
+      print(e)
+      db.rollback()
+      for ch in guild.channels:
+        if ("технический" in ch.name):
+          await ch.send(f"Cant display activity log for **{mem.display_name}** !")
+          return 
+
+    db.close()
+
+    embed.set_footer(text="Смотрите как зарабатывать очки в Манифесте")
+    main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
+    embed.add_field(name=main_field, value="⠀", inline=False)
+    ############################################################################################################ 
     # If all the mods have marked this user, remove from unmarked_confessions table
     if (len(mods) == 0):
       sql = f"DELETE FROM unmarked_confessions WHERE ID=\"{id_to_search}\""
       for ch in guild.channels:
         if ("гласность" in ch.name):
-          await ch.send(f"Все Модераторы оценили описание гражданина <@!{mem.id}>!\n\n\t\t Окончательная оценка — **{int(curr_mean)}**\n\n----------------------------------------------------------------------")
+          # await ch.send(f"Все Модераторы оценили описание гражданина <@!{mem.id}>!\n\n\t\t Окончательная оценка — **{int(curr_mean)}**\n\n----------------------------------------------------------------------")
+          await ch.send(embed=embed)
 
       # Once all mods marked the description. record the result into logs table and add the points 
       await add_points_quick(source=ME, target=mem.id, type="Description", amount=curr_mean, description="Обновление описания")
-
     
     else:  
       mods = ", ".join([str(m) for m in mods])
@@ -2387,7 +2437,6 @@ async def confess(ctx, *, args=None):
 
       snm = discord.utils.get(guild.roles, name='СовНарМод')
       markers = ", ".join([str(mem.id) for mem in snm.members])
-
       replace = f"REPLACE INTO unmarked_confessions(ID, Name, Markers) VALUES(\"{iid}\", \"{name}\", \"{markers}\")"
 
       try:
