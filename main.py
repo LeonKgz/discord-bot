@@ -1780,7 +1780,14 @@ async def add_points(ctx, target, type, amount, description):
             for m in r.members:
               await add_points_quick(source, m.id, type, amount, description)
             
-            res = f"Модераторы начисляют **[ {amount} ]** очков социального рейтинга гражданам {every}!\n\n\t\t Причина — *{description}*\n\n----------------------------------------------------------------------"
+            if amount == 0 or (amount >= 5 and amount <= 10):
+              points_word = "очков"
+            elif amount == 1:
+              points_word = "очко"
+            else:
+              points_word = "очка"
+            
+            res = f"Модераторы начисляют **[ {amount} ] {points_word}** социального рейтинга гражданам {every}!\n\n\t\t Причина — *{description}*\n\n----------------------------------------------------------------------"
 
             guild = bot.get_guild(GUILD)
             for ch in guild.channels:
@@ -1802,6 +1809,13 @@ async def add_points(ctx, target, type, amount, description):
         db.close()
         await ctx.send(f"<@!{ctx.message.author.id}>, очки успешно добавлены! Текущий рейтинг - {end}")
 
+        if amount == 0 or (amount >= 5 and amount <= 10):
+          points_word = "очков"
+        elif amount == 1:
+          points_word = "очко"
+        else:
+          points_word = "очка"
+
         guild = bot.get_guild(GUILD)
         for ch in guild.channels:
           if "гласность" in ch.name:
@@ -1809,7 +1823,7 @@ async def add_points(ctx, target, type, amount, description):
             embed = await get_simple_embed(bot=bot, 
                                     member=member, 
                                     title="За заслуги перед Мошной", 
-                                    message=f"Модераторы начисляют **{amount}** очков социального рейтинга гражданину {member.display_name} за *\"{description}\"*.", 
+                                    message=f"Модераторы начисляют **{amount} {points_word}** социального рейтинга гражданину {member.display_name} за *{description}*.", 
                                     thumbnail_url="", 
                                     color_hex_code=0x7621b8)
             await ch.send(embed=embed)
