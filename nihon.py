@@ -78,7 +78,7 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new kanji is finished! Anki updated. Don't forget to synchronize!")
 
-  @bot.command(name="words")
+  @commands.command(name="words")
   async def words(self, ctx: commands.Context, *, args=None):
 
       if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
@@ -148,7 +148,7 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new words is finished! Anki updated. Don't forget to synchronize!")
 
-  @bot.command(name="grammar")
+  @commands.command(name="grammar")
   async def grammar(self, ctx: commands.Context, *, args=None):
 
       if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
