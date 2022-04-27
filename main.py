@@ -355,168 +355,6 @@ async def remedies(ctx):
   ret_str = ", ".join(data)
   await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
 
-@bot.command(name="kanji")
-async def kanji(ctx, *, args=None):
-
-    if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
-      return
-    name = ctx.author.name
-    iid = ctx.author.id
-    confession = str(args)
-    confession = confession.strip()
-    kanjis = confession.split()
-    for kanji in kanjis:
-      on, kun, meanings = get_kanji_info(kanji)
-      note = {
-            "deckName": "__________Kanji",
-            "modelName": "Основная",
-            # "modelName": "Основная (+ обратные карточки)",
-            "fields": {
-               "вопрос": f"{kanji}",
-               "ответ": f"{on}<br><br>{kun}<br><br>{meanings}"
-            },
-            "options": {
-                "allowDuplicate": True,
-            },
-            "tags": [],
-        }
-
-      success = False
-      errmsg = ""
-      try:
-        invoke('addNote', note=note)
-        success = True
-      except Exception as e:
-        errmsg = f"{e}"
-
-      if not success:
-        ret = f"There was an error with {kanji}! ` {errmsg} `"
-        await ctx.send(ret)
-
-    await ctx.send("Processsing of new kanji is finished! Anki updated. Don't forget to synchronize!")
-
-# import configparser
-# import re
-# from telethon.errors import SessionPasswordNeededError
-# from telethon import TelegramClient, events, sync
-# from telethon.tl.functions.messages import (GetHistoryRequest)
-# from telethon.tl.types import (
-# PeerChannel
-# )
-# from telethon.tl.types import MessageEntityTextUrl
-
-@bot.command(name="words")
-async def words(ctx, *, args=None):
-
-    if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
-      return
-    name = ctx.author.name
-    iid = ctx.author.id
-    confession = str(args)
-    confession = confession.strip()
-    words = confession.split()
-
-    for word in words:
-      success = False
-      original, furigana, meaning = get_word_info(word)
-      errmsg = meaning
-
-      if original:
-
-        # brackets = f" ({furigana})" if furigana else ""
-        note = {
-              "deckName": "__________Kotoba",
-              # "modelName": "Основная",
-              "modelName": "Основная (+ обратные карточки)",
-              "fields": {
-                "вопрос": original,
-                # "вопрос": original + brackets,
-                "ответ": meaning
-              },
-              "options": {
-                  "allowDuplicate": True,
-              },
-              "tags": [],
-          }
-
-        errmsg = ""
-        try:
-          invoke('addNote', note=note)
-          success = True
-        except Exception as e:
-          errmsg = f"{e}"
-
-        if furigana:
-          note = {
-                "deckName": "__________Reading",
-                "modelName": "Основная",
-                # "modelName": "Основная (+ обратные карточки)",
-                "fields": {
-                  "вопрос": original,
-                  # "вопрос": original + brackets,
-                  "ответ": furigana,
-                },
-                "options": {
-                    "allowDuplicate": True,
-                },
-                "tags": [],
-            }
-
-          errmsg = ""
-          try:
-            invoke('addNote', note=note)
-            success = True
-          except Exception as e:
-            errmsg = f"{e}"
-
-      if not success:
-        ret = f"There was an error with {word}! ` {errmsg} `"
-        await ctx.send(ret)
-
-    await ctx.send("Processsing of new words is finished! Anki updated. Don't forget to synchronize!")
-
-@bot.command(name="grammar")
-async def grammar(ctx, *, args=None):
-
-    if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
-      return
-
-    confession = str(args)
-    confession = confession.strip()
-    ss = [s.strip() for s in confession.split("\n")]
-
-    for s in ss:
-      original = s.split("(")[0]
-      interpret = s.split("(")[1].split(")")[0].strip()
-
-      note = {
-            "deckName": "__________Bunpou",
-            "modelName": "Основная",
-            "modelName": "Основная (+ обратные карточки)",
-            "fields": {
-               "вопрос": original,
-               "ответ": interpret,
-            },
-            "options": {
-                "allowDuplicate": True,
-            },
-            "tags": [],
-        }
-
-      success = False
-      errmsg = ""
-      try:
-        invoke('addNote', note=note)
-        success = True
-      except Exception as e:
-        errmsg = f"{e}"
-
-      if not success:
-        ret = f"There was an error with {s}! ` {errmsg} `"
-        await ctx.send(ret)
-
-    await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
-
 @bot.command(name="долги")
 async def duties(ctx):
   url = f"http://albenz.xyz:6969/duties"
@@ -2453,8 +2291,11 @@ async def confess(ctx, *, args=None):
 from status import Status
 from loops import Loops
 from voice import Voice 
+from nihon import Nihon
 
 bot.add_cog(Status(bot))
 bot.add_cog(Loops(bot))
+# bot.add_cog(Nihon(bot))
+# bot.add_cog(Voice(bot))
 
 bot.run(TOKEN)
