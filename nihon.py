@@ -41,7 +41,7 @@ class Nihon(commands.Cog):
   @commands.command(name="kanji")
   async def kanji(self, ctx: commands.Context, *, args=None):
 
-      if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
+      if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
         return
       name = ctx.author.name
       iid = ctx.author.id
@@ -81,7 +81,7 @@ class Nihon(commands.Cog):
   @commands.command(name="words")
   async def words(self, ctx: commands.Context, *, args=None):
 
-      if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
+      if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
         return
       name = ctx.author.name
       iid = ctx.author.id
@@ -90,26 +90,33 @@ class Nihon(commands.Cog):
       words = confession.split()
 
       for word in words:
+        
+        kanjiless = word[0] == 's'
+        if kanjiless:
+          word = word[1:]
+
         success = False
         original, furigana, meaning = get_word_info(word)
+        print(original, furigana, meaning)
         errmsg = meaning
 
         if original:
-
+          
           # brackets = f" ({furigana})" if furigana else ""
+          tags = ["simple"] if kanjiless else []
           note = {
                 "deckName": "__________Kotoba",
                 # "modelName": "Основная",
                 "modelName": "Основная (+ обратные карточки)",
                 "fields": {
-                  "вопрос": original,
+                  "вопрос": furigana if kanjiless else original,
                   # "вопрос": original + brackets,
                   "ответ": meaning
                 },
                 "options": {
                     "allowDuplicate": True,
                 },
-                "tags": [],
+                "tags": tags,
             }
 
           errmsg = ""
@@ -119,7 +126,7 @@ class Nihon(commands.Cog):
           except Exception as e:
             errmsg = f"{e}"
 
-          if furigana:
+          if furigana and not kanjiless:
             note = {
                   "deckName": "__________Reading",
                   "modelName": "Основная",
@@ -151,7 +158,7 @@ class Nihon(commands.Cog):
   @commands.command(name="grammar")
   async def grammar(self, ctx: commands.Context, *, args=None):
 
-      if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
+      if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
         return
 
       confession = str(args)
@@ -189,6 +196,23 @@ class Nihon(commands.Cog):
           await ctx.send(ret)
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
+
+  async def check_rights(self, ctx, acceptable_roles, tell=True):
+    #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
+    super_roles = acceptable_roles
+
+    try:
+      res_roles = ctx.author.roles
+    except Exception as e:
+      res_roles = self.bot.get_user(ctx.author.id).roles
+
+    for role in list(map(str, res_roles)):
+      if (role in super_roles):
+        return True
+    if tell:
+      response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(du_get(bot.emojis, name='peepoClown'))
+      await ctx.send(response)
+    return False
 
 def setup(bot):
   bot.add_cog(Nihon(bot))
