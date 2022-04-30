@@ -2046,6 +2046,17 @@ async def who(ctx, mem):
       except Exception as e: 
         print(e)
 
+    if (mem.lower() == "я"):
+
+      embed = discord.Embed(title="Я знаю, кто ты...") 
+      embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+      embed.color = 0x64B82E
+      embed.set_image(url="https://i.imgur.com/aqfPdkJ.gif")
+      embed.set_footer(text="Манифест открой...")
+      # embed.set_image(url="https://media.discordapp.net/attachments/703737790848040974/969896172149932042/unknown.png")
+      await ctx.send(embed=embed)
+      return 
+
     id_author = ctx.author.id
     id_to_search = get_id(mem)
     mem = bot.get_user(id_to_search)

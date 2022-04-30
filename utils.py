@@ -103,7 +103,6 @@ async def parse_zettel_json(ctx, data):
     #await ctx.send(embed=embed)
   
   else:
-    
     content = data["content"]
     # TODO Solve multiple attachments
     imgdata = data["files"][0]
@@ -111,7 +110,12 @@ async def parse_zettel_json(ctx, data):
     interpreter = data["interpreter"]
     title = data["title"]
     number= data["number"]
-    
+
+    thumbs = {
+      "Конфуций": "https://i.imgur.com/nJFW7SG.png",
+      "Омар Хаям": "https://obrazovaka.ru/wp-content/uploads/2021/02/omar-hayyam-e1614119392242.jpg", 
+    }
+
     if (not title):
       raise Exception("JSON is empty")
 
@@ -120,11 +124,14 @@ async def parse_zettel_json(ctx, data):
     filename = 'temporary_holder'  # I assume you have a way of picking unique filenames
     with open(filename, 'wb') as f:
       f.write(imgdata)
-      
-      if author:
+
+      if author and title.lower().strip() != author.lower().strip():
         embed = discord.Embed(title=f"{title}. {author}", description=f"{number}", color=0xa87f32) #creates embed
       else:
         embed = discord.Embed(title=f"{title}", description=f"{number}", color=0xa87f32) #creates embed
+      
+      if author:
+        embed.set_thumbnail(url=thumbs[author])
       
       dfile = discord.File(filename, filename="image.png")
       embed.set_image(url="attachment://image.png")
