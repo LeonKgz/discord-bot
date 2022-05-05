@@ -316,6 +316,74 @@ async def remedy(ctx, issue):
   except Exception as e:
     await ctx.send(f"<@!{ctx.author.id}>, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.")
 
+from io import BytesIO
+
+@bot.command(name="pdf")
+async def pdf(ctx):
+  # with open("plays.pdf", 'rb') as f:
+  #   data = f.read()
+  #   await ctx.channel.send(discord.File(data, filename="plays.pdf"))
+  await ctx.channel.send(file=discord.File("plays.pdf"))
+  # await ctx.channel.send(discord.Attachment("plays.pdf"))
+
+import os 
+
+@bot.command(name="молитва")
+async def remedy(ctx):
+
+  ret = await ctx.send("*Генерирую вашу уникальную молитву...*")
+
+  url = f"http://albenz.xyz:6969/prayer"
+
+  response = requests.get(url)
+  data = response.json()
+  verses = data["verses"] 
+  tex = """\documentclass[10pt]{article}
+\\usepackage[russian]{babel}
+\\usepackage{tgpagella}
+\\usepackage[left=0.5in,right=0.5in,top=0.5in,bottom=0.7in]{geometry}
+\\usepackage{multicol}
+%\\pagenumbering{gobble}
+\\setlength{\columnsep}{1cm}
+
+\\begin{document}
+
+\\begin{multicols}{2}""" + "".join(["\\section{" + v["remedy"] + "}" + "\n\n".join(v["content"].split("\n\n")[1:]).replace("  ", " ").strip().replace("\n\n", "\\\\\n\n") for v in verses]) + """
+
+\\end{multicols}
+
+\\end{document}
+  """
+
+  filename = "Stoic_prayer_for_" + "_".join(ctx.author.display_name.split())
+  with open(f"./{filename}.tex", "w") as f:
+    f.write(tex)
+
+  # Necessary set up to install pdf latex  
+  # sudo apt-get install texlive-latex-base
+  # sudo apt-get install texlive-fonts-recommended
+  # sudo apt-get install texlive-fonts-extra
+  # sudo apt-get install texlive-latex-extra
+
+  # pdflatex latex_source_name.tex
+
+  # sudo apt-cache search texlive russian
+  # sudo apt-get install texlive-lang-cyrillic
+
+  os.system(f"pdflatex {filename}.tex")
+  # await ret.delete()
+  await ctx.channel.send("Готово! Советую распечатать.")
+  await ctx.channel.send(file=discord.File(f"{filename}.pdf"))
+
+  os.remove(f"./{filename}.tex")
+  # os.remove(f"./{filename}.pdf")
+
+  # try:
+  #   await parse_zettel_json(ctx, data)
+  # except Exception as e:
+  #   await ctx.send(f"<@!{ctx.author.id}>, {e}")
+
+
 @bot.command(name="стих")
 async def remedy(ctx, issue):
 
