@@ -23,13 +23,13 @@ class Loops(commands.Cog):
 
   def __init__(self, bot):
     self.bot = bot
-    # self.news_alert.start()
-    # self.scan.start()
-    # self.important_info.start()
+    self.news_alert.start()
+    self.scan.start()
+    self.important_info.start()
     self.change_channel_name.start()
     ## self.deaths.start()
     ## self.births.start()
-    # self.meditations.start()
+    self.meditations.start()
   
   # def get_db_cursor(self):
 
@@ -134,7 +134,7 @@ class Loops(commands.Cog):
   @tasks.loop(seconds=HOUR)
   async def news_alert(self):
     guild = self.bot.get_guild(GUILD) 
-    db, cursor = self.get_db_cursor()
+    db, cursor = get_db_cursor()
 
     hour = int(datetime.datetime.now().hour)
 
@@ -169,7 +169,7 @@ class Loops(commands.Cog):
         db.rollback()
         return
 
-      db, cursor = self.get_db_cursor()
+      db, cursor = get_db_cursor()
       try:
         sql = f"REPLACE INTO counters(ID, Value) VALUES(\"timers\", {counter})"
         cursor.execute(sql)
@@ -200,7 +200,7 @@ class Loops(commands.Cog):
   @tasks.loop(seconds=DAY)
   async def scan(self):
 
-    db, cursor = self.get_db_cursor()
+    db, cursor = get_db_cursor()
     guild = self.bot.get_guild(GUILD) 
     day = int(datetime.datetime.today().weekday())
 
