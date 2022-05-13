@@ -24,6 +24,9 @@ PASSWORD = str(os.getenv('DB_PASSWORD'))
 DB = str(os.getenv('DB_DATABASE'))
 
 def get_db_cursor():
+  # HOST = "***REMOVED***"
+  # USER = "***REMOVED***"
+  # PASSWORD = "chechera7220"                                                                                                                                                                                                                                                                     
   db = pymysql.connect(host=HOST,
                        user=USER,
                        password=PASSWORD,
@@ -41,6 +44,7 @@ def get_db_row(db_name, id_to_search):
     try:
       cursor.execute(select)
       row = cursor.fetchone()
+      db.close()
       return row
       
     except Exception as e:
@@ -50,7 +54,74 @@ def get_db_row(db_name, id_to_search):
       return False
 
 async def parse_zettel_json(ctx, data):
-  if not data["files"]:
+  
+  if "verses" in data:
+    verses = data["verses"]
+
+    title = verses[0]["title"]
+    if (not title):
+      raise Exception("JSON is empty")
+
+    author = verses[0]["author"]
+    if (author == ""):
+      head = f"{title}."
+    else:
+      head = f"{title}. {author}."
+
+    for v in verses:
+
+      data = v["content"]
+      remedy = v["remedy"]
+
+      data = "\n\n".join(data.split("\n\n")[1:])
+      data = data.replace("  ", " ")
+      data = data.strip()
+
+      test_string = f"***{remedy}***\t{data}\n"
+      
+      size = len(test_string)
+
+      if (size > 2000):
+        splits = data.split("\n \n")
+        
+        if (len(splits) > 1):
+
+          await ctx.send(f"\t\t\t\t***{remedy}***\t{splits[0]}\n")
+          # await ctx.send(f"—\n\n*{head}*\n\n\t{splits[0]}\n—")
+          for e in splits[1:-1]:
+            await ctx.send(f"\n{e}\n")
+          
+          await ctx.send(f"{splits[-1]}\n\n")
+
+        else:
+
+          data = f"***{remedy}***\t{data}"
+          left = 0
+          right = 2000
+          chunks = []
+          while (right - left > 0):
+    #        print(f"({left}, {right})")
+            while right != size and data[right-1] != " ":
+              right -= 1
+            curr = data[left:right]
+            chunks.append(curr)
+            left = right
+            if (size - left > 2000):
+              right += 2000
+            else:
+              right = size
+
+          for c in chunks:
+            await ctx.send(f"{c}")
+
+        continue 
+  
+      # await ctx.send(f"—\n\n*{head}*\n\n{data}\n\n—")
+      await ctx.send(f"\t\t\t\t***{remedy}***\t{data}\n")
+
+    await ctx.send(f"...")
+      
+  elif not data["files"]:
     author = data["author"]
     title = data["title"]
     links = data["links"]
@@ -82,22 +153,41 @@ async def parse_zettel_json(ctx, data):
       data += f"\n\n{ls}"
 
     size = len(data)
-
     if (size > 2000):
       # For now there is a limit on number of characters that the bot can send on server. 
       # Manually make sure that paragraphs are less than 2000 chars and send them seperately
       splits = data.split("\n \n")
+      if (len(splits) > 1):
+        await ctx.send(f"—\n\n*{head}*\n\n\t{splits[0]}\n—")
+        for e in splits[1:-1]:
+          await ctx.send(f"\n{e}\n—")
+        
+        await ctx.send(f"{splits[-1]}\n\n—")
 
-      await ctx.send(f"—\n\n*{head}*\n\n\t{splits[0]}\n—")
-      for e in splits[1:-1]:
-        await ctx.send(f"\n{e}\n—")
-      
-      await ctx.send(f"{splits[-1]}\n\n—")
+      else:
+        
+        left = 0
+        right = 2000
+        chunks = []
+        while (right - left > 0):
+  #        print(f"({left}, {right})")
+          while right != size and data[right-1] != " ":
+            right -= 1
+          curr = data[left:right]
+          chunks.append(curr)
+          left = right
+          if (size - left > 2000):
+            right += 2000
+          else:
+            right = size
+
+        for c in chunks:
+          await ctx.send(f"{c}")
       return
+
     #data = data.replace("\\n", "\n")
  
     await ctx.send(f"—\n\n*{head}*\n\n{data}\n\n—")
-
     #embed = discord.Embed(title=f"{title}. {author}", description=f"\n\n\t{data}\n\n", color=0xa87f32) #creates embed
     #embed.set_footer(text=f"перевод: Переводчик")
     #await ctx.send(embed=embed)

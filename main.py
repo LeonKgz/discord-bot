@@ -33,7 +33,7 @@ FOOD_KEY = str(os.getenv('FOOD_KEY'))
 seneca_api = str(os.getenv('SENECA_API_TOKEN'))
 
 intents = discord.Intents.all()
-bot = commands.Bot(intents=intents, command_prefix="!")
+bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
 #bot.timer_manager = timers.TimerManager(bot)
 
 @bot.event
@@ -157,7 +157,6 @@ async def ebmed(ctx):
     return
 
   await ctx.send(f"Ваш токен: ` {auth_code} `\nОтправьте его боту в телеграме (https://t.me/seneca69_bot) в личном сообщении таким образом: \n\n\t\t\t` !discord {auth_code} `\n\nТокеном можно воспользоваться только один раз!")
-
 
 @bot.command(name="file")
 async def ebmed(ctx, user):
@@ -376,7 +375,9 @@ async def remedy(ctx):
   await ctx.channel.send(file=discord.File(f"{filename}.pdf"))
 
   os.remove(f"./{filename}.tex")
-  # os.remove(f"./{filename}.pdf")
+  os.remove(f"./{filename}.pdf")
+  os.remove(f"./{filename}.log")
+  os.remove(f"./{filename}.aux")
 
   # try:
   #   await parse_zettel_json(ctx, data)
@@ -2169,6 +2170,11 @@ async def confesss(ctx):
 
     db.close()
 
+@bot.command(name='no', aliases=['нет', 'いいえ'])
+async def confess(ctx, *, args=None):
+  print(args)
+  print(ctx.invoked_with)
+
 @bot.command(name='рассказать')
 async def confess(ctx, *, args=None):
 #async def confess(ctx, confession):
@@ -2374,7 +2380,7 @@ from nihon import Nihon
 
 bot.add_cog(Status(bot))
 bot.add_cog(Loops(bot))
-# bot.add_cog(Nihon(bot))
+bot.add_cog(Nihon(bot))
 # bot.add_cog(Voice(bot))
 
 bot.run(TOKEN)

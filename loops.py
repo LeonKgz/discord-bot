@@ -23,27 +23,113 @@ class Loops(commands.Cog):
 
   def __init__(self, bot):
     self.bot = bot
-    self.news_alert.start()
-    self.scan.start()
-    self.important_info.start()
-    # self.deaths.start()
-    # self.births.start()
-    self.meditations.start()
+    # self.news_alert.start()
+    # self.scan.start()
+    # self.important_info.start()
+    self.change_channel_name.start()
+    ## self.deaths.start()
+    ## self.births.start()
+    # self.meditations.start()
   
-  def get_db_cursor(self):
-    db = pymysql.connect(host=HOST,
-												 user=USER,
-												 password=PASSWORD,
-												 db=DB,
-												 charset='utf8mb4',
-												 cursorclass=pymysql.cursors.DictCursor)
-    return db, db.cursor()
+  # def get_db_cursor(self):
+
+  #   HOST = "***REMOVED***"
+  #   USER = "***REMOVED***"
+  #   PASSWORD = "chechera7220"
+  #   db = pymysql.connect(host=HOST,
+	# 											 user=USER,
+	# 											 password=PASSWORD,
+	# 											 db=DB,
+	# 											 charset='utf8mb4',
+	# 											 cursorclass=pymysql.cursors.DictCursor)
+  #   return db, db.cursor()
 
   def get_channel(self, guild, name):
     for ch in guild.channels:
       if name in ch.name:
         return ch
     return False
+  
+  def get_channel_by_id(self, guild, id):
+    for ch in guild.channels:
+      if id == str(ch.id):
+        return ch
+    return False
+
+  @tasks.loop(seconds=10.0)
+  async def change_channel_name(self):
+
+    # db, cursor = get_db_cursor()
+    # sql = "SHOW COLUMNS FROM tmg_channels"
+    # try:
+    #   cursor.execute(sql)
+    #   res = cursor.fetchall()
+    #   # list of available language options (effectively list of column names from the tbg_channels table minus the first one which is 'ID')
+    #   langs = [r['Field'] for r in res][1:]
+    # except Exception as e:
+    #   print(e)
+    #   db.rollback()
+
+    guild = self.bot.get_guild(GUILD)
+
+    if guild:
+
+      for ch in guild.channels:
+        # change name to russian version
+        row = get_db_row("tmg_channels", str(ch.id))
+        if not row:
+          print(f"{ch.name} was not found!")
+          continue
+        russian = row["Russian"]
+        prefix = row['Prefix']
+        res = prefix + russian 
+        await ch.edit(name=res)
+        print(f"{ch.name} successfully renamed!")
+
+      print("DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOONE")
+      # colnames = ", ".join(langs)
+      # for ch in guild.channels:
+      #   if str(ch.id) == "858331607398875156":
+      #     name = ch.name[:-1].encode('utf-8')
+      #     pre = ch.name[-1]
+      #     sql = f"INSERT INTO tmg_channels(ID, {colnames}) VALUES(\"{ch.id}\", \"{pre}\", \"n\", \"{name}\", \"n\")"
+      #     # sql = f"UPDATE tmg_channels SET Prefix = \"{pre}\" WHERE ID = \"{ch.id}\""
+      #     try:
+      #       cursor.execute(sql)
+      #       db.commit()
+      #     except Exception as e:
+      #       db.rollback()
+
+      # db.close()
+      # print("DONE")
+      # return 
+
+      # db, cursor = get_db_cursor()
+      # the next line only makes sense when first executed 
+      # (if executed after the channel is renamed, pointless, TODO account for that later in the actual implementation)
+      # ch = self.get_channel_by_id(guild, "974068379356913724")
+      # a list of languages get from the database potentially once in a while and keep as a pickle?
+      
+
+      # implement the counter via the database as usual i.e. verses
+
+      # with open("counter.txt", 'r') as f:
+      #   data = f.read()
+      #   if not data:
+      #     counter = 0
+      #   else:
+      #     counter = int(data)
+
+      #   # this implementation is for a particular test channel, thats where the magic number comes from
+      #   # newname = langs[languages[counter]]
+      #   newname = get_db_row("tmg_channels", "974068379356913724")[languages[counter]]
+      # with open("counter.txt", 'w') as f:
+      #   towrite = (counter + 1) % len(languages)
+      #   f.write(str(towrite))
+
+      # await ch.edit(name=newname)
+      # await ch.send(f"Renamed to {newname}!")
+
 
   @tasks.loop(seconds=HOUR)
   async def news_alert(self):
@@ -149,7 +235,7 @@ class Loops(commands.Cog):
         quotes = ",\n\t".join([(str(j) + ") \t" + str(i)) for j, i in enumerate(spiski)])
         if(len(spiski) > 0):
           await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшие сутки: \n\n\t{quotes}")
-      
+
     if (guild and day == 0):
 
       super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
