@@ -23,10 +23,7 @@ USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
 DB = str(os.getenv('DB_DATABASE'))
 
-def get_db_cursor():
-  # HOST = "45.32.178.186"
-  # USER = "root"
-  # PASSWORD = "chechera7220"                                                                                                                                                                                                                                                                     
+def get_db_cursor():                                                                                                                                                                                                                                                               
   db = pymysql.connect(host=HOST,
                        user=USER,
                        password=PASSWORD,
