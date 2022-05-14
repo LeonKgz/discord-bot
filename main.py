@@ -386,7 +386,7 @@ async def remedy(ctx):
 
 
 @bot.command(name="стих")
-async def remedy(ctx, issue):
+async def poem(ctx, issue):
 
   url = f"http://albenz.xyz:6969/poem?issue={issue}"
 
@@ -399,7 +399,7 @@ async def remedy(ctx, issue):
     await ctx.send(f"<@!{ctx.author.id}>, стих для *«{issue}»* не найдено! « !стихи », чтобы посмотреть все ключевые слова.")
 
 @bot.command(name="стихи")
-async def remedies(ctx):
+async def poems(ctx):
   url = f"http://albenz.xyz:6969/poems"
 
   response = requests.get(url)
