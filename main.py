@@ -205,10 +205,12 @@ async def weekly_activity_notification(id_to_search):
   except Exception as e:
     print(e)
     db.rollback()
-    for ch in guild.channels:
-      if ("технический" in ch.name):
-        await ch.send(f"Cant display activity log for **{mem.display_name}** !")
-        return 
+    
+    ch = get_channel_by_name(bot, "технический", 'Russian')
+    # for ch in guild.channels:
+    #   if ("технический" in ch.name):
+    await ch.send(f"Cant display activity log for **{mem.display_name}** !")
+    return 
 
   db.close()
 
@@ -216,9 +218,8 @@ async def weekly_activity_notification(id_to_search):
   main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
   embed.add_field(name=main_field, value="⠀", inline=False)
 
-  for ch in guild.channels:
-    if ("гласность" in ch.name):
-      await ch.send(embed=embed)
+  ch = get_channel_by_name(bot, "гласность", 'Russian')
+  await ch.send(embed=embed)
 
 async def telegram_registration_notification(id_to_search):
   # if str(id_to_search) == str(ME) or str(id_to_search) == str(MANASCHI):
@@ -249,10 +250,10 @@ async def telegram_registration_notification(id_to_search):
   except Exception as e:
     print(e)
     db.rollback()
-    for ch in guild.channels:
-      if ("технический" in ch.name):
-        await ch.send(f"Cant display activity log for **{mem.display_name}** !")
-        return 
+
+    ch = get_channel_by_name(bot, "технический", 'Russian')
+    await ch.send(f"Cant display activity log for **{mem.display_name}** !")
+    return 
 
   db.close()
 
@@ -260,10 +261,8 @@ async def telegram_registration_notification(id_to_search):
   main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
   embed.add_field(name=main_field, value="⠀", inline=False)
 
-  for ch in guild.channels:
-    # if ("технический" in ch.name):
-    if ("гласность" in ch.name):
-      await ch.send(embed=embed)
+  ch = get_channel_by_name(bot, "гласность", 'Russian')
+  await ch.send(embed=embed)
 
 @bot.command(name="манифест")
 async def website(ctx):
@@ -1044,6 +1043,9 @@ async def spisok(ctx, role):
 
 @bot.event
 async def on_message(message):
+  
+  russian_name = get_channel_names(bot, str(message.channel.id))["Russian"]
+
   if message.author == bot.user:
   #if message.author == bot.user and "!кто" not in str(message.content):
     return
@@ -1069,7 +1071,8 @@ async def on_message(message):
     # if int(message.author.id) != ME:
     if int(message.author.id) != ME and not "!донести" in message.content:
         await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
-  elif 'погран' not in message.channel.name:
+  elif 'погран' not in russian_name:
+  # elif 'погран' not in message.channel.name:
     name = message.author.name
     iid = message.author.id
     time = message.created_at
@@ -1093,7 +1096,7 @@ async def on_message(message):
       db.rollback()
 
     db.close()
-  elif 'технический' in message.channel.name and message.author.id == 116275390695079945:
+  elif 'технический' in russian_name and message.author.id == 116275390695079945:
     msg = message.content
     mss = msg.split()
     if (mss[0] == "free"):
@@ -1104,7 +1107,7 @@ async def on_message(message):
           politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
           await mem.add_roles(proletariat)
           await mem.remove_roles(politzek)
-      await channel.send("The guy is free!")
+      await message.channel.send("The guy is free!")
 
   await bot.process_commands(message)
 
@@ -1265,43 +1268,44 @@ async def let_free(ctx):
 
   db.close()
 
-@bot.command(name='19273468236482734627846798326486')
-async def vse(ctx):
-  guild = bot.get_guild(GUILD) 
-  db, cursor = get_db_cursor()
-  proletariat = discord.utils.get(guild.roles, name='Пролетарий')
-  politzek= discord.utils.get(guild.roles, name='Апатрид')
-  npc = discord.utils.get(guild.roles, name='NPC can\'t meme')
-  #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит', 'NPC can\'t meme']
-  ms = []
-  for m in proletariat.members:
+# @bot.command(name='19273468236482734627846798326486')
+# async def vse(ctx):
+#   guild = bot.get_guild(GUILD) 
+#   db, cursor = get_db_cursor()
+#   proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+#   politzek= discord.utils.get(guild.roles, name='Апатрид')
+#   npc = discord.utils.get(guild.roles, name='NPC can\'t meme')
+#   #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит', 'NPC can\'t meme']
+#   ms = []
+#   for m in proletariat.members:
     
-    if (npc in m.roles):
-      continue
+#     if (npc in m.roles):
+#       continue
 
-    iid = m.id
-    sql = f"SELECT * from confessions WHERE `ID` = \"{iid}\""
-    try:
-     cursor.execute(sql)
-     res = cursor.fetchone()
+#     iid = m.id
+#     sql = f"SELECT * from confessions WHERE `ID` = \"{iid}\""
+#     try:
+#      cursor.execute(sql)
+#      res = cursor.fetchone()
     
-     if (res is None):
-       ms.append(m)
-       await m.add_roles(politzek)
-       await m.remove_roles(proletariat)       
+#      if (res is None):
+#        ms.append(m)
+#        await m.add_roles(politzek)
+#        await m.remove_roles(proletariat)       
 
-    except Exception as e:
-      print(e)
+#     except Exception as e:
+#       print(e)
 
-  for ch in guild.channels:
-    if ("погранnnn" in ch.name):
-      mentions = ""
-      for m in ms:
-        mentions += f"<@!{m.id}> "
+#   ch =    
+#   for ch in guild.channels:
+#     if ("погранnnn" in ch.name):
+#       mentions = ""
+#       for m in ms:
+#         mentions += f"<@!{m.id}> "
       
-      res = f"Граждане {mentions}! \n\nМы не можем установить вашу личность! Вам нужно зарекомендовать себя! \n\n\t\tЭто можно сделать с помощью команды **« !рассказать »**\n\n\t\t Например: !рассказать \"Привет, я Албанец. Мне 22 года, по образованию программист. Устраиваю читки пьес в дискорде, пытаюсь собрать народ на групповые чтения поэзии и просмотры японских мультиков. В свободное время люблю почитать что-то по философии или религии. Могу сыграть на гитаре твой реквест. В видео-игры не играю. Играю в Го. Энтузиаст Высокой Мошны.\"\n\n\t Не забудьте про **кавычки**! Боту можно написать и в личку. Соответственно рекомендации пользователя можно узнать с помощью команды **« !кто »**, например: !кто @Albanec69 . Учтите, что **записи о себе можно править только один раз в 7 дней!**"
-      await ch.send(res)
-      break
+#       res = f"Граждане {mentions}! \n\nМы не можем установить вашу личность! Вам нужно зарекомендовать себя! \n\n\t\tЭто можно сделать с помощью команды **« !рассказать »**\n\n\t\t Например: !рассказать \"Привет, я Албанец. Мне 22 года, по образованию программист. Устраиваю читки пьес в дискорде, пытаюсь собрать народ на групповые чтения поэзии и просмотры японских мультиков. В свободное время люблю почитать что-то по философии или религии. Могу сыграть на гитаре твой реквест. В видео-игры не играю. Играю в Го. Энтузиаст Высокой Мошны.\"\n\n\t Не забудьте про **кавычки**! Боту можно написать и в личку. Соответственно рекомендации пользователя можно узнать с помощью команды **« !кто »**, например: !кто @Albanec69 . Учтите, что **записи о себе можно править только один раз в 7 дней!**"
+#       await ch.send(res)
+#       break
 
 @bot.command(name="оценить")
 async def evaluate(ctx, mem, points):
@@ -1438,10 +1442,10 @@ async def evaluate(ctx, mem, points):
     except Exception as e:
       print(e)
       db.rollback()
-      for ch in guild.channels:
-        if ("технический" in ch.name):
-          await ch.send(f"Cant display activity log for **{mem.display_name}** !")
-          return 
+
+      ch = get_channel_by_name(bot, "технический", 'Russian')
+      await ch.send(f"Cant display activity log for **{mem.display_name}** !")
+      return 
 
     embed.set_footer(text="Смотрите как зарабатывать очки в Манифесте")
     main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
@@ -1450,10 +1454,9 @@ async def evaluate(ctx, mem, points):
     # If all the mods have marked this user, remove from unmarked_confessions table
     if (len(mods) == 0):
       sql = f"DELETE FROM unmarked_confessions WHERE ID=\"{id_to_search}\""
-      for ch in guild.channels:
-        if ("гласность" in ch.name):
-          # await ch.send(f"Все Модераторы оценили описание гражданина <@!{mem.id}>!\n\n\t\t Окончательная оценка — **{int(curr_mean)}**\n\n----------------------------------------------------------------------")
-          await ch.send(embed=embed)
+      ch = get_channel_by_name(bot, "гласность", 'Russian')
+      # await ch.send(f"Все Модераторы оценили описание гражданина <@!{mem.id}>!\n\n\t\t Окончательная оценка — **{int(curr_mean)}**\n\n----------------------------------------------------------------------")
+      await ch.send(embed=embed)
 
       # Once all mods marked the description. record the result into logs table and add the points 
 
@@ -1697,10 +1700,9 @@ async def add_points(ctx, target, type, amount, description):
             res = f"Модераторы начисляют **[ {amount} ] {points_word}** социального рейтинга гражданам {every}!\n\n\t\t Причина — *{description}*\n\n----------------------------------------------------------------------"
 
             guild = bot.get_guild(GUILD)
-            for ch in guild.channels:
-              if "гласность" in ch.name:
-                await ch.send(res)
-                return
+            ch = get_channel_by_name(bot, "гласность", 'Russian')
+            await ch.send(res)
+            return
 
       # Otherwise it's one person
       else:
@@ -1724,16 +1726,15 @@ async def add_points(ctx, target, type, amount, description):
           points_word = "очка"
 
         guild = bot.get_guild(GUILD)
-        for ch in guild.channels:
-          if "гласность" in ch.name:
-            member = bot.get_user(get_id(target))
-            embed = await get_simple_member_embed(bot=bot, 
-                                    member=member, 
-                                    title="За заслуги перед Мошной", 
-                                    message=f"Модераторы начисляют **{amount} {points_word}** социального рейтинга гражданину {member.display_name} за *{description}*.", 
-                                    thumbnail_url="", 
-                                    color_hex_code=0x7621b8)
-            await ch.send(embed=embed)
+        ch = get_channel_by_name(bot, "гласность", 'Russian')
+        member = bot.get_user(get_id(target))
+        embed = await get_simple_member_embed(bot=bot, 
+                                member=member, 
+                                title="За заслуги перед Мошной", 
+                                message=f"Модераторы начисляют **{amount} {points_word}** социального рейтинга гражданину {member.display_name} за *{description}*.", 
+                                thumbnail_url="", 
+                                color_hex_code=0x7621b8)
+        await ch.send(embed=embed)
 
 @bot.command(name="донести")
 async def donos(ctx, *, args=None):
@@ -1905,11 +1906,10 @@ async def approve_donos(ctx, donos_id, priority, evidence):
         5: "низкая Мошна",
       }
 
-      for ch in guild.channels:
-        if "гласность" in ch.name:
-          user = bot.get_user(row["Target"])
 
-          await ch.send(f"Модераторы рассмотрели донос на гражданина <@!{user.id}>!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n\t\t*Материалы дела* — {evidence}\n\n----------------------------------------------------------------------")
+      ch = get_channel_by_name(bot, "гласность", 'Russian')
+      user = bot.get_user(row["Target"])
+      await ch.send(f"Модераторы рассмотрели донос на гражданина <@!{user.id}>!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n\t\t*Материалы дела* — {evidence}\n\n----------------------------------------------------------------------")
 
 
     else:
