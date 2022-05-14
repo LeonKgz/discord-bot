@@ -23,6 +23,10 @@ USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
 DB = str(os.getenv('DB_DATABASE'))
 
+id_repository = {
+  "glasnost_channel": "894988536305033228",
+}
+
 def get_db_cursor():                                                                                                                                                                                                                                                               
   db = pymysql.connect(host=HOST,
                        user=USER,
@@ -241,8 +245,22 @@ def get_times_str(num):
 
   return counter_str
 
-# simple beacause it has one field, to convey one message
-async def get_simple_embed(bot, member, title, message, thumbnail_url, color_hex_code):
+async def get_simple_embed(title, message, thumbnail_url, color_hex_code, footer):
+  embed = discord.Embed(title=title) 
+  embed.set_thumbnail(url=thumbnail_url)
+
+  # light green, same as СовНарМод
+  embed.color = color_hex_code 
+  embed.add_field(name="⠀", value=message, inline=False)
+
+  embed.set_footer(text=footer)
+  # embed.add_field(name=main_field, value="⠀", inline=False)
+
+  return embed
+
+
+# simple beacause it has one field, to convey one message regarding a server member
+async def get_simple_member_embed(bot, member, title, message, thumbnail_url, color_hex_code):
   embed = discord.Embed(title=title) 
   embed.set_author(name=member.display_name, icon_url=member.avatar_url)
   embed.set_thumbnail(url=thumbnail_url)
@@ -677,4 +695,17 @@ def get_word_info(word):
     meaning = meaning1
 
     return mixed, furigana, meaning
-    
+
+def get_channel_name_languages():
+  db, cursor = get_db_cursor()
+  sql = "SHOW COLUMNS FROM tmg_channels"
+  try:
+    cursor.execute(sql)
+    res = cursor.fetchall()
+    # list of available language options (effectively list of column names from the tmg_channels table minus the first two which is 'ID') and Preifx
+    langs = [r['Field'] for r in res][2:]
+    return langs
+  except Exception as e:
+    print(e)
+    db.rollback()
+    return []
