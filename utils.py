@@ -205,6 +205,8 @@ async def parse_zettel_json(ctx, data):
     thumbs = {
       "Конфуций": "https://i.imgur.com/nJFW7SG.png",
       "Омар Хаям": "https://obrazovaka.ru/wp-content/uploads/2021/02/omar-hayyam-e1614119392242.jpg", 
+      "Белла Ахмадулина": "https://i.imgur.com/yPiHVTY.png",
+      "Евгений Баратынский": "https://www.askbooka.ru/sites/default/files/styles/medium/public/evgeniy-baratinskiy_2.jpg?itok=AKq2aEzf",
     }
 
     if (not title):
@@ -257,7 +259,6 @@ async def get_simple_embed(title, message, thumbnail_url, color_hex_code, footer
   # embed.add_field(name=main_field, value="⠀", inline=False)
 
   return embed
-
 
 # simple beacause it has one field, to convey one message regarding a server member
 async def get_simple_member_embed(bot, member, title, message, thumbnail_url, color_hex_code):
