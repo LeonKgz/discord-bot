@@ -136,7 +136,7 @@ class Loops(commands.Cog):
 
       db.close()
 
-      ch = self.get_channel(guild, "погран-застава")
+      ch = get_channel_by_name(self.bot, "погран-застава", "Russian")
       await ch.send(f"{content}")     
 
   @tasks.loop(seconds=DAY)
@@ -212,15 +212,13 @@ class Loops(commands.Cog):
         except Exception as e:
           print(e)
 
-      for ch in guild.channels:
-        if ("погран" in ch.name):
-          mentions = ""
-          for m in ms:
-            mentions += f"<@!{m.id}> "
-          
-          res = f"Граждане {mentions}! \n\nВы были неактивны более 7 дней и нам нужно убедиться, что вы ещё живы! « **!пропуск** » чтобы пересечь границу Мошны!"
-          await ch.send(res)
-          break
+      ch = get_channel_by_name(self.bot, "погран-застава", "Russian")
+      mentions = ""
+      for m in ms:
+        mentions += f"<@!{m.id}> "
+      
+      res = f"Граждане {mentions}! \n\nВы были неактивны более 7 дней и нам нужно убедиться, что вы ещё живы! « **!пропуск** » чтобы пересечь границу Мошны!"
+      await ch.send(res)
 
       sql = f"DELETE FROM cache"
 
@@ -264,7 +262,7 @@ class Loops(commands.Cog):
       ps = [item for item in ps if item.id not in bl]      
       m = ps[random.randint(0, len(ps) - 1)]
       
-      ch = self.get_channel(guild, "погран")
+      ch = get_channel_by_name(self.bot, "погран-застава", "Russian")
       row = get_db_row("confessions", m.id)
 
       if row:
@@ -311,10 +309,8 @@ class Loops(commands.Cog):
           found_valid_page = len(content) <= 2000
         
       guild = self.bot.get_guild(GUILD)
-      if (guild):
-        for ch in guild.channels:
-          if ("өлүм" in ch.name):
-            await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
+      ch = get_channel_by_name(self.bot, "смерти", "Russian")
+      await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
 
   @tasks.loop(seconds=HOUR)
   async def births(self):
@@ -353,20 +349,20 @@ class Loops(commands.Cog):
           content = f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**"
           found_valid_page = len(content) <= 2000
           
-      guild = self.bot.get_guild(GUILD)
-      if (guild):
-        for ch in guild.channels:
-          if ("туулган" in ch.name):
-            await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
 
-  @tasks.loop(seconds=HOUR)
+      ch = get_channel_by_name(self.bot, "рождения", "Russian")
+      await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
+
+  # @tasks.loop(seconds=HOUR)
+  @tasks.loop(seconds=5.0)
   async def meditations(self):
 
     hour = int(datetime.datetime.now().hour)
     guild = self.bot.get_guild(GUILD)
-    if hour == 9 and guild:
+    # if hour == 9 and guild:
+    if guild:
 
-      channel = self.get_channel(guild, "meditations")
+      channel = get_channel_by_name(self.bot, "размышления", "Russian")
       url = f"http://albenz.xyz:6969/remedy?issue=Random"
 
       response = requests.get(url)

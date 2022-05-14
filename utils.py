@@ -206,7 +206,7 @@ async def parse_zettel_json(ctx, data):
       "Конфуций": "https://i.imgur.com/nJFW7SG.png",
       "Омар Хаям": "https://obrazovaka.ru/wp-content/uploads/2021/02/omar-hayyam-e1614119392242.jpg", 
       "Белла Ахмадулина": "https://i.imgur.com/yPiHVTY.png",
-      "Евгений Баратынский": "https://www.askbooka.ru/sites/default/files/styles/medium/public/evgeniy-baratinskiy_2.jpg?itok=AKq2aEzf",
+      "Евгений Баратынский": "https://i.imgur.com/YwXdyEr.png",
     }
 
     if (not title):
@@ -247,6 +247,41 @@ def get_times_str(num):
 
   return counter_str
 
+def get_channel_names(bot, id):
+  db, cursor = get_db_cursor()
+  sql = f"SELECT * FROM tmg_channels WHERE ID = \"{id}\""
+  try:
+    cursor.execute(sql)
+    row = cursor.fetchone()
+    db.close()
+    return row
+
+  except Exception as e:
+    print(e)
+    db.rollback()
+  
+  db.close()
+  return False  
+
+def get_channel_by_name(bot, name, language):
+  guild = bot.get_guild(GUILD)
+  db, cursor = get_db_cursor()
+  sql = f"SELECT * FROM tmg_channels WHERE {language} = \"{name}\""
+  try:
+    cursor.execute(sql)
+    row = cursor.fetchone()
+    id_to_search = str(row["ID"])
+    for ch in guild.channels:
+      if (str(ch.id) == id_to_search):
+        db.close()
+        return ch
+  except Exception as e:
+    print(e)
+    db.rollback()
+  
+  db.close()
+  return False  
+
 async def get_simple_embed(title, message, thumbnail_url, color_hex_code, footer):
   embed = discord.Embed(title=title) 
   embed.set_thumbnail(url=thumbnail_url)
@@ -283,10 +318,9 @@ async def get_simple_member_embed(bot, member, title, message, thumbnail_url, co
   except Exception as e:
     print(e)
     db.rollback()
-    for ch in guild.channels:
-      if ("технический" in ch.name):
-        await ch.send(f"Problems displaying \"{title}\" embed for server member \"{member.display_name}\"")
-        return 
+    ch = get_channel_by_name(bot, "технический", 'Russian')
+    await ch.send(f"Problems displaying \"{title}\" embed for server member \"{member.display_name}\"")
+    return 
 
   embed.set_footer(text="Смотрите как зарабатывать очки в Манифесте")
   main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
