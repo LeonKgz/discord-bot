@@ -1043,8 +1043,7 @@ async def spisok(ctx, role):
 
 @bot.event
 async def on_message(message):
-  
-  russian_name = get_channel_names(bot, str(message.channel.id))["Russian"]
+  russian_name = get_channel_names(bot, str(message.channel.id))["Russian"] if message.guild else ""
 
   if message.author == bot.user:
   #if message.author == bot.user and "!кто" not in str(message.content):
