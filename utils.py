@@ -263,6 +263,9 @@ def get_channel_names(bot, id):
   db.close()
   return False  
 
+def mention_author(ctx):
+  return f"<@!{ctx.author.id}>"
+
 def get_channel_by_name(bot, name, language):
   guild = bot.get_guild(GUILD)
   db, cursor = get_db_cursor()
