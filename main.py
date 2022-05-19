@@ -32,6 +32,15 @@ FOOD_KEY = str(os.getenv('FOOD_KEY'))
 
 seneca_api = str(os.getenv('SENECA_API_TOKEN'))
 
+global_languages_dictionary = {
+  "remedies": "en",
+  "remedy": "en",
+  "средства": "ru",
+  "средство": "ru",
+  "prayer": "en",
+  "молитва": "ru",
+}
+
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
 #bot.timer_manager = timers.TimerManager(bot)
@@ -301,41 +310,76 @@ async def duty(ctx, issue):
     print(e)
     await ctx.send(f"<@!{ctx.author.id}>, долг для *«{issue}»* не найден! « !долги », чтобы посмотреть все ключевые слова.")
     
-@bot.command(name="средство")
-async def remedy(ctx, issue):
+from googletrans import Translator
+
+@bot.command(name='remedy', aliases=['средство'])
+async def remedy(ctx, *, args=None):
+  translator = Translator()
+  issue = args.strip()
+
+  global global_languages_dictionary
+  response_options = { 
+    "en": {
+      "404": f"{mention_author(ctx)}, remedy for *«{issue}»* was not found! « !remedies » to view all available keywords.",
+    },
+    "ru": {
+      "404": f"*{mention_author(ctx)}, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.",
+    }
+  }
+
+  invoked = ctx.invoked_with
+  lang = global_languages_dictionary[invoked]
 
   url = f"http://albenz.xyz:6969/remedy?issue={issue}"
 
   response = requests.get(url)
   data = response.json()
-  
+
+  rus_version = data["content"]
+  eng_version = translator.translate(rus_version).text
+  data["content"] = eng_version
+
   try:
     await parse_zettel_json(ctx, data)
   except Exception as e:
-    await ctx.send(f"<@!{ctx.author.id}>, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.")
-
-from io import BytesIO
-
-@bot.command(name="pdf")
-async def pdf(ctx):
-  # with open("plays.pdf", 'rb') as f:
-  #   data = f.read()
-  #   await ctx.channel.send(discord.File(data, filename="plays.pdf"))
-  await ctx.channel.send(file=discord.File("plays.pdf"))
-  # await ctx.channel.send(discord.Attachment("plays.pdf"))
+    await ctx.send(response_options[lang]["404"])
 
 import os 
 
-@bot.command(name="молитва")
-async def remedy(ctx):
+@bot.command(name='prayer', aliases=['молитва'])
+async def prayer(ctx):
 
-  ret = await ctx.send("*Генерирую вашу уникальную молитву...*")
+  translator = Translator()
+  global global_languages_dictionary
+  response_options = { 
+    "en": {
+      "hold": "*Generating your unique prayer...*", 
+      "ready": "Done! I recommend printing it.",
+    },
+    "ru": {
+      "hold": "*Генерирую вашу уникальную молитву...*",
+      "ready": "Готово! Советую распечатать.",
+    }
+  }
+
+  invoked = ctx.invoked_with
+  lang = global_languages_dictionary[invoked]
+
+  await ctx.channel.send(response_options[lang]["hold"])
 
   url = f"http://albenz.xyz:6969/prayer"
 
   response = requests.get(url)
   data = response.json()
   verses = data["verses"] 
+  
+  if lang == "en":
+    for v in verses:
+      original = v["content"]
+      eng_version = translator.translate(original).text
+      v["content"] = eng_version
+      v["remedy"] = v["remedy"].split(" - ")[1]
+
   tex = """\documentclass[10pt]{article}
 \\usepackage[russian]{babel}
 \\usepackage{tgpagella}
@@ -370,19 +414,13 @@ async def remedy(ctx):
 
   os.system(f"pdflatex {filename}.tex")
   # await ret.delete()
-  await ctx.channel.send("Готово! Советую распечатать.")
+  await ctx.channel.send(response_options[lang]["ready"])
   await ctx.channel.send(file=discord.File(f"{filename}.pdf"))
 
   os.remove(f"./{filename}.tex")
   os.remove(f"./{filename}.pdf")
   os.remove(f"./{filename}.log")
   os.remove(f"./{filename}.aux")
-
-  # try:
-  #   await parse_zettel_json(ctx, data)
-  # except Exception as e:
-  #   await ctx.send(f"<@!{ctx.author.id}>, {e}")
-
 
 @bot.command(name="стих")
 async def poem(ctx, issue):
@@ -410,18 +448,32 @@ async def poems(ctx):
   ret_str = ", ".join(data)
   await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
 
-@bot.command(name="средства")
+@bot.command(name="remedies", aliases=['средства'])
 async def remedies(ctx):
+  global global_languages_dictionary
+  response_options = { 
+    "en": {
+      "404": f"*{mention_author(ctx)}, remedies not found!*",
+      "success": f"*{mention_author(ctx)}, here's the list of keywords: "
+    },
+    "ru": {
+      "404": f"*{mention_author(ctx)}, средства не найдены!",
+      "success": f"*{mention_author(ctx)}, вот список ключевых слов: "
+    }
+  }
+  invoked = ctx.invoked_with
+  lang = global_languages_dictionary[invoked]
+
   url = f"http://albenz.xyz:6969/remedies"
-
   response = requests.get(url)
-  data = response.json()["remedies"]
 
+  data = response.json()["remedies"][lang]
+  
   if not data:
-    await ctx.send(f"<@!{ctx.author.id}>, средства не найдены!")
-
+    await ctx.send(response_options[lang]["404"])
+  
   ret_str = ", ".join(data)
-  await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
+  await ctx.send(response_options[lang]["success"] + f"\n\n\t{ret_str}.*")
 
 @bot.command(name="долги")
 async def duties(ctx):
@@ -2168,11 +2220,6 @@ async def confesss(ctx):
         db.rollback()
 
     db.close()
-
-@bot.command(name='no', aliases=['нет', 'いいえ'])
-async def confess(ctx, *, args=None):
-  print(args)
-  print(ctx.invoked_with)
 
 @bot.command(name='рассказать')
 async def confess(ctx, *, args=None):

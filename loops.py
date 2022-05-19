@@ -353,14 +353,13 @@ class Loops(commands.Cog):
       ch = get_channel_by_name(self.bot, "рождения", "Russian")
       await ch.send(f"**— {day} {month} —**\n\n\t**{page.title}**\n\n\t - {page.summary}\n\n\t - *{section.text}*\n\n**—**")
 
-  # @tasks.loop(seconds=HOUR)
-  @tasks.loop(seconds=5.0)
+  @tasks.loop(seconds=HOUR)
   async def meditations(self):
 
     hour = int(datetime.datetime.now().hour)
     guild = self.bot.get_guild(GUILD)
-    # if hour == 9 and guild:
-    if guild:
+    if hour == 9 and guild:
+    # if guild:
 
       channel = get_channel_by_name(self.bot, "размышления", "Russian")
       url = f"http://albenz.xyz:6969/remedy?issue=Random"
