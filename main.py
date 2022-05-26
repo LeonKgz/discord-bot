@@ -2225,14 +2225,21 @@ async def confesss(ctx):
 
     db.close()
 
+from nihon import Nihon
+nihon = Nihon(bot)
+
 # before starting local bot disconnect remote one
 @bot.command(name='jpoff')
 async def disconnect_japanese(ctx):
-  bot.remove_cog(Nihon(bot))
+  global nihon
+  bot.remove_cog(nihon)
+  await ctx.send("Nihon Cog is disconnected!")
 
 @bot.command(name='jpon')
-async def disconnect_japanese(ctx):
-  bot.add_cog(Nihon(bot))
+async def connect_japanese(ctx):
+  global nihon
+  bot.add_cog(nihon)
+  await ctx.send("Nihon Cog is connected!")
 
 @bot.command(name='рассказать')
 async def confess(ctx, *, args=None):
@@ -2435,11 +2442,11 @@ async def confess(ctx, *, args=None):
 from status import Status
 from loops import Loops
 from voice import Voice 
-from nihon import Nihon
 
 bot.add_cog(Status(bot))
 bot.add_cog(Loops(bot))
-bot.add_cog(Nihon(bot))
+# bot.add_cog(nihon)
+# bot.add_cog(Nihon(bot))
 # bot.add_cog(Voice(bot))
 
 bot.run(TOKEN)
