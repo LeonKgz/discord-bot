@@ -336,8 +336,9 @@ async def remedy(ctx, *, args=None):
   data = response.json()
 
   rus_version = data["content"]
-  eng_version = translator.translate(rus_version).text
-  data["content"] = eng_version
+  if lang == "en":
+    eng_version = translator.translate(rus_version).text
+    data["content"] = eng_version
 
   try:
     await parse_zettel_json(ctx, data)
@@ -379,6 +380,9 @@ async def prayer(ctx):
       eng_version = translator.translate(original).text
       v["content"] = eng_version
       v["remedy"] = v["remedy"].split(" - ")[1]
+  else:
+    for v in verses:
+      v["remedy"] = v["remedy"].split(" - ")[0]
 
   tex = """\documentclass[10pt]{article}
 \\usepackage[russian]{babel}
@@ -2220,6 +2224,15 @@ async def confesss(ctx):
         db.rollback()
 
     db.close()
+
+# before starting local bot disconnect remote one
+@bot.command(name='jpoff')
+async def disconnect_japanese(ctx):
+  bot.remove_cog(Nihon(bot))
+
+@bot.command(name='jpon')
+async def disconnect_japanese(ctx):
+  bot.add_cog(Nihon(bot))
 
 @bot.command(name='рассказать')
 async def confess(ctx, *, args=None):
