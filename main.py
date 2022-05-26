@@ -2229,17 +2229,22 @@ from nihon import Nihon
 nihon = Nihon(bot)
 
 # before starting local bot disconnect remote one
-@bot.command(name='jpoff')
-async def disconnect_japanese(ctx):
+@bot.command(name='nihon')
+async def check_japanese(ctx):
   global nihon
-  bot.remove_cog(nihon)
-  await ctx.send("Nihon Cog is disconnected!")
+  try:
+    response = json.load(urllib.request.urlopen(urllib.request.Request('http://localhost:8765', json.dumps({}).encode('utf-8'))))
+    bot.add_cog(nihon)
+    await ctx.send("Local Nihon Cog is connected!")
+  except Exception as e:
+    bot.remove_cog(nihon)
+    await ctx.send("Remote Nihon Cog is disconnected!")
+    print(e)
 
-@bot.command(name='jpon')
-async def connect_japanese(ctx):
-  global nihon
-  bot.add_cog(nihon)
-  await ctx.send("Nihon Cog is connected!")
+# @bot.command(name='jpon')
+# async def connect_japanese(ctx):
+#   global nihon
+#   await ctx.send("Nihon Cog is connected!")
 
 @bot.command(name='рассказать')
 async def confess(ctx, *, args=None):
