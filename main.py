@@ -323,7 +323,7 @@ async def remedy(ctx, *, args=None):
       "404": f"{mention_author(ctx)}, remedy for *«{issue}»* was not found! « !remedies » to view all available keywords.",
     },
     "ru": {
-      "404": f"*{mention_author(ctx)}, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.",
+      "404": f"{mention_author(ctx)}, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.",
     }
   }
 
@@ -2231,8 +2231,13 @@ nihon = Nihon(bot)
 # before starting local bot disconnect remote one
 @bot.command(name='nihon')
 async def check_japanese(ctx):
+  
+  if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
+    return
+
   global nihon
   try:
+    # Trying to connect to the AnkiConnect endpoint, for now only work locally
     response = json.load(urllib.request.urlopen(urllib.request.Request('http://localhost:8765', json.dumps({}).encode('utf-8'))))
     bot.add_cog(nihon)
     await ctx.send("Local Nihon Cog is connected!")
