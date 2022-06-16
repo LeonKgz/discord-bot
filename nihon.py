@@ -59,7 +59,8 @@ class Nihon(commands.Cog):
                 "ответ": f"{on}<br><br>{kun}<br><br>{meanings}"
               },
               "options": {
-                  "allowDuplicate": True,
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
               },
               "tags": [],
           }
@@ -114,7 +115,8 @@ class Nihon(commands.Cog):
                   "ответ": meaning
                 },
                 "options": {
-                    "allowDuplicate": True,
+                    "allowDuplicate": False,
+                    "duplicateScope": "deck",
                 },
                 "tags": tags,
             }
@@ -137,7 +139,8 @@ class Nihon(commands.Cog):
                     "ответ": furigana,
                   },
                   "options": {
-                      "allowDuplicate": True,
+                      "allowDuplicate": False,
+                      "duplicateScope": "deck",
                   },
                   "tags": [],
               }
@@ -178,7 +181,8 @@ class Nihon(commands.Cog):
                 "ответ": interpret,
               },
               "options": {
-                  "allowDuplicate": True,
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
               },
               "tags": [],
           }
