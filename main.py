@@ -323,7 +323,7 @@ async def remedy(ctx, *, args=None):
       "404": f"{mention_author(ctx)}, remedy for *«{issue}»* was not found! « !remedies » to view all available keywords.",
     },
     "ru": {
-      "404": f"*{mention_author(ctx)}, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.",
+      "404": f"{mention_author(ctx)}, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.",
     }
   }
 
