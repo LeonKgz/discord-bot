@@ -49,5 +49,5 @@ jobs:
       - name: Running The Bot
         run: | 
           docker build -t mankurt .
-          docker run --env ME='384492518043287555' mankurt 
+          docker run --env ME=${{secrets.ME}} mankurt 
           
