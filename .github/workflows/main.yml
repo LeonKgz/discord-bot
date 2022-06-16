@@ -47,5 +47,5 @@ jobs:
           
       # Runs a single command using the runners shell
       - name: Running The Bot
-        run: python main.py
+        run: python3 main.py
           
