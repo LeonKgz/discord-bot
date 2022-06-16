@@ -2,6 +2,8 @@
 # vim: set fileencoding=utf-8:
 # coding=utf-8
 
+# testing new remote 7
+
 import asyncio
 from http.client import REQUEST_URI_TOO_LONG
 import os
@@ -2231,8 +2233,13 @@ nihon = Nihon(bot)
 # before starting local bot disconnect remote one
 @bot.command(name='nihon')
 async def check_japanese(ctx):
+  
+  if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
+    return
+
   global nihon
   try:
+    # Trying to connect to the AnkiConnect endpoint, for now only work locally
     response = json.load(urllib.request.urlopen(urllib.request.Request('http://localhost:8765', json.dumps({}).encode('utf-8'))))
     bot.add_cog(nihon)
     await ctx.send("Local Nihon Cog is connected!")
