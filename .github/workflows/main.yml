@@ -49,5 +49,15 @@ jobs:
       - name: Running The Bot
         run: | 
           docker build -t mankurt .
-          docker run mankurt
+          docker run mankurt -e ME: ${{ secrets.ME }} \
+                             -e DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }} \
+                             -e DISCORD_GUILD: ${{ secrets.DISCORD_GUILD }} \
+                             -e SENECA_API_TOKEN: ${{ secrets.SENECA_API_TOKEN }} \
+                             -e DB_USER: ${{ secrets.DB_USER }} \
+                             -e DB_PASSWORD: ${{ secrets.DB_PASSWORD }} \
+                             -e DB_HOST: ${{ secrets.DB_HOST }} \
+                             -e DB_DATABASE: ${{ secrets.DB_DATABASE }} \
+                             -e QUOTES_KEY: ${{ secrets.QUOTES_KEY }} \ 
+                             -e FOOD_KEY: ${{ secrets.FOOD_KEY }} \
+                             -e MANASCHI: ${{ secrets.MANASCHI }} \
           
