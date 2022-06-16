@@ -7,3 +7,4 @@ discord-timers
 numpy
 wikipedia-api
 youtube-dl
+googletrans
