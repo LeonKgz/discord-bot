@@ -49,5 +49,5 @@ jobs:
       - name: Running The Bot
         run: | 
           docker build -t mankurt .
-          docker run --e ME='***REMOVED***' mankurt 
+          docker run --env ME='***REMOVED***' mankurt 
           
