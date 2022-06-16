@@ -5,13 +5,13 @@ RUN mkdir -p /usr/src/bot
 WORKDIR /usr/src/bot
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
-RUN sudo apt-get install texlive-latex-base
-RUN sudo apt-get install texlive-fonts-recommended
-RUN sudo apt-get install texlive-fonts-extra
-RUN sudo apt-get install texlive-latex-extra
+RUN apt-get install texlive-latex-base
+RUN apt-get install texlive-fonts-recommended
+RUN apt-get install texlive-fonts-extra
+RUN apt-get install texlive-latex-extra
 RUN pdflatex latex_source_name.tex
-RUN sudo apt-cache search texlive russian
-RUN sudo apt-get install texlive-lang-cyrillic
+RUN apt-cache search texlive russian
+RUN apt-get install texlive-lang-cyrillic
 
 COPY . .
 
