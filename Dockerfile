@@ -9,8 +9,6 @@ RUN apt-get install texlive-latex-base
 RUN apt-get install texlive-fonts-recommended
 RUN apt-get install texlive-fonts-extra
 RUN apt-get install texlive-latex-extra
-RUN pdflatex latex_source_name.tex
-RUN apt-cache search texlive russian
 RUN apt-get install texlive-lang-cyrillic
 
 COPY . .
