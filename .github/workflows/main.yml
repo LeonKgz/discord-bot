@@ -49,5 +49,7 @@ jobs:
       - name: Running The Bot
         run: | 
           docker build -t mankurt .
-          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI -d mankurt 
+          docker stop mankurt_discord_bot
+          docker container prune --force 
+          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI -d --name mankurt_discord_bot mankurt 
           
