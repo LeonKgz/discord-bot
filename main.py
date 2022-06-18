@@ -953,11 +953,10 @@ async def jail(ctx, poor_guy, protocol):
       
       length = lengths[status]
 
-      guild = bot.get_guild(GUILD) 
-      for ch in guild.channels:
-        if ("гулаг" in ch.name):
-          res = f"Заключённый <@!{mem_id}>! Ваше заключение составит {words[status]}. \nУзнать свой протокол можно с помощью команды « !начальник »"
-          await ch.send(res)
+
+      ch = get_channel_by_name(bot, "гулаг", 'Russian')
+      res = f"Заключённый <@!{mem_id}>! Ваше заключение составит {words[status]}. \nУзнать свой протокол можно с помощью команды « !начальник »"
+      await ch.send(res)
 
       sql = f"REPLACE INTO prisoners(ID, Protocol, Status, Counter) VALUES(\"{mem.id}\", \"{protocol}\", \"{status}\", \"{imprisonment_cnt}\")"
       try:
