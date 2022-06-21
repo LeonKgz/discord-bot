@@ -23,6 +23,7 @@ import sys
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
 GUILD = int(str(os.getenv('DISCORD_GUILD'))) if sys.argv[1] == "prod" else int(str(os.getenv('TEST_DISCORD_GUILD')))
+TEST_USER = int(str(os.getenv('TEST_USER')))
 ME = int(os.getenv('ME'))
 MANASCHI = int(os.getenv('MANASCHI'))
 
@@ -190,7 +191,7 @@ async def ebmed(ctx, user):
 
 async def weekly_activity_notification(id_to_search):
   # print(bot.get_user(id_to_search.bot))
-  if str(id_to_search) == str(ME) or str(id_to_search) == str(MANASCHI) or bot.get_user(id_to_search).bot:
+  if str(id_to_search) == str(ME) or str(id_to_search) == str(MANASCHI) or (bot.get_user(id_to_search).bot and int(id_to_search) != TEST_USER):
     print("Tis the owner or the music bot!")
     return
 
@@ -1156,8 +1157,10 @@ async def on_message(message):
     sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
 
     try:
+      print("started...")
       cursor.execute(sql)
       db.commit()
+      print("finished!")
     except Exception as e:
       print(e)
       db.rollback()
@@ -1177,7 +1180,7 @@ async def on_message(message):
       await message.channel.send("The guy is free!")
 
 #   await bot.process_commands(message)
-
+  print(42)
   ctx = await bot.get_context(message)
   await bot.invoke(ctx)
 
