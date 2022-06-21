@@ -7,13 +7,14 @@ import wikipediaapi
 import random
 import requests
 from utils import *
+import sys
 
 # retrieving JAWSDB credentials
 HOST = str(os.getenv('DB_HOST'))
 USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
-DB = str(os.getenv('DB_DATABASE'))
-GUILD = int(str(os.getenv('DISCORD_GUILD')))
+DB = str(os.getenv('DB_DATABASE')) if sys.argv[1] == "prod" else str(os.getenv('TEST_DB_DATABASE'))
+GUILD = int(str(os.getenv('DISCORD_GUILD'))) if sys.argv[1] == "prod" else int(str(os.getenv('TEST_DISCORD_GUILD')))
 
 class Nihon(commands.Cog):
 
