@@ -6,12 +6,13 @@ from discord.ext import commands, tasks
 from discord.ext.commands import Bot
 from discord.utils import get
 import pymysql.cursors
+import sys
 
 # retrieving JAWSDB credentials
 HOST = str(os.getenv('DB_HOST'))
 USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
-DB = str(os.getenv('DB_DATABASE'))
+DB = str(os.getenv('DB_DATABASE')) if sys.argv[1] == "prod" else str(os.getenv('TEST_DB_DATABASE'))
 
 class Status(commands.Cog):
 
