@@ -17,11 +17,12 @@ import datetime
 from requests import get
 from utils import *
 import numpy as np
-# test comment
+import sys
 
+# test comment
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
-GUILD = int(str(os.getenv('DISCORD_GUILD')))
+GUILD = int(str(os.getenv('DISCORD_GUILD'))) if sys.argv[1] == "prod" else int(str(os.getenv('TEST_DISCORD_GUILD')))
 ME = int(os.getenv('ME'))
 MANASCHI = int(os.getenv('MANASCHI'))
 
@@ -29,6 +30,7 @@ MANASCHI = int(os.getenv('MANASCHI'))
 HOST = str(os.getenv('DB_HOST'))
 USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
+
 QUOTES = str(os.getenv('QUOTES_KEY'))
 FOOD_KEY = str(os.getenv('FOOD_KEY'))
 
@@ -1098,6 +1100,10 @@ async def spisok(ctx, role):
   await ctx.send(ret)      
   return
 
+@bot.command(name='test')
+async def scnns(ctx):
+  scan_test_channel_names(bot)
+
 @bot.event
 async def on_message(message):
   russian_name = get_channel_names(bot, str(message.channel.id))["Russian"] if message.guild else ""
@@ -1112,12 +1118,18 @@ async def on_message(message):
       iid = message.content.split(" ")[1].strip()
       await add_points_quick(source=me.id, target=iid, amount=5, type='Telegram Integration', description='Подключение телеграм аккаунта')
       await telegram_registration_notification(iid)
-    return
+
+    if int(message.author.id) != ***REMOVED***:
+      return
 
   # For now if the bot is on some other server, do nothing!
   if (message.guild):
-    if (message.guild.name != "ТМГ"):
-      return
+    if sys.argv[1] == "prod" and message.guild.name != "ТМГ":
+      return 
+    if sys.argv[1] == "test" and message.guild.name != "TMG Zanshin":
+      return 
+    # if (not (message.guild.name == "ТМГ" or message.guild.name == "TMG Zanshin")):
+    #   return
 
   #if not message.guild and message.content[0] != "!" and int(message.author.id) != ME :
   if not message.guild:
@@ -1132,7 +1144,6 @@ async def on_message(message):
     name = message.author.name
     iid = message.author.id
     time = message.created_at
-
     db, cursor = get_db_cursor()
     row = get_db_row("cache", iid)
     # Check if this is the first message of the week for someone who wasnt sent to pogran-zastava on that monday; then +1 point
@@ -1165,7 +1176,10 @@ async def on_message(message):
           await mem.remove_roles(politzek)
       await message.channel.send("The guy is free!")
 
-  await bot.process_commands(message)
+#   await bot.process_commands(message)
+
+  ctx = await bot.get_context(message)
+  await bot.invoke(ctx)
 
 def get_guild():
   for guild in bot.guilds:
@@ -2254,8 +2268,8 @@ async def check_japanese(ctx):
 
 @bot.command(name='рассказать')
 async def confess(ctx, *, args=None):
+    print("32")
 #async def confess(ctx, confession):
-
     name = ctx.author.name
     iid = ctx.author.id
     confession = str(args)

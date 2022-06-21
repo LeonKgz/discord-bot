@@ -32,6 +32,8 @@ jobs:
       QUOTES_KEY: ${{ secrets.QUOTES_KEY }}
       FOOD_KEY: ${{ secrets.FOOD_KEY }}
       MANASCHI: ${{ secrets.MANASCHI }}
+      TEST_DB_DATABASE: ${{ secrets.TEST_DB_DATABASE}}
+      TEST_DISCORD_GUILD: ${{ secrets.TEST_DISCORD_GUILD }}
     strategy:
       matrix:
         python-version: [3.7]
@@ -51,5 +53,5 @@ jobs:
           docker build -t mankurt .
           docker stop mankurt_discord_bot
           docker container prune --force 
-          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI -d --name mankurt_discord_bot mankurt 
+          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD -d --name mankurt_discord_bot mankurt 
           
