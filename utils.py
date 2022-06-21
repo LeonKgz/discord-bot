@@ -37,6 +37,22 @@ def get_db_cursor():
                        cursorclass=pymysql.cursors.DictCursor)
   return db, db.cursor()
 
+def clear_db_table(table):
+  if not DB == str(os.getenv('TEST_DB_DATABASE')):
+    print("Can only clear tables in test mode!")
+    return 
+
+  db, cursor = get_db_cursor()
+  sql = f"DELETE FROM {table}" 
+  try:
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    print(e)
+    db.rollback()
+  
+  db.close()
+  
 def get_db_row(db_name, id_to_search):
 
     db, cursor = get_db_cursor()
@@ -266,6 +282,9 @@ def get_channel_names(bot, id):
 
 def mention_author(ctx):
   return f"<@!{ctx.author.id}>"
+
+def mention(id):
+  return f"<@!{id}>"
 
 def get_channel_by_name(bot, name, language):
   guild = bot.get_guild(GUILD)
