@@ -11,17 +11,18 @@ import os
 import pymysql.cursors
 import urllib.request
 import urllib.request
+import sys
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
-GUILD = int(str(os.getenv('DISCORD_GUILD')))
+GUILD = int(str(os.getenv('DISCORD_GUILD'))) if sys.argv[1] == "prod" else int(str(os.getenv('TEST_DISCORD_GUILD')))
 ME = int(os.getenv('ME'))
 
 # retrieving JAWSDB credentials
 HOST = str(os.getenv('DB_HOST'))
 USER = str(os.getenv('DB_USER'))
 PASSWORD = str(os.getenv('DB_PASSWORD'))
-DB = str(os.getenv('DB_DATABASE'))
+DB = str(os.getenv('DB_DATABASE')) if sys.argv[1] == "prod" else str(os.getenv('TEST_DB_DATABASE'))
 
 id_repository = {
   "glasnost_channel": "894988536305033228",
