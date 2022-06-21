@@ -14,4 +14,4 @@ RUN apt-get -y install texlive-lang-cyrillic
 
 COPY . .
 
-CMD [ "python3", "main.py" ]
+CMD [ "python3", "main.py" , "prod"]
