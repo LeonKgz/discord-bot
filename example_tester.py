@@ -22,7 +22,7 @@ created_channel = None
 
 @test_collector()
 async def test_description_basic(interface):
-#   clear_db_table("confessions")
+  clear_db_table("confessions")
   expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
   try:
     ret_msg = await interface.assert_reply_contains("!рассказать \"Я бот тестер!\"", expected)
