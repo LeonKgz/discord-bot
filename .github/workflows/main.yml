@@ -59,7 +59,7 @@ jobs:
           
       - name: Running Tests
         run: |
-          python3 example_tester.py -c ***REMOVED*** --run all ***REMOVED*** ***REMOVED***
+          python3 example_tester.py -c ***REMOVED*** --run all ***REMOVED*** $TEST_USER_TOKEN
 #          docker container prune --force
 #          docker build -t zanshin_runner --file Dockerfile_Tester .
 #          docker run --env TEST_USER_TOKEN=$TEST_USER_TOKEN --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD --env TEST_CHANNEL=$TEST_CHANNEL --env TEST_TARGET=$TEST_TARGET --env TEST_USER=$TEST_USER --name zanshin_runner zanshin_runner 
