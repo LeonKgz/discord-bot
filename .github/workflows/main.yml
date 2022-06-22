@@ -61,7 +61,7 @@ jobs:
           
       - name: Running Tests
         run: |
-          python3 example_tester.py -c $TEST_CHANNEL --run all $TEST_TARGET $TEST_USER_TOKEN_1.$TEST_USER_TOKEN_2.$TEST_USER_TOKEN_3
+          python3 example_tester.py -c $TEST_CHANNEL --run all $TEST_TARGET "OTg3ODU3NjM3MzYwMTQ0Mzk0"."GKLCpy"."byZ5sNpSrHx1aLlNwrEO37mFs4BcMMd2oRbbws"
           
       - name: Stopping the Tester Bot
         run: |
