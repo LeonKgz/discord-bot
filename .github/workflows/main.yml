@@ -23,7 +23,7 @@ jobs:
     env:
       ME: "***REMOVED***"
       DISCORD_TOKEN: "***REMOVED***"
-      TEST_USER_TOKEN: "OTg3ODU3NjM3MzYwMTQ0Mzk0.GUUDcp.UfYtCkgjAQrNQs4OKxPGQ3uenkLz7hKjNLWHxI"
+      TEST_USER_TOKEN: "***REMOVED***"
       DISCORD_GUILD: "***REMOVED***"
       SENECA_API_TOKEN: "***REMOVED***"
       DB_USER: "***REMOVED***"
