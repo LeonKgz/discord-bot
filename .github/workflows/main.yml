@@ -35,10 +35,10 @@ jobs:
       FOOD_KEY: ${{ secrets.FOOD_KEY }}
       MANASCHI: ${{ secrets.MANASCHI }}
       TEST_DB_DATABASE: ${{ secrets.TEST_DB_DATABASE }}
-      TEST_DISCORD_GUILD: ***REMOVED***
-      TEST_CHANNEL: ***REMOVED***
-      TEST_TARGET: ***REMOVED***
-      TEST_USER: ***REMOVED***
+      TEST_DISCORD_GUILD: "***REMOVED***"
+      TEST_CHANNEL: "***REMOVED***"
+      TEST_TARGET: "***REMOVED***"
+      TEST_USER: "***REMOVED***"
     strategy:
       matrix:
         python-version: [3.7]
