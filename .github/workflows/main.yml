@@ -21,20 +21,19 @@ jobs:
     runs-on: self-hosted
     environment: mankurt
     env:
-      ME: ${{ secrets.ME }}
-      DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-      DISCORD_TOKENN: ${{ secrets.DISCORD_TOKEN_2 }}
-      TEST_USER_TOKEN: ${{ secrets.TEST_USER_TOKEN }}
-      DISCORD_GUILD: ${{ secrets.DISCORD_GUILD }}
-      SENECA_API_TOKEN: ${{ secrets.SENECA_API_TOKEN }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_DATABASE: ${{ secrets.DB_DATABASE }}      
+      ME: "***REMOVED***"
+      DISCORD_TOKEN: "***REMOVED***"
+      TEST_USER_TOKEN: "OTg3ODU3NjM3MzYwMTQ0Mzk0.GUUDcp.UfYtCkgjAQrNQs4OKxPGQ3uenkLz7hKjNLWHxI"
+      DISCORD_GUILD: "***REMOVED***"
+      SENECA_API_TOKEN: "***REMOVED***"
+      DB_USER: "***REMOVED***"
+      DB_PASSWORD: "***REMOVED***"
+      DB_HOST: "***REMOVED***"
+      DB_DATABASE: "***REMOVED***"    
       QUOTES_KEY: ${{ secrets.QUOTES_KEY }}
       FOOD_KEY: ${{ secrets.FOOD_KEY }}
-      MANASCHI: ${{ secrets.MANASCHI }}
-      TEST_DB_DATABASE: ${{ secrets.TEST_DB_DATABASE }}
+      MANASCHI: "***REMOVED***"
+      TEST_DB_DATABASE: "***REMOVED***"
       TEST_DISCORD_GUILD: "***REMOVED***"
       TEST_CHANNEL: "***REMOVED***"
       TEST_TARGET: "***REMOVED***"
@@ -60,9 +59,10 @@ jobs:
           
       - name: Running Tests
         run: |
-          docker container prune --force
-          docker build -t zanshin_runner --file Dockerfile_Tester .
-          docker run --env TEST_USER_TOKEN=$TEST_USER_TOKEN --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD --env TEST_CHANNEL=$TEST_CHANNEL --env TEST_TARGET=$TEST_TARGET --env TEST_USER=$TEST_USER --name zanshin_runner zanshin_runner 
+          python3 example_tester.py -c $TEST_CHANNEL --run all $TEST_TARGET ***REMOVED***
+#          docker container prune --force
+#          docker build -t zanshin_runner --file Dockerfile_Tester .
+#          docker run --env TEST_USER_TOKEN=$TEST_USER_TOKEN --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD --env TEST_CHANNEL=$TEST_CHANNEL --env TEST_TARGET=$TEST_TARGET --env TEST_USER=$TEST_USER --name zanshin_runner zanshin_runner 
 #           python3 example_tester.py -c $TEST_CHANNEL --run all $TEST_TARGET ***REMOVED***          
 #       - name: Stopping the Tester Bot and the Runner container
 #         run: |
