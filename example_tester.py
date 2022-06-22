@@ -29,7 +29,7 @@ async def test_description_basic(interface):
     print("Test is passed")
   except Exception as e:
     print(e)
-    assert False
+    exit(-1)
 
 # @test_collector()
 # async def test_ping(interface):
