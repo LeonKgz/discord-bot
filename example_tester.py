@@ -160,9 +160,4 @@ async def test_description_basic(interface):
 # Actually run the bot
 
 if __name__ == "__main__":
-    to = sys.argv
-    a = "OTg3ODU3NjM3MzYwMTQ0Mzk0"
-    b = "GUUDcp"
-    c = "UfYtCkgjAQrNQs4OKxPGQ3uenkLz7hKjNLWHxI"
-    to[-1] = f"{a}.{b}.{c}"
-    run_dtest_bot(to, test_collector)
+    run_dtest_bot(sys.argv, test_collector)
