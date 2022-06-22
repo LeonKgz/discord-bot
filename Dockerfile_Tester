@@ -7,5 +7,5 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
 COPY . .
-
+CMD echo $TEST_USER_TOKEN
 CMD python3 example_tester.py -c $TEST_CHANNEL --run all $TEST_TARGET $TEST_USER_TOKEN
