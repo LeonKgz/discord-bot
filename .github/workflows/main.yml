@@ -55,7 +55,6 @@ jobs:
       - name: Retrieving keystore
         run: |
           echo $KEYSTORE_BASE64 | base64 -d > my_production.keystore
-          cat my_production.keystore
 
       - name: Running the Tester Bot
         run: | 
