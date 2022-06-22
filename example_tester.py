@@ -13,6 +13,7 @@ from utils import *
 import os
 
 TEST_USER = int(str(os.getenv('TEST_USER')))
+TEST_USER_TOKEN = str(os.getenv('TEST_USER_TOKEN'))
 
 # The tests themselves
 
@@ -159,4 +160,5 @@ async def test_description_basic(interface):
 # Actually run the bot
 
 if __name__ == "__main__":
+    sys.argv[-1] = TEST_USER_TOKEN 
     run_dtest_bot(sys.argv, test_collector)
