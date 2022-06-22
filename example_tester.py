@@ -9,7 +9,7 @@ from distest import TestCollector
 from distest import run_dtest_bot
 from discord import Embed, Member, Status
 from distest import TestInterface
-from utils import *
+from utils import clear_db_table, mention
 import os
 
 TEST_USER = int(str(os.getenv('TEST_USER')))
