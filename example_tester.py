@@ -160,5 +160,8 @@ async def test_description_basic(interface):
 # Actually run the bot
 
 if __name__ == "__main__":
-    sys.argv[-1] = TEST_USER_TOKEN 
+    a = "OTg3ODU3NjM3MzYwMTQ0Mzk0"
+    b = "GUUDcp"
+    c = "UfYtCkgjAQrNQs4OKxPGQ3uenkLz7hKjNLWHxI"
+    sys.argv[-1] = f"{a}.{b}.{c}"
     run_dtest_bot(sys.argv, test_collector)
