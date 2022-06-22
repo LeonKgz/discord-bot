@@ -160,4 +160,7 @@ async def test_description_basic(interface):
 # Actually run the bot
 
 if __name__ == "__main__":
+    print("==================")
+    print(sys.argv)
+    print("==================")
     run_dtest_bot(sys.argv, test_collector)
