@@ -1101,9 +1101,15 @@ async def spisok(ctx, role):
   await ctx.send(ret)      
   return
 
+<<<<<<< HEAD
 # @bot.command(name='test')
 # async def scnns(ctx):
 #   scan_test_channel_names(bot)
+=======
+@bot.command(name='test')
+async def scnns(ctx):
+  scan_test_channel_names(bot)
+>>>>>>> 4b7264f9ab00fb6b3cffe3d31c9d38f2fb174e5a
 
 @bot.event
 async def on_message(message):
