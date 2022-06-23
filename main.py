@@ -580,7 +580,7 @@ async def record_log(ctx):
   # time =  d.datetime(2021, 11, 5, 2, 34)
   actor = discord.utils.get(ctx.guild.roles, name="Актёр Запаса")
 
-  source_id = ***REMOVED***
+  source_id = 384492518043287555
   type = "Play"
   sign = "Positive"
   amount = "10"
@@ -1120,7 +1120,7 @@ async def on_message(message):
       await add_points_quick(source=me.id, target=iid, amount=5, type='Telegram Integration', description='Подключение телеграм аккаунта')
       await telegram_registration_notification(iid)
 
-    if int(message.author.id) != ***REMOVED***:
+    if int(message.author.id) != 987857637360144394:
       return
 
   # For now if the bot is on some other server, do nothing!
@@ -1208,7 +1208,7 @@ async def check_rights(ctx, acceptable_roles, tell=True):
   return False
 
 async def check_rights_dm(ctx):
-  super_roles = [214320783357378560, 696405991876722718, ***REMOVED***, 498264068415553537]
+  super_roles = [214320783357378560, 696405991876722718, 384492518043287555, 498264068415553537]
   if ctx.author.id in super_roles:
       return True
   response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(du_get(bot.emojis, name='peepoClown'))
@@ -1311,7 +1311,7 @@ async def let_free(ctx):
     
     if (res is None):
 
-      res = f"Гражданин <@!{iid}>! \n\nМы не можем установить вашу личность! Вам нужно зарекомендовать себя! \n\n\t\tЭто можно сделать с помощью команды **« !рассказать »**\n\n\t\t **Например:** !рассказать \"Привет, я Хитари, ну или просто Сергей. Мне 27, живу в городе Санкт-Петербург, люблю японские компьютерные игры, читать мангу и так, по мелочи...\"\n\n\t Не забудьте про **кавычки**! Боту можно написать и в личку. Соответственно рекомендации пользователя можно узнать с помощью команды **« !кто »**, например: !кто <@!***REMOVED***> . Учтите, что **записи о себе можно править только один раз в 7 дней!**"
+      res = f"Гражданин <@!{iid}>! \n\nМы не можем установить вашу личность! Вам нужно зарекомендовать себя! \n\n\t\tЭто можно сделать с помощью команды **« !рассказать »**\n\n\t\t **Например:** !рассказать \"Привет, я Хитари, ну или просто Сергей. Мне 27, живу в городе Санкт-Петербург, люблю японские компьютерные игры, читать мангу и так, по мелочи...\"\n\n\t Не забудьте про **кавычки**! Боту можно написать и в личку. Соответственно рекомендации пользователя можно узнать с помощью команды **« !кто »**, например: !кто <@!384492518043287555> . Учтите, что **записи о себе можно править только один раз в 7 дней!**"
       await ctx.send(res)
       return  
 
