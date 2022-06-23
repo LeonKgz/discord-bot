@@ -22,23 +22,7 @@ jobs:
     environment: mankurt
     env:
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-#      ME: "384492518043287555"
-#      DISCORD_TOKEN: "NzI1NzEyNDU3NTQ0MzY4MTg4.XvSuZA.wnLNf4oV0REA3YIHDI_3cYQzVhU"
-      TEST_USER_TOKEN: "OTg3ODU3NjM3MzYwMTQ0Mzk0.GZDPxs._YPaV8MCZeGq22nDd2nsAgLyJ2S_SWrH4CkiRM"
-#      DISCORD_GUILD: "703737790848040971"
-#      SENECA_API_TOKEN: "5341436760:AAEg3XVn5cRVFNSQUjOg2jrhThF8TJZ5gr8"
-#      DB_USER: "root"
-#      DB_PASSWORD: "SenecaPraemeditatio1874"
-#      DB_HOST: "45.32.178.186"
-#      DB_DATABASE: "a8nf9cctdcnbl7xz"    
-#      QUOTES_KEY: ${{ secrets.QUOTES_KEY }}
-#      FOOD_KEY: ${{ secrets.FOOD_KEY }}
-#      MANASCHI: "940320239344824320"
-#      TEST_DB_DATABASE: "zanshin_db"
-#      TEST_DISCORD_GUILD: "987868240376102932"
-      TEST_CHANNEL: "987868241235939352"
-      TEST_TARGET: "725712457544368188"
-#      TEST_USER: "987857637360144394"
+      
     strategy:
       matrix:
         python-version: [3.7]
@@ -52,7 +36,7 @@ jobs:
           python3 -m pip install --upgrade pip
           pip3 install -r requirements.txt
 
-      - name: Retrieving keystore
+      - name: Retrieving Environment Variables
         run: |
           echo "$KEYSTORE_BASE64"==== | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > my_production.keystore
 
@@ -61,9 +45,7 @@ jobs:
           docker stop zanshin_discord_bot || true
           docker container prune --force
           docker build -t zanshin --file Dockerfile_Test .
-          cat my_production.keystore
           docker run --env-file my_production.keystore -d --name zanshin_discord_bot zanshin
-#          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD --env TEST_CHANNEL=$TEST_CHANNEL --env TEST_TARGET=$TEST_TARGET --env TEST_USER=$TEST_USER -d --name zanshin_discord_bot zanshin 
 
       - name: Running Tests
         run: |
@@ -71,7 +53,6 @@ jobs:
           docker container prune --force
           docker build -t zanshin_runner --file Dockerfile_Tester .
           docker run --env-file my_production.keystore --name zanshin_runner zanshin_runner       
-#          python3 example_tester.py -c $TEST_CHANNEL --run all $TEST_TARGET $TEST_USER_TOKEN
 
       - name: Stopping the Tester Bot and the Runner container
         run: |
@@ -85,5 +66,4 @@ jobs:
           docker stop mankurt_discord_bot
           docker container prune --force
           docker run --env-file my_production.keystore -d --name mankurt_discord_bot mankurt 
-#          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD --env TEST_CHANNEL=$TEST_CHANNEL --env TEST_TARGET=$TEST_TARGET --env TEST_USER=$TEST_USER -d --name mankurt_discord_bot mankurt 
           
