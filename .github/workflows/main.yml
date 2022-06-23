@@ -22,23 +22,23 @@ jobs:
     environment: mankurt
     env:
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-      ME: "***REMOVED***"
-      DISCORD_TOKEN: "***REMOVED***"
+#      ME: "***REMOVED***"
+#      DISCORD_TOKEN: "***REMOVED***"
       TEST_USER_TOKEN: "***REMOVED***"
-      DISCORD_GUILD: "***REMOVED***"
-      SENECA_API_TOKEN: "***REMOVED***"
-      DB_USER: "***REMOVED***"
-      DB_PASSWORD: "***REMOVED***"
-      DB_HOST: "***REMOVED***"
-      DB_DATABASE: "***REMOVED***"    
-      QUOTES_KEY: ${{ secrets.QUOTES_KEY }}
-      FOOD_KEY: ${{ secrets.FOOD_KEY }}
-      MANASCHI: "***REMOVED***"
-      TEST_DB_DATABASE: "***REMOVED***"
-      TEST_DISCORD_GUILD: "***REMOVED***"
+#      DISCORD_GUILD: "***REMOVED***"
+#      SENECA_API_TOKEN: "***REMOVED***"
+#      DB_USER: "***REMOVED***"
+#      DB_PASSWORD: "***REMOVED***"
+#      DB_HOST: "***REMOVED***"
+#      DB_DATABASE: "***REMOVED***"    
+#      QUOTES_KEY: ${{ secrets.QUOTES_KEY }}
+#      FOOD_KEY: ${{ secrets.FOOD_KEY }}
+#      MANASCHI: "***REMOVED***"
+#      TEST_DB_DATABASE: "***REMOVED***"
+#      TEST_DISCORD_GUILD: "***REMOVED***"
       TEST_CHANNEL: "***REMOVED***"
       TEST_TARGET: "***REMOVED***"
-      TEST_USER: "***REMOVED***"
+#      TEST_USER: "***REMOVED***"
     strategy:
       matrix:
         python-version: [3.7]
@@ -64,7 +64,7 @@ jobs:
           cat my_production.keystore
           docker run --env-file my_production.keystore -d --name zanshin_discord_bot zanshin
 #          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD --env TEST_CHANNEL=$TEST_CHANNEL --env TEST_TARGET=$TEST_TARGET --env TEST_USER=$TEST_USER -d --name zanshin_discord_bot zanshin 
-#         docker run --env-file my_production.keystore -d --name zanshin_discord_bot zanshin 
+
       - name: Running Tests
         run: |
           python3 example_tester.py -c $TEST_CHANNEL --run all $TEST_TARGET $TEST_USER_TOKEN
@@ -82,6 +82,7 @@ jobs:
         run: | 
           docker build -t mankurt .
           docker stop mankurt_discord_bot
-          docker container prune --force 
-          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD --env TEST_CHANNEL=$TEST_CHANNEL --env TEST_TARGET=$TEST_TARGET --env TEST_USER=$TEST_USER -d --name mankurt_discord_bot mankurt 
+          docker container prune --force
+          docker run --env-file my_production.keystore -d --name mankurt_discord_bot mankurt 
+#          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD --env TEST_CHANNEL=$TEST_CHANNEL --env TEST_TARGET=$TEST_TARGET --env TEST_USER=$TEST_USER -d --name mankurt_discord_bot mankurt 
           
