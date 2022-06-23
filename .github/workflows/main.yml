@@ -59,8 +59,11 @@ jobs:
       - name: Running the Tester Bot
         run: | 
           docker stop zanshin_discord_bot || true
+          docker container prune --force
           docker build -t zanshin --file Dockerfile_Test .
-          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD --env TEST_CHANNEL=$TEST_CHANNEL --env TEST_TARGET=$TEST_TARGET --env TEST_USER=$TEST_USER -d --name zanshin_discord_bot zanshin 
+          cat my_production.keystore
+          docker run --env-file my_production.keystore -d --name zanshin_discord_bot zanshin
+#          docker run --env DISCORD_TOKEN=$DISCORD_TOKEN --env ME=$ME --env DISCORD_GUILD=$DISCORD_GUILD --env SENECA_API_TOKEN=$SENECA_API_TOKEN --env DB_USER=$DB_USER --env DB_PASSWORD=$DB_PASSWORD --env DB_HOST=$DB_HOST --env DB_DATABASE=$DB_DATABASE --env QUOTES_KEY=$QUOTES_KEY --env FOOD_KEY=$FOOD_KEY --env MANASCHI=$MANASCHI --env TEST_DB_DATABASE=$TEST_DB_DATABASE --env TEST_DISCORD_GUILD=$TEST_DISCORD_GUILD --env TEST_CHANNEL=$TEST_CHANNEL --env TEST_TARGET=$TEST_TARGET --env TEST_USER=$TEST_USER -d --name zanshin_discord_bot zanshin 
 #         docker run --env-file my_production.keystore -d --name zanshin_discord_bot zanshin 
       - name: Running Tests
         run: |
