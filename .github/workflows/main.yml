@@ -70,7 +70,7 @@ jobs:
           docker stop zanshin_runner || true
           docker container prune --force
           docker build -t zanshin_runner --file Dockerfile_Tester .
-          docker run --env-file my_production.keystore -d --name zanshin_runner zanshin_runner       
+          docker run --env-file my_production.keystore --name zanshin_runner zanshin_runner       
 #          python3 example_tester.py -c $TEST_CHANNEL --run all $TEST_TARGET $TEST_USER_TOKEN
 
       - name: Stopping the Tester Bot and the Runner container
