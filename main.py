@@ -1101,9 +1101,9 @@ async def spisok(ctx, role):
   await ctx.send(ret)      
   return
 
-@bot.command(name='test')
-async def scnns(ctx):
-  scan_test_channel_names(bot)
+# @bot.command(name='test')
+# async def scnns(ctx):
+#   scan_test_channel_names(bot)
 
 @bot.event
 async def on_message(message):
@@ -1157,10 +1157,8 @@ async def on_message(message):
     sql = f"REPLACE INTO cache(ID, Name, Timestamp) VALUES(\"{iid}\", \"{name}\", \"{time}\")"
 
     try:
-      print("started...")
       cursor.execute(sql)
       db.commit()
-      print("finished!")
     except Exception as e:
       print(e)
       db.rollback()
@@ -1180,7 +1178,6 @@ async def on_message(message):
       await message.channel.send("The guy is free!")
 
 #   await bot.process_commands(message)
-  print(42)
   ctx = await bot.get_context(message)
   await bot.invoke(ctx)
 
