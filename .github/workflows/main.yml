@@ -43,14 +43,12 @@ jobs:
       - name: Running the Tester Bot
         run: | 
           docker stop zanshin_discord_bot || true
-          docker container prune --force
           docker build -t zanshin --file Dockerfile_Test .
           docker run --env-file my_production.keystore -d --name zanshin_discord_bot zanshin
 
       - name: Running Tests
         run: |
           docker stop zanshin_runner || true
-          docker container prune --force
           docker build -t zanshin_runner --file Dockerfile_Tester .
           docker run --env-file my_production.keystore --name zanshin_runner zanshin_runner       
 
@@ -63,7 +61,7 @@ jobs:
       - name: Running The Bot
         run: | 
           docker build -t mankurt .
-          docker stop mankurt_discord_bot
+          docker stop mankurt_discord_bot || true
           docker container prune --force
           docker run --env-file my_production.keystore -d --name mankurt_discord_bot mankurt 
           
