@@ -12,6 +12,7 @@ import pymysql.cursors
 import urllib.request
 import urllib.request
 import sys
+import re
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
@@ -696,7 +697,45 @@ def get_kanji_info(kanji):
 
     return on, kun, meanings
 
+from bs4 import BeautifulSoup
+
 def get_word_info(word):
+    # open a connection to a URL using urllib
+    print(word)
+    jisho_url_prefix = "https://jisho.org/word/"
+    val = urllib.parse.quote(word.encode('utf-8'))
+    try:
+      webUrl = urllib.request.urlopen(f'{jisho_url_prefix}{val}')
+    except Exception as e:
+      print(e)
+      return None, None, str(e)
+
+    # read the data from the URL and print it
+    data = (webUrl.read())
+    data = data.decode('Utf-8')
+
+    soup = BeautifulSoup(data, 'html.parser')
+    soup = soup.find("div", {"class": "concept_light clearfix"})
+    japanese = soup.find("div", {"class": "concept_light-representation"})
+    furigana = japanese.find("span", {"class": "furigana"})
+    furigana_including_spaces = [f.get_text() for f in furigana.findChildren()]
+    text = japanese.find("span", {"class": "text"})
+    kana_between_kanji = [f.get_text() for f in text.findChildren()]
+    
+    if kana_between_kanji:
+      idx = 0
+      for i in range(len(furigana_including_spaces)):
+        curr = furigana_including_spaces[i]
+        if not curr:
+          furigana_including_spaces[i] = kana_between_kanji[idx]
+          idx += 1
+
+    proper_furigana = "".join(furigana_including_spaces)
+    english = soup.find("span", {"class": "meaning-meaning"})
+    english = english.get_text()
+    return word, proper_furigana, english
+
+def get_word_info_deprecated(word):
     # open a connection to a URL using urllib
     jisho_url_prefix = "https://jisho.org/word/"
     # jisho_url_postfix = "%20%23kanji"
@@ -719,6 +758,8 @@ def get_word_info(word):
     data = data.decode('Utf-8')
     temp = data.split("<div class=\"concept_light clearfix\">")[1]
     temp = temp.split("<h3>Discussions")[0].split("<div class=\"concept_light-meanings")
+    # Now temp is an array of two divs, one with readings and the other with meaning
+
     # furigana1 = temp[0].split("-up kanji\">")[1].split("</span>")[0]
     furigana1s = temp[0].split("-up kanji\">")
     # subparts = int(furigana1s[0][-1])
