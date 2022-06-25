@@ -1,0 +1,67 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    environment: mankurt
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      
+    strategy:
+      matrix:
+        python-version: [3.7]
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -r requirements.txt
+
+      - name: Retrieving Environment Variables
+        run: |
+          echo "$KEYSTORE_BASE64"==== | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > my_production.keystore
+
+      - name: Running the Tester Bot
+        run: | 
+          docker rm -fv zanshin_discord_bot
+          docker build -t zanshin --file Dockerfile_Test .
+          docker run --env-file my_production.keystore -d --name zanshin_discord_bot zanshin
+
+      - name: Running Tests
+        run: |
+          docker rm -fv zanshin_runner
+          docker build -t zanshin_runner --file Dockerfile_Tester .
+          docker run --env-file my_production.keystore --name zanshin_runner zanshin_runner       
+
+      - name: Stopping the Tester Bot and the Runner container
+        run: |
+          docker rm -fv zanshin_discord_bot 
+          docker rm -fv zanshin_runner
+          
+      # Runs a single command using the runners shell
+      - name: Running The Bot
+        run: | 
+          docker build -t mankurt .
+          docker rm -fv mankurt_discord_bot 
+          docker container prune --force
+          docker run --env-file my_production.keystore -d --name mankurt_discord_bot mankurt 
+          
