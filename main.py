@@ -2261,11 +2261,6 @@ async def check_japanese(ctx):
     await ctx.send("Remote Nihon Cog is disconnected!")
     print(e)
 
-# @bot.command(name='jpon')
-# async def connect_japanese(ctx):
-#   global nihon
-#   await ctx.send("Nihon Cog is connected!")
-
 @bot.command(name='рассказать')
 async def confess(ctx, *, args=None):
     print("32")
