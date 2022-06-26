@@ -69,8 +69,6 @@ def update_db_entry(table, field_name, new_val, id_val):
     db.rollback()
   
   db.close()
- 
-
 
 def get_db_row(db_name, id_to_search):
 
