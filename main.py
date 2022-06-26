@@ -2261,15 +2261,8 @@ async def check_japanese(ctx):
     await ctx.send("Remote Nihon Cog is disconnected!")
     print(e)
 
-# @bot.command(name='jpon')
-# async def connect_japanese(ctx):
-#   global nihon
-#   await ctx.send("Nihon Cog is connected!")
-
 @bot.command(name='рассказать')
 async def confess(ctx, *, args=None):
-    print("32")
-#async def confess(ctx, confession):
     name = ctx.author.name
     iid = ctx.author.id
     confession = str(args)
@@ -2335,6 +2328,7 @@ async def confess(ctx, *, args=None):
     select = f"SELECT * from confessions WHERE ID={iid};"
     replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{iid}\", \"{name}\", \"{confession}\", \"{time}\", \"{data}\")"
 
+    curr_mean = 0
     try:
       cursor.execute(select)
       ret = cursor.fetchone()
@@ -2379,7 +2373,7 @@ async def confess(ctx, *, args=None):
             print(e)
             db.rollback()
 
-          await ctx.send(f"<@!{iid}> проходите, ваше описание обновлено!")
+          await ctx.send(f"<@!{iid}> ваше описание обновлено, проходите!")
 
           #author = bot.get_user(ctx.author.id)
           author = guild.get_member(ctx.author.id) 
@@ -2431,14 +2425,13 @@ async def confess(ctx, *, args=None):
         print(e)
         db.rollback()
 
-    # If description was updated successfully need to reinsert user into the unmarked_confessions table and update Confession status in raiting databse
-
+    # If description was updated successfully need to reinsert user into the unmarked_confessions table and update Confession status in raiting database
     if updated:
 
       # if there are no entries unmarked tables i.e. points for the previous description were already added to the overall score, we need to subtract them now
       row = get_db_row("unmarked_confessions", iid)
       if not row:
-        await remove_points_quick(iid, curr_mean)
+        await remove_points_quick(source=ME, target=iid, type="Description", amount=curr_mean, description="Корректировка оценки описания")
 
       update = f"UPDATE raiting SET Confession = \"Yes\" WHERE ID =\"{iid}\""
 
@@ -2462,6 +2455,7 @@ async def confess(ctx, *, args=None):
         await ctx.send(f"Проблема учёта оценок новых описаний!")
         db.rollback()
 
+    # await ctx.send(f"<@!{iid}> ваше описание обновлено, проходите!")
     db.close()
 
 from status import Status

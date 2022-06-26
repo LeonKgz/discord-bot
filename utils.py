@@ -2,7 +2,6 @@
 # vim: set fileencoding=utf-8:
 # coding=utf-8
 
-import asyncio
 import base64
 import discord
 import json
@@ -12,7 +11,8 @@ import pymysql.cursors
 import urllib.request
 import urllib.request
 import sys
-import re
+import random
+import string
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
@@ -54,6 +54,24 @@ def clear_db_table(table):
   
   db.close()
   
+def update_db_entry(table, field_name, new_val, id_val):
+  if not DB == str(os.getenv('TEST_DB_DATABASE')):
+    print("Can only rewrite tables in test mode!")
+    return 
+
+  db, cursor = get_db_cursor()
+  sql = f"UPDATE {table} SET {field_name} = \"{new_val}\" WHERE ID = \"{id_val}\""  
+  try:
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    print(e)
+    db.rollback()
+  
+  db.close()
+ 
+
+
 def get_db_row(db_name, id_to_search):
 
     db, cursor = get_db_cursor()
@@ -71,6 +89,10 @@ def get_db_row(db_name, id_to_search):
       db.rollback()
       db.close()
       return False
+
+def generate_text(word_size=10, text_size=10):
+  text = ' '.join([''.join(random.choices(string.ascii_uppercase + string.digits, k = word_size)) for _ in range(text_size)])
+  return text
 
 async def parse_zettel_json(ctx, data):
   
