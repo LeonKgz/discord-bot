@@ -3,6 +3,7 @@
 # coding=utf-8
 
 import base64
+from calendar import month
 import discord
 import json
 import numpy as np
@@ -13,6 +14,7 @@ import urllib.request
 import sys
 import random
 import string
+import datetime
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
@@ -569,11 +571,13 @@ def get_file(bot, mem):
     main_field = "⠀\n" + main_field
 
 
-  logs = get_logs(id_to_search)
+  # logs = get_logs(id_to_search)
+  logs = get_logs_compressed(id_to_search)
+
   if logs[-1]:
     main_field += f"\n\nАктивность:"
     embed.add_field(name=main_field, value=f"⠀\n{logs[0]}\n⠀", inline=False)
-    print(len(logs[0]))
+    # print(len(logs[0]))
     for l in logs[1:]:
       embed.add_field(name="⠀", value=f"⠀\n{l}\n⠀", inline=False)
 
@@ -601,6 +605,88 @@ def record_logs(timestamp, source, target, type, sign, amount, description):
     print(e)
     entry = "INSERT INTO logs(" + (", ".join([timestamp, source, target, type, sign, amount, description])) + ")"
     print(f"Failed to record logs for this entry: {entry}")
+
+# same as get_logs but compresses weekly activity into months
+def get_logs_compressed(id_to_search):
+
+  # id_author = ctx.author.id
+  # id_to_search = get_id(mem)
+  # mem = bot.get_user(id_to_search)
+  db, cursor = get_db_cursor()
+  sql = f"SELECT * FROM logs WHERE Target = \"{id_to_search}\" ORDER BY Timestamp ASC"
+  field_content_limit = 1020
+
+
+  try:
+
+    cursor.execute(sql)
+    ret = cursor.fetchall()
+    res = [""]
+    size = 0
+
+    curr_month_activity = []
+    curr_month = None
+    prev_row = None
+
+    def record_row(r, res):
+        nonlocal size      
+        sign = "+" if r['Sign'] == "Positive" else "-"
+        
+        time = r['Timestamp'].strftime('%d-%m-%Y')
+        # num = sign + str(r['Amount'])
+        to_add = f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\t*{r['Description']}*\n"
+
+        if len(to_add) + size > field_content_limit:
+          res.append("") 
+          size = 0
+
+        res[-1] += to_add 
+        size += len(to_add)
+
+    def is_weekly(r):
+      return r and r['Type'] == 'Activity' and r['Description'] == "Недельная активность"
+
+    def record_month_activity(curr_month_activity, res):
+      if curr_month_activity:
+        monthly_row = {key: val for key, val in curr_month_activity[-1].items()}
+        monthly_row["Amount"] = sum([sub_r["Amount"] for sub_r in curr_month_activity])
+        monthly_row["Description"] = "Недельная активность (за месяц)"
+        record_row(monthly_row, res)
+
+    for r in ret:
+      # TODO add additional check in the futura addition od descriptions in other languages e.g. english
+      curr_month = r['Timestamp'].month
+      if is_weekly(r):
+        if curr_month_activity and curr_month_activity[-1]['Timestamp'].month == curr_month:
+          curr_month_activity.append(r)
+        else:
+          size = len(curr_month_activity)
+          if size > 1:
+            record_month_activity(curr_month_activity, res)
+          if size == 1:
+            record_row(curr_month_activity[-1], res)
+
+          curr_month_activity = [r]
+
+      else:        
+        if is_weekly(prev_row) and curr_month != curr_month_activity[-1]['Timestamp'].month:
+          record_month_activity(curr_month_activity, res)
+
+        record_row(r, res)
+      prev_row = r
+
+    record_month_activity(curr_month_activity, res)
+
+    return res
+
+  except Exception as e:
+
+    print(e)
+    db.rollback()
+
+  db.close()
+
+  return False
 
 def get_logs(id_to_search):
 
