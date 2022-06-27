@@ -104,9 +104,8 @@ async def test_submit_bad_description_too_soon(interface):
   expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
   await assert_reply(interface, msg, expected)
 
-  # set a random date between now and now + 7 days
   diff = int(random.random() * 7)
-  new_date = datetime.datetime.now() - datetime.timedelta(days=diff)
+  new_date = get_db_row("confessions", TEST_USER)['Timestamp'] - datetime.timedelta(days=diff)
   update_db_entry("confessions", "Timestamp", new_date, TEST_USER)
 
   msg = f"!рассказать \"{generate_text()}\""
