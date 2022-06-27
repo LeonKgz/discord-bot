@@ -3,7 +3,6 @@
 # coding=utf-8
 
 import base64
-from calendar import month
 import discord
 import json
 import numpy as np
@@ -14,7 +13,7 @@ import urllib.request
 import sys
 import random
 import string
-import datetime
+from bs4 import BeautifulSoup
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN'))
@@ -802,8 +801,6 @@ def get_kanji_info(kanji):
     #     file.close()
 
     return on, kun, meanings
-
-from bs4 import BeautifulSoup
 
 def get_word_info(word):
     # open a connection to a URL using urllib
