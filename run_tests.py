@@ -10,6 +10,7 @@ import random
 import sys
 import os
 import datetime
+import json
 
 TEST_USER = int(str(os.getenv('TEST_USER')))
 TEST_USER_TOKEN = str(os.getenv('TEST_USER_TOKEN'))
@@ -24,7 +25,7 @@ async def assert_reply(interface, actual, expected):
   try:
     ret_msg = await interface.assert_reply_contains(actual, expected)
     assert ret_msg.content == expected
-    print("Test is passed")
+    # print("Test is passed")
   except Exception as e:
     print(e)
     exit(-1)
@@ -119,6 +120,16 @@ async def test_submit_new_description(interface):
   expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
   await assert_reply(interface, msg, expected)
 
+  random_evaluation_value = int(random.random() * 10)
+  random_evaluation = {TEST_USER: random_evaluation_value}
+  random_evaluation = json.dumps(random_evaluation)
+  random_evaluation = random_evaluation.replace("\"", "\\\"")
+
+  update_db_entry("confessions", "Points", random_evaluation, TEST_USER)
+
+  random_social_score = int(random.random() * 100) + random_evaluation_value
+  update_db_entry("raiting", "Points", random_social_score, TEST_USER)
+
   # set a random date between now and now + 7 days
   diff = int(random.random() * 7) + 7
   new_date = datetime.datetime.now() - datetime.timedelta(days=diff)
@@ -127,6 +138,10 @@ async def test_submit_new_description(interface):
   msg = f"!рассказать \"{generate_text()}\""
   expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
   await assert_reply(interface, msg, expected)
+
+  confessions_row = get_db_row("confessions", TEST_USER)
+  assert confessions_row, exit(-1)
+  assert confessions_row["Points"] == "{}", exit(-1)
 
 @test_collector()
 async def test_submit_retrieve_description(interface):
@@ -279,4 +294,4 @@ async def test_submit_retrieve_description(interface):
 # Actually run the bot
 
 if __name__ == "__main__":
-    run_dtest_bot(sys.argv, test_collector)
+    run_dtest_bot(sys.argv, test_collector, timeout=10)
