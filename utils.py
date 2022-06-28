@@ -596,7 +596,7 @@ def get_file(bot, mem):
 
 def record_logs(timestamp, source, target, type, sign, amount, description):
   db, cursor = get_db_cursor()
-  sql = f"INSERT INTO logs(Timestamp, Source, Target, Type, Sign, Amount, Description) VALUES(\"{timestamp}\",\"{source}\", \"{target}\", \"{type}\", \"{sign}\", \"{amount}\", \"{description}\")"
+  sql = f"INSERT INTO logs(Timestamp, Source, Target, Type, Sign, Amount, Description) VALUES(\"{timestamp}\",\"{source}\", \"{target}\", \"{type}\", \"{sign}\", \"{amount}\", \'{description}\')"
 
   try: 
     cursor.execute(sql)
