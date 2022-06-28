@@ -44,6 +44,7 @@ bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
 @bot.event
 async def on_ready():
   print(f'{bot.user.name} has connected to Discord!')
+  await status_update()
 
 # Command to connect a telegram account
 @bot.command(name="telegram")
@@ -1455,5 +1456,31 @@ bot.add_cog(Zettel(bot))
 # # For now it's okay if an entry already exists in the cache. 
 # # This means that the previous code was redeemed yet.
 # # Potentially this accomodates for users who got a new telegram account.
+
+async def status_update():
+    db, cursor = get_db_cursor()
+    try:
+      sql = f"SELECT COUNT(*) FROM media_records"
+      cursor.execute(sql)
+      counter = cursor.fetchone()['COUNT(*)']
+    except Exception as e:
+      print(e)
+      db.rollback()
+
+    try:
+      n = int(random.random() * counter)
+      sql = f"SELECT * FROM media_records ORDER BY Original LIMIT {n-1},1"
+      cursor.execute(sql)
+      row = cursor.fetchone()
+      name = row['Original']
+      type = row['DiscordType']
+      activity = discord.Activity(name=name, type=type)
+      await bot.change_presence(status=discord.Status.online, activity=activity)
+
+    except Exception as e:
+      print(e)
+      db.rollback()
+
+    db.close()
 
 bot.run(TOKEN)

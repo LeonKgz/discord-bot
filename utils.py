@@ -377,7 +377,7 @@ async def get_simple_member_embed(bot, member, title, message, thumbnail_url, co
 # Досье
 def get_file(bot, mem):
   id_to_search = mem.id
-  embed = discord.Embed(title=f"Досье") 
+  embed = discord.Embed(title=f"Досье №{id_to_search}") 
   embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
 
   #description = get_description(id_to_search)
