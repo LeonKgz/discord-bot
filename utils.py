@@ -665,17 +665,13 @@ def get_logs_compressed(id_to_search):
         if curr_month_activity and curr_month_activity[-1]['Timestamp'].month == curr_month:
           curr_month_activity.append(r)
         else:
-          size = len(curr_month_activity)
-          if size > 1:
-            record_month_activity(curr_month_activity, res)
-          if size == 1:
-            record_row(curr_month_activity[-1], res)
-
+          record_month_activity(curr_month_activity, res)
           curr_month_activity = [r]
 
       else:        
         if is_weekly(prev_row) and curr_month != curr_month_activity[-1]['Timestamp'].month:
           record_month_activity(curr_month_activity, res)
+          curr_month_activity = []
 
         record_row(r, res)
       prev_row = r
