@@ -55,15 +55,11 @@ async def on_ready():
   print(f'{bot.user.name} has connected to Discord!')
 
 @bot.command(name="st")
-async def st(ctx, status):
-  user = bot.get_user(249503118885257216)
-  activity = discord.Game(name="Netflix", type=3)
-
-  proletariat = discord.utils.get(ctx.guild.roles, name='Апатрид')
-  for m in proletariat.members:
-    if (str(m.id) == str(249503118885257216)):
-      await m.change_presence(status=discord.Status.dle, activity=activity)
-
+async def st(ctx, activity, type):
+  # activity = discord.Activity(name=str(activity), type=discord.ActivityType.watching)
+  activity = discord.Activity(name=str(activity), type=int(type))
+  # activity = discord.Game(name="Netflix", type=3)
+  await bot.change_presence(status=discord.Status.idle, activity=activity)
   await ctx.send("Done!")
 
 # Command to connect a telegram account
@@ -213,30 +209,6 @@ async def telegram_registration_notification(id_to_search):
 
   ch = get_channel_by_name(bot, "гласность", 'Russian')
   await ch.send(embed=embed)
-
-@bot.command(name="манифест")
-async def website(ctx):
-  await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => https://albenz.xyz/files/tractatus.pdf")
-
-@bot.command(name="сайт")
-async def website(ctx):
-  await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => https://albenz.xyz")
-
-@bot.command(name="пьесы")
-async def website(ctx):
-  await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => https://albenz.xyz/plays/allplays/")
-
-@bot.command(name="песни")
-async def website(ctx):
-  await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => https://www.albenz.xyz/songs/allartists/")
-
-@bot.command(name="plays")
-async def website(ctx):
-  await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => https://www.youtube.com/channel/UCdVx_oiTYB8fQdkbYmUPRQQ")
-
-@bot.command(name="songs")
-async def website(ctx):
-  await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => https://www.youtube.com/channel/UCVRzrqkQxWawb-cKz1zXBZQ")
 
 @bot.command(name="долг")
 async def duty(ctx, issue):
@@ -2394,14 +2366,42 @@ async def confess(ctx, *, args=None):
     # await ctx.send(f"<@!{iid}> ваше описание обновлено, проходите!")
     db.close()
 
+def load_anime():
+  return 
+  db, cursor = get_db_cursor()
+  with open("as.txt", "r") as f:
+    animes = f.readlines()
+    f.close()
+
+  for a in animes:
+    watching = 3
+    playing = 1
+    listening = 2
+    competing = 5
+    replace = f"REPLACE INTO media_records(Original, Score, Tags, Review, Thumbnail, MediaType, DiscordType) VALUES(\"{a.strip()}\", \"0\", \"\", \"\", \"\", \"Anime\", \"{watching}\")"
+
+    try:
+      cursor.execute(replace)
+      db.commit()
+    except Exception as e:
+      print(e)
+      db.rollback()
+
+  db.close()
+
 from status import Status
 from loops import Loops
 from voice import Voice 
+from static import Static
 
 bot.add_cog(Status(bot))
 bot.add_cog(Loops(bot))
-# bot.add_cog(nihon)
+bot.add_cog(Static(bot))
 # bot.add_cog(Nihon(bot))
 # bot.add_cog(Voice(bot))
+
+# # For now it's okay if an entry already exists in the cache. 
+# # This means that the previous code was redeemed yet.
+# # Potentially this accomodates for users who got a new telegram account.
 
 bot.run(TOKEN)

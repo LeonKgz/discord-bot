@@ -1,11 +1,6 @@
-import discord
 import os
-from discord.ext import commands, tasks
+from discord.ext import commands
 import pymysql.cursors
-import datetime
-import wikipediaapi
-import random
-import requests
 from utils import *
 import sys
 

@@ -9,7 +9,6 @@ from youtube_dl import YoutubeDL
 from utils import *
 from discord import FFmpegPCMAudio
 from discord.ext import commands
-# test comment
 
 class Voice(commands.Cog):
 
