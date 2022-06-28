@@ -4,6 +4,7 @@
 
 import base64
 import discord
+from discord.utils import get as du_get
 import json
 import numpy as np
 import os
@@ -689,9 +690,6 @@ def get_logs_compressed(id_to_search):
 
 def get_logs(id_to_search):
 
-  # id_author = ctx.author.id
-  # id_to_search = get_id(mem)
-  # mem = bot.get_user(id_to_search)
   db, cursor = get_db_cursor()
   sql = f"SELECT * FROM logs WHERE Target = \"{id_to_search}\" ORDER BY Timestamp ASC"
   field_content_limit = 1020
@@ -707,7 +705,6 @@ def get_logs(id_to_search):
       sign = "+" if r['Sign'] == "Positive" else "-"
       
       time = r['Timestamp'].strftime('%d-%m-%Y')
-      # num = sign + str(r['Amount'])
       to_add = f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\t*{r['Description']}*\n"
 
       if len(to_add) + size > field_content_limit:
@@ -717,10 +714,6 @@ def get_logs(id_to_search):
       res[-1] += to_add 
       size += len(to_add)
     
-    # if len(res) == 0:
-    #   await ctx.send(f"<@!{id_author}>, no logs found for ***{mem.name}*** !")
-    # else:
-    #   await ctx.send(res)
     return res
 
   except Exception as e:
@@ -911,3 +904,12 @@ def get_channel_name_languages():
     print(e)
     db.rollback()
     return []
+
+async def check_rights_dm(ctx):
+  super_roles = [214320783357378560, 696405991876722718, 384492518043287555, 498264068415553537]
+  if ctx.author.id in super_roles:
+      return True
+  response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(du_get(bot.emojis, name='peepoClown'))
+  await ctx.send(response)
+  return False
+

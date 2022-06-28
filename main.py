@@ -37,15 +37,6 @@ FOOD_KEY = str(os.getenv('FOOD_KEY'))
 
 seneca_api = str(os.getenv('SENECA_API_TOKEN'))
 
-global_languages_dictionary = {
-  "remedies": "en",
-  "remedy": "en",
-  "средства": "ru",
-  "средство": "ru",
-  "prayer": "en",
-  "молитва": "ru",
-}
-
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
 #bot.timer_manager = timers.TimerManager(bot)
@@ -53,14 +44,6 @@ bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
 @bot.event
 async def on_ready():
   print(f'{bot.user.name} has connected to Discord!')
-
-@bot.command(name="st")
-async def st(ctx, activity, type):
-  # activity = discord.Activity(name=str(activity), type=discord.ActivityType.watching)
-  activity = discord.Activity(name=str(activity), type=int(type))
-  # activity = discord.Game(name="Netflix", type=3)
-  await bot.change_presence(status=discord.Status.idle, activity=activity)
-  await ctx.send("Done!")
 
 # Command to connect a telegram account
 @bot.command(name="telegram")
@@ -168,9 +151,6 @@ async def weekly_activity_notification(id_to_search):
   await ch.send(embed=embed)
 
 async def telegram_registration_notification(id_to_search):
-  # if str(id_to_search) == str(ME) or str(id_to_search) == str(MANASCHI):
-  #   print("Tis the owner or the music bot!")
-  #   return
 
   mem = bot.get_user(int(id_to_search))
   embed = discord.Embed(title=f"Роскомнадзор хочет знать ваше местоположение") 
@@ -210,201 +190,6 @@ async def telegram_registration_notification(id_to_search):
   ch = get_channel_by_name(bot, "гласность", 'Russian')
   await ch.send(embed=embed)
 
-@bot.command(name="долг")
-async def duty(ctx, issue):
-  url = f"http://albenz.xyz:6969/duty?issue={issue}"
-  
-  #ret = await ctx.send("*Подождите...*")
-  response = requests.get(url)
-  response = response.json()
-  try:
-    await parse_zettel_json(ctx, response)
-  except Exception as e:
-    print(e)
-    await ctx.send(f"<@!{ctx.author.id}>, долг для *«{issue}»* не найден! « !долги », чтобы посмотреть все ключевые слова.")
-    
-from googletrans import Translator
-
-@bot.command(name='remedy', aliases=['средство'])
-async def remedy(ctx, *, args=None):
-  translator = Translator()
-  issue = args.strip()
-
-  global global_languages_dictionary
-  response_options = { 
-    "en": {
-      "404": f"{mention_author(ctx)}, remedy for *«{issue}»* was not found! « !remedies » to view all available keywords.",
-    },
-    "ru": {
-      "404": f"{mention_author(ctx)}, средство для *«{issue}»* не найдено! « !средства », чтобы посмотреть все ключевые слова.",
-    }
-  }
-
-  invoked = ctx.invoked_with
-  lang = global_languages_dictionary[invoked]
-
-  url = f"http://albenz.xyz:6969/remedy?issue={issue}"
-
-  response = requests.get(url)
-  data = response.json()
-
-  rus_version = data["content"]
-  if lang == "en":
-    eng_version = translator.translate(rus_version).text
-    data["content"] = eng_version
-
-  try:
-    await parse_zettel_json(ctx, data)
-  except Exception as e:
-    await ctx.send(response_options[lang]["404"])
-
-import os 
-
-@bot.command(name='prayer', aliases=['молитва'])
-async def prayer(ctx):
-
-  translator = Translator()
-  global global_languages_dictionary
-  response_options = { 
-    "en": {
-      "hold": "*Generating your unique prayer...*", 
-      "ready": "Done! I recommend printing it.",
-    },
-    "ru": {
-      "hold": "*Генерирую вашу уникальную молитву...*",
-      "ready": "Готово! Советую распечатать.",
-    }
-  }
-
-  invoked = ctx.invoked_with
-  lang = global_languages_dictionary[invoked]
-
-  await ctx.channel.send(response_options[lang]["hold"])
-
-  url = f"http://albenz.xyz:6969/prayer"
-
-  response = requests.get(url)
-  data = response.json()
-  verses = data["verses"] 
-  
-  if lang == "en":
-    for v in verses:
-      original = v["content"]
-      eng_version = translator.translate(original).text
-      v["content"] = eng_version
-      v["remedy"] = v["remedy"].split(" - ")[1]
-  else:
-    for v in verses:
-      v["remedy"] = v["remedy"].split(" - ")[0]
-
-  tex = """\documentclass[10pt]{article}
-\\usepackage[russian]{babel}
-\\usepackage{tgpagella}
-\\usepackage[left=0.5in,right=0.5in,top=0.5in,bottom=0.7in]{geometry}
-\\usepackage{multicol}
-%\\pagenumbering{gobble}
-\\setlength{\columnsep}{1cm}
-
-\\begin{document}
-
-\\begin{multicols}{2}""" + "".join(["\\section{" + v["remedy"] + "}" + "\n\n".join(v["content"].split("\n\n")[1:]).replace("  ", " ").strip().replace("\n\n", "\\\\\n\n") for v in verses]) + """
-
-\\end{multicols}
-
-\\end{document}
-  """
-
-  filename = "Stoic_prayer_for_" + "_".join(ctx.author.display_name.split())
-  with open(f"./{filename}.tex", "w") as f:
-    f.write(tex)
-
-  # Necessary set up to install pdf latex  
-  # sudo apt-get install texlive-latex-base
-  # sudo apt-get install texlive-fonts-recommended
-  # sudo apt-get install texlive-fonts-extra
-  # sudo apt-get install texlive-latex-extra
-
-  # pdflatex latex_source_name.tex
-
-  # sudo apt-cache search texlive russian
-  # sudo apt-get install texlive-lang-cyrillic
-
-  os.system(f"pdflatex {filename}.tex")
-  # await ret.delete()
-  await ctx.channel.send(response_options[lang]["ready"])
-  await ctx.channel.send(file=discord.File(f"{filename}.pdf"))
-
-  os.remove(f"./{filename}.tex")
-  os.remove(f"./{filename}.pdf")
-  os.remove(f"./{filename}.log")
-  os.remove(f"./{filename}.aux")
-
-@bot.command(name="стих")
-async def poem(ctx, issue):
-
-  url = f"http://albenz.xyz:6969/poem?issue={issue}"
-
-  response = requests.get(url)
-  data = response.json()
-  
-  try:
-    await parse_zettel_json(ctx, data)
-  except Exception as e:
-    await ctx.send(f"<@!{ctx.author.id}>, стих для *«{issue}»* не найдено! « !стихи », чтобы посмотреть все ключевые слова.")
-
-@bot.command(name="стихи")
-async def poems(ctx):
-  url = f"http://albenz.xyz:6969/poems"
-
-  response = requests.get(url)
-  data = response.json()["poems"]
-
-  if not data:
-    await ctx.send(f"<@!{ctx.author.id}>, стихи не найдены!")
-
-  ret_str = ", ".join(data)
-  await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
-
-@bot.command(name="remedies", aliases=['средства'])
-async def remedies(ctx):
-  global global_languages_dictionary
-  response_options = { 
-    "en": {
-      "404": f"*{mention_author(ctx)}, remedies not found!*",
-      "success": f"*{mention_author(ctx)}, here's the list of keywords: "
-    },
-    "ru": {
-      "404": f"*{mention_author(ctx)}, средства не найдены!",
-      "success": f"*{mention_author(ctx)}, вот список ключевых слов: "
-    }
-  }
-  invoked = ctx.invoked_with
-  lang = global_languages_dictionary[invoked]
-
-  url = f"http://albenz.xyz:6969/remedies"
-  response = requests.get(url)
-
-  data = response.json()["remedies"][lang]
-  
-  if not data:
-    await ctx.send(response_options[lang]["404"])
-  
-  ret_str = ", ".join(data)
-  await ctx.send(response_options[lang]["success"] + f"\n\n\t{ret_str}.*")
-
-@bot.command(name="долги")
-async def duties(ctx):
-  url = f"http://albenz.xyz:6969/duties"
-
-  response = requests.get(url)
-  data = response.json()["duties"]
-
-  if not data:
-    await ctx.send(f"<@!{ctx.author.id}>, долги не найдены!")
-
-  ret_str = ", ".join(data)
-  await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
-
 @bot.command(
   name='втруппу',
   brief='Убирает роль актёра, включает в труппу',
@@ -434,278 +219,6 @@ class Actor:
       "descs": [f"За участив в пьесе {d}" for d in descs]
     }
 
-# async def record_log(ctx, source_id, target_id, type, sign, amount, desc):
-@bot.command(name="ab213123213123123213c")
-async def record_log(ctx):
-  return
-  if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
-    return
-
-  db, cursor = get_db_cursor()
-  sql = "SELECT * from confessions"
-  try:
-    cursor.execute(sql)
-    ret = cursor.fetchall()
-    for r in ret:
-      time = r['Timestamp']
-      source_id = ME
-      target_id = r['ID']
-      type = 'Description'
-      sign = 'Positive'
-      name = r['Name']
-      data = json.loads(r["Points"])
-      if (len(data) == 0):
-        mean = 0
-      else:
-        mean = int(np.mean(list(data.values())))
-
-      amount = mean
-
-      disc = "Обновление описания"
-
-      dbb, cursorr = get_db_cursor()
-      sql = f"INSERT INTO logs(Timestamp, Source, Target, Type, Sign, Amount, Description) VALUES(\"{time}\", \"{source_id}\", \"{target_id}\", \"{type}\", \"{sign}\", \"{amount}\", \'{disc}\')"
-
-      try:
-        cursorr.execute(sql)
-        dbb.commit()
-      except Exception as e:
-        print(e)
-        print(f"problem with {name}")
-        dbb.rollback()
-      dbb.close()
-
-  except Exception as e:
-    print(e)
-    print('Larger problem')
-    db.rollback()
-  db.close()
-
-  return
-
-  # time = d.datetime.now()
-  # time = d.datetime(2021, 11, 5, 2, 34)
-  # time =  d.datetime(2021, 11, 5, 2, 34)
-  actor = discord.utils.get(ctx.guild.roles, name="Актёр Запаса")
-
-  source_id = 384492518043287555
-  type = "Play"
-  sign = "Positive"
-  amount = "10"
-
-  gamlet_date = (2020, 8, 21)
-  gamlet_actors = [
-    "ellanta", 
-    "SlowLadin",
-    "Albanec69",
-    "kucher",
-    "MadDudeUnstoppable"
-  ]
-
-  bottom_date = (2020, 9, 5)
-  bottom_actors = [
-    "Albanec",
-    "mrkimster",
-    "Ellanta",
-    "hitary",
-    "kaleeida",
-    "kucher",
-    "SlowLadin",
-    "olya",
-    "MadDudeUnstoppable",
-    # "nimferna",
-  ]
-
-  gore_date = (2020, 9, 22)
-  gore_actors = [
-    "hitary",
-    "MadDudeUnstoppable",
-    "SlowLadin",
-    "krabick",
-    # "nimferna",
-    "ellanta",
-    "ramona",
-    "kalaboque",
-    "Albanec",
-    "vccttu"
-  ]
-
-  maskarad_date = (2020, 10, 2)
-  maskarad_actors = [
-    "SlowLadin",
-    "Albanec",
-    "MadDudeUnstoppable",
-    "Ellanta",
-    "Фролов",
-    "1Torba",
-    "NickSEX",
-    "kaleeida",
-    "Unuasha",
-    "KoItsy",
-    # "Nimferna",
-    "MrHarper",
-  ]
-
-  sisters_date = (2020, 10, 18)
-  sisters_actors = [
-    "NickSEX",
-    "hitary",
-    "Cockenz",
-    "Albanec69",
-    "sosaaaaaaaad",
-    "Фролов",
-    "kaleeida",
-    "SlowLadin",
-    "MrHarper",
-    "Dude",
-    "Kalaboque",
-  ]
-
-  dom_date = (2020, 11, 8)
-  dom_actors = [
-    "Unuasha",
-    "SleXy",
-    "Albanec69",
-    "1Torba",
-    "Dude",
-    "NickSEX",
-    "Shizov",
-    "Hyomushka",
-    "SlowLadin",
-    "sosaaaaaaaad",
-    "Фролов",
-  ]
-  
-  eugene_date = (2020, 11, 20)
-  eugene_actors = [
-    "Alice_Nespit",
-    "Albanec69",
-    "1Torba",
-    "SlowLadin",
-    "Hitary",
-    "MrHarper",
-    "NickSEX",
-    "Ramona",
-    "Ellanta",
-  ]
-  
-  podolsk_date = (2021, 7, 26)
-  podolsk_actors = [
-    "NickSEX",
-    "Psijicus",
-    "Albanec69",
-    "Фролов",
-    "Ellanta",
-    "MrKimster",
-  ]
-  
-  rnj_date = (2021, 2, 3)
-  rnj_actors = [
-    "Ellanta",
-    "Funnybone",
-    "Albanec69",
-  ]
-  
-  piter_date = (2021, 8, 1)
-  piter_actors = [
-    "Albanec",
-    "Hitary",
-    "Ellanta",
-    "SleXy",
-    "sosaaaaaaaad",
-    "мякушка",
-    "SlowLadin",
-  ]
-  
-  kaligula_date = (2021, 9, 21)
-  kaligula_actors = [
-    "Nightingale",
-    "Hitary",
-    "MrHarper",
-    "Фролов",
-    "Albanec69",
-    "WELOVEWELOVEGAMES",
-    "sosaaaaaaaad",
-  ]
-  
-  cherry_date = (2021, 9, 11)
-  cherry_actors = [
-    "WELOVEWELOVEGAMES",
-    "MrHarper",
-    "Ellanta",
-    "Sekyshka",
-    "Kucher",
-    "Alice_Nespit",
-    "Albanec69",
-  ]
-  
-  bog_date = (2021, 10, 31)
-  bog_actors = [
-    "Alice_Nespit",
-    "WELOVEWELOVEGAMES",
-    "Фролов",
-    "Unuasha",
-    "Albanec69", 
-  ]
-
-  godot_date = (2021, 12, 18)
-  godot_actors = [
-    "Nightingale",
-    "Albanec69",
-    "Unuasha",
-    "TomasX",
-    "NickSEX",
-    "Фролов",
-  ]
-
-  theatre = [
-    (gamlet_date, gamlet_actors, "Гамлет"),
-    (bottom_date, bottom_actors, "На дне"),
-    (gore_date, gore_actors, "Горе от ума"),
-    (maskarad_date, maskarad_actors, "Маскарад"),
-    (sisters_date, sisters_actors, "Три сестры"),
-    (dom_date, dom_actors, "Дом, где разбиваются сердца"),
-    (eugene_date, eugene_actors, "Евгений Онегин"),
-    (podolsk_date, podolsk_actors, "Человек из Подольска"),
-    (rnj_date, rnj_actors, "Ромео и Джульетта"),
-    (piter_date, piter_actors, "Жиды города Питера"),
-    (kaligula_date, kaligula_actors, "Калигула"),
-    (cherry_date, cherry_actors, "Вишнёвый сад"),
-    (bog_date, bog_actors, "Бог резни"),
-    (godot_date, godot_actors, "В ожидании Годо"),
-  ]
-
-  actor_names = []
-  actor_ids = {}
-
-  for m in actor.members:
-    actor_names.append(m.name)
-    actor_ids[m.name] = m.id
-    # print(m.name)
-
-  for date, actors, desc in theatre:
-    for a in actors:
-      for j in actor_names:
-        if (a.lower() in j.lower()):
-          target_id = actor_ids[j]
-          time = d.datetime(date[0], date[1], date[2], 22)
-          db, cursor = get_db_cursor()
-          # target_id = m.id
-          disc = f'Участие в пьесе \"{desc}\"'
-          sql = f"INSERT INTO logs(Timestamp, Source, Target, Type, Sign, Amount, Description) VALUES(\"{time}\", \"{source_id}\", \"{target_id}\", \"{type}\", \"{sign}\", \"{amount}\", \'{disc}\')"
-          # print(sql)
-          try:
-            cursor.execute(sql)
-            db.commit()
-          except Exception as e:
-            print(e)
-            db.rollback()
-          db.close()
-          break
-
-    print(f"{disc} is done!")
-    print("------------------------------")
-34578379852793
 @bot.command(name="logs")
 async def logs(ctx, mem):
 
@@ -718,42 +231,17 @@ async def logs(ctx, mem):
     except Exception as e: 
       print(e)
 
-
-
   id_author = ctx.author.id
   id_to_search = get_id(mem)
   mem = bot.get_user(id_to_search)
-  db, cursor = get_db_cursor()
-  sql = f"SELECT * FROM logs WHERE Target = \"{id_to_search}\" ORDER BY Timestamp ASC"
-  
-  try:
 
-    cursor.execute(sql)
-    ret = cursor.fetchall()
-    res = ""
-    for r in ret:
-      sign = "+" if r['Sign'] == "Positive" else "-"
-      
-      time = r['Timestamp'].strftime('%d-%m-%Y')
-      # num = sign + str(r['Amount'])
+  res = get_logs(id_to_search)
+  if not res:
+    await ctx.send(f"{mention(id_author)}, no logs were found for {mention(mem.name)}")
+  else:
+    await ctx.send("\n".  join(res))
 
-      res += f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\t*{r['Description']}*\n"
-      # res += f"` {time} `\t—\t` {sign}{r['Amount']:<2} `\tпо причине:\t*{r['Description']}*\n"
-    
-    if len(res) == 0:
-      await ctx.send(f"<@!{id_author}>, no logs found for ***{mem.name}*** !")
-    else:
-      await ctx.send(res)
-
-  except Exception as e:
-
-    print(e)
-    db.rollback()
-
-  db.close()
-
-
-
+  return 
 
 def get_id(ref):
 
@@ -1112,80 +600,11 @@ async def check_rights(ctx, acceptable_roles, tell=True):
     await ctx.send(response)
   return False
 
-async def check_rights_dm(ctx):
-  super_roles = [214320783357378560, 696405991876722718, 384492518043287555, 498264068415553537]
-  if ctx.author.id in super_roles:
-      return True
-  response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(du_get(bot.emojis, name='peepoClown'))
-  await ctx.send(response)
-  return False
-
 def convert_brief(message):
   # REPLACE BAD PRACTISE
   total = 61
   desired_indent = 5
   actual_indent = 0
-
-@bot.command(
-  name='history',
-)
-async def print_history(ctx):
-
-  db, cursor = get_db_cursor()
-
-  guild = bot.get_guild(GUILD) 
-  if (guild):
-    total = len(guild.members)
-    curr = 0
-#    for mem in guild.members:
-
-    cache = {} 
-#    obj = load_obj("history")
-#    print(obj)
-
-    curr += 1
-    lastMessage = None
-    for ch in guild.channels:
-      if (not str(ch.type) == 'text'):
-        continue
-      
-      #fetchMessage = await ch.history(limit=10000).find(lambda m: m.author.id == mem.id)
-      print("checking...")
-      history = await ch.history(limit=10000).flatten()
-      for m in history:
-        if (m.author.id not in cache):
-          cache[m.author.id] = m
-        else:
-          if (cache[m.author.id].created_at < m.created_at):
-            cache[m.author.id] = m
-
-    for mem in guild.members:
-      if (mem.id in cache):
-        content = cache[mem.id]
-        try:
-          await ctx.send(f"For user {mem.name} — last message is \t\t\t \"{content.content}\"")
-          sql = f"""INSERT INTO activity(ID, name, timestamp)
-                  VALUES(\"{mem.id}\", \"{mem.name}\", \"{content.created_at}\")
-                """
-          try:
-            cursor.execute(sql)
-            db.commit()
-          except Exception as e:
-            print(e)
-            db.rollback()
-
-        except Exception as e:
-          #await ctx.send(f"For user {mem.name} — ERROR")
-          print(f"For user {mem.name} — ERROR")
-      else:
-        #await ctx.send(f"For user {mem.name} — no message was found")
-        print(f"For user {mem.name} — no message was found")
-
-    try:      
-      db.close()
-    except:
-      print("Already closed")
-    print("Scanning is finished.")  
 
 @bot.command(
   name='пропуск',
@@ -1245,45 +664,6 @@ async def let_free(ctx):
     db.rollback()
 
   db.close()
-
-# @bot.command(name='19273468236482734627846798326486')
-# async def vse(ctx):
-#   guild = bot.get_guild(GUILD) 
-#   db, cursor = get_db_cursor()
-#   proletariat = discord.utils.get(guild.roles, name='Пролетарий')
-#   politzek= discord.utils.get(guild.roles, name='Апатрид')
-#   npc = discord.utils.get(guild.roles, name='NPC can\'t meme')
-#   #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит', 'NPC can\'t meme']
-#   ms = []
-#   for m in proletariat.members:
-    
-#     if (npc in m.roles):
-#       continue
-
-#     iid = m.id
-#     sql = f"SELECT * from confessions WHERE `ID` = \"{iid}\""
-#     try:
-#      cursor.execute(sql)
-#      res = cursor.fetchone()
-    
-#      if (res is None):
-#        ms.append(m)
-#        await m.add_roles(politzek)
-#        await m.remove_roles(proletariat)       
-
-#     except Exception as e:
-#       print(e)
-
-#   ch =    
-#   for ch in guild.channels:
-#     if ("погранnnn" in ch.name):
-#       mentions = ""
-#       for m in ms:
-#         mentions += f"<@!{m.id}> "
-      
-#       res = f"Граждане {mentions}! \n\nМы не можем установить вашу личность! Вам нужно зарекомендовать себя! \n\n\t\tЭто можно сделать с помощью команды **« !рассказать »**\n\n\t\t Например: !рассказать \"Привет, я Албанец. Мне 22 года, по образованию программист. Устраиваю читки пьес в дискорде, пытаюсь собрать народ на групповые чтения поэзии и просмотры японских мультиков. В свободное время люблю почитать что-то по философии или религии. Могу сыграть на гитаре твой реквест. В видео-игры не играю. Играю в Го. Энтузиаст Высокой Мошны.\"\n\n\t Не забудьте про **кавычки**! Боту можно написать и в личку. Соответственно рекомендации пользователя можно узнать с помощью команды **« !кто »**, например: !кто @Albanec69 . Учтите, что **записи о себе можно править только один раз в 7 дней!**"
-#       await ch.send(res)
-#       break
 
 @bot.command(name="оценить")
 async def evaluate(ctx, mem, points):
@@ -1455,40 +835,6 @@ async def evaluate(ctx, mem, points):
       db.rollback()
 
     db.close()
-
-@bot.command(name="ppppoppppulpappte")
-async def populate_raiting(ctx):
-  return
-  db, cursor = get_db_cursor()
-  sql = "SELECT * FROM confessions"
-  try:
-    cursor.execute(sql)
-    res = [e["ID"] for e in cursor.fetchall()]
-  except Exception as e:
-    print(e)
-    db.rollback()
-    return
-
-  for m in ctx.guild.members:
-    
-    curr= get_db_row("raiting", m.id)
-    
-    if (curr):
-      curr = curr["Points"]
-    else:
-      print(curr["Name"] + " is missing")
-      curr = 0
-    bol = "Yes" if m.id in res else "No"
-    sql = f"REPLACE INTO raiting(ID, Name, Points, Confession) VALUES(\"{m.id}\", \"{m.name}\", \"{curr}\", \"{bol}\")"
-
-    try:
-      cursor.execute(sql)
-      db.commit()
-    except Exception as e:
-      print(e)
-      db.rollback()
-
-  db.close()
 
 async def remove_points_quick(source, target, type, amount, description):
 
@@ -1714,191 +1060,6 @@ async def add_points(ctx, target, type, amount, description):
                                 color_hex_code=0x7621b8)
         await ch.send(embed=embed)
 
-@bot.command(name="донести")
-async def donos(ctx, *, args=None):
-    
-    # If somebody tries to supply ID instead of mentioning a user on one of the server's channels, delete the message
-    if (ctx.guild):
-      await ctx.message.delete()
-      return
-
-    source_id = ctx.author.id
-    user = bot.get_user(source_id)
-    db, cursor = get_db_cursor()
-    guild = bot.get_guild(GUILD)
-
-    blacklist_row = get_db_row("tellings_blacklist", source_id)
-
-    if blacklist_row:
-      unban_time = blacklist_row["Timestamp"]
-      now = datetime.datetime.now()
-      if now < unban_time:
-        period = unban_time - now
-        await user.create_dm()
-        await user.dm_channel.send(f"Вы получили бан на функцию доноса! Бан продлится ещё {period.days} дней.")
-        return
-
-
-    # Check that user has a description
-    cnfs = get_db_row("confessions", source_id)
-    if not cnfs:
-      await ctx.send(f"<@!{source_id}>, для использования данной функции нужно иметь описание на сервере!")
-      return
-
-    # Check that user has at least 5 social points
-    points = get_db_row("raiting", source_id)["Points"]
-    if (points < 1):
-      await ctx.send(f"<@!{source_id}>, для использования данной функции нужно иметь минимум 1 очко социального рейтинга! Его можно заработать, например, качественно обновив своё описание.")
-      return
-      
-    iid = args[:args.find("\"")].strip()
-    after_quote = args[(args.find("\"") + 1):]
-    inside = after_quote[:after_quote.find("\"")].strip()
-    links = after_quote[after_quote.find("\"") + 1:].strip().split()
-    links = ", ".join(links)
-    time = datetime.datetime.now()
-
-    # Now update the general log of tellings, with an AUTOINCREMENT column ID
-    try:
-      sql = f"INSERT INTO tellings(Timestamp, Target, Source, Description, Evidence, Status) VALUES(\"{time}\", \"{iid}\", \"{source_id}\", \"{inside}\", \"{links}\", \"TBD\")"
-      cursor.execute(sql)
-      db.commit()
-      res_id = cursor.lastrowid
-
-    except Exception as e:
-      print(e)
-      db.rollback()
-      await ctx.send(f"<@!{source_id}>, ошибка обновления базы данных! Убедитесь, что в вашей приписке нет кавычек!")
-      return
-    
-    await ctx.send(f"<@!{source_id}>, ваше заявление принято и вскоре будет рассмотрено одним из Модераторов!")
-
-
-    # Now keep track of unprocessed tellings through the 'Status' field
-
-    sovnarmod = discord.utils.get(guild.roles, name='СовНарМод')
-
-    links = "\n\t\t\t\t\t\t\t".join(links.split(","))
-    # Scan through all the unmarked descriptions and remind SovNarMod members to mark them immediately
-    for m in sovnarmod.members:
-      await m.create_dm()
-      await m.dm_channel.send(f"Товарищ Народный Модератор! Поступило заявление!\n\n\t\tНомер —  {res_id}\n\n\t\tПриписка — *{inside}*\n\n\t\tСсылки — {links}")
-       
-    #
-    #select = "SELECT * FROM unmarked_confessions"
-    #try:
-    #  cursor.execute(select)
-    #  entries = cursor.fetchall()
-    #  for e in entries:
-    #    to_remind = [i.strip() for i in e["Markers"].split(",")]
-    #    for i in to_remind:
-    #      snm_dict[i].append(e["ID"])
-
-    #except Exception as e:
-    #  print(e)
-    #  db.rollback()
-   
-    #for sovok, spiski in snm_dict.items():
-    #  sovok = bot.get_user(int(sovok))
-    #  await sovok.create_dm()
-    #  quotes = ",\n\t".join([(str(j) + ") \t" + str(i)) for j, i in enumerate(spiski)])
-    #  await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшую неделю: \n\n\t{quotes}")
-
-    #id_author = ctx.author.id
-    #id_to_search = get_id(mem)
-    #mem = bot.get_user(id_to_search)
-
-    #for member in ctx.guild.members:
-    #  p = await member.profile()
-    #  print(p)
-
-@bot.command(name="статьи")
-async def statji(ctx):
-  if (not await check_rights_dm(ctx)):
-      return
-
-  if (ctx.guild):
-    await ctx.message.delete()
-    return
-
-  res = "1) Ненормативная лексика\n2) Прескриптивная лингвистика\n3) Спам\n4) Необоснованное оскорбление\n5) низкая Мошна"
-
-  await ctx.send(res)
-
-@bot.command(name="approve")
-async def approve_donos(ctx, donos_id, priority, evidence):
-
-  # If somebody tries to supply ID instead of mentioning a user on one of the server's channels, delete the message
-  if (ctx.guild):
-    await ctx.message.delete()
-    return
-
-  priority = int(priority)
-  donos_id = int(donos_id)
-
-  if (priority < 1 or priority > 5):
-    await ctx.send(f"<@!{ctx.author.id}>, приоритет должен быть между 1 и 5!")
-    return
-
-  source_id = ctx.author.id
-  db, cursor = get_db_cursor()
-  guild = bot.get_guild(GUILD)
-
-  row = get_db_row("tellings", donos_id)
-  if (row):
-    status = row["Status"]
-
-    if status == "TBD":
-      
-      # For now dont add points for tellings as they are too easy to write and not serious at this point
-      # await add_points_quick(row["Source"], priority)
-      # TODO For now don't remove points from the target. 
-      #await remove_points_quick(row["Target"], priority)
-
-      try:
-        update = f"UPDATE tellings SET Status = \"Approved\" WHERE ID =\"{donos_id}\""
-        cursor.execute(update)
-        db.commit()
-
-      except Exception as e:
-        print(e)
-        db.rollback()
-        await ctx.send(f"<@!{ctx.author.id}>, ошибка обновления базы данных!")
-        return
-
-      await ctx.send(f"<@!{ctx.author.id}>, донос рассмотрен!")
-
-      wording1 = {
-        1: "Статья 3. Пункт 2.",
-        2: "Статья 1. Пункт 3. (д)",
-        3: "Статья 1. Пункт 3. (а)",
-        4: "Статья 1. Пункт 3. (в)",
-        5: "Статья 2. Пункт 2.",
-      }
-
-      wording2 = {
-        1: "Ненормативная лексика",
-        2: "Прескриптивная лингвистика",
-        3: "Спам",
-        4: "Необоснованное оскорбление",
-        5: "низкая Мошна",
-      }
-
-
-      ch = get_channel_by_name(bot, "гласность", 'Russian')
-      user = bot.get_user(row["Target"])
-      await ch.send(f"Модераторы рассмотрели донос на гражданина <@!{user.id}>!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n\t\t*Материалы дела* — {evidence}\n\n----------------------------------------------------------------------")
-
-
-    else:
-      await ctx.send(f"<@!{ctx.author.id}>, донос уже обработан! Вердикт — {status}")
-      return
-
-
-  else:
-    await ctx.send(f"<@!{ctx.author.id}>, такого доноса нет!")
-    return
-
 def get_line(i):
   total = 50
   empty = " "
@@ -1908,7 +1069,7 @@ def get_line(i):
 
 import random
 @bot.command(name="мина")
-async def dismiss_donos(ctx):
+async def mina(ctx):
   await ctx.send(f"<@!{ctx.author.id}>, вы наступили на мину!")
   ret = await ctx.send("*Взрыв через 3...*")
   await asyncio.sleep(1)
@@ -1951,118 +1112,6 @@ async def slow_printout(ctx, content, around=""):
   for i in range(2, len(content) + 1):
     final = around + content[:i] + around
     await msg.edit(content=final)
-
-@bot.command(name="dismiss")
-async def dismiss_donos(ctx, donos_id):
-
-  # If somebody tries to supply ID instead of mentioning a user on one of the server's channels, delete the message
-  if (ctx.guild):
-    await ctx.message.delete()
-    return
-
-  donos_id = int(donos_id)
-
-  db, cursor = get_db_cursor()
-  guild = bot.get_guild(GUILD)
-
-  row = get_db_row("tellings", donos_id)
-  if (row):
-    status = row["Status"]
-
-    if status == "TBD":
-
-      try:
-        update = f"UPDATE tellings SET Status = \"Dismissed\" WHERE ID =\"{donos_id}\""
-        cursor.execute(update)
-        db.commit()
-
-      except Exception as e:
-        print(e)
-        db.rollback()
-        await ctx.send(f"<@!{ctx.author.id}>, ошибка обновления базы данных!")
-        return
-
-      await ctx.send(f"<@!{ctx.author.id}>, донос рассмотрен!")
-
-      user = bot.get_user(row["Source"])
-      await user.create_dm()
-      iid = row["ID"]
-      await user.dm_channel.send(f"Ваш донос под номером {iid} был отклонён за недостатком улик!")
-
-      await ch.send(f"Модераторы рассмотрели донос на гражданина **{user.display_name}**!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n----------------------------------------------------------------------")
-
-    else:
-      await ctx.send(f"<@!{ctx.author.id}>, донос уже обработан! Вердикт — {status}")
-      return
-  else:
-    await ctx.send(f"<@!{ctx.author.id}>, такого доноса нет!")
-    return
-
-@bot.command(name="blacklist")
-async def blacklist_donos(ctx, donos_id):
-  # If somebody tries to supply ID instead of mentioning a user on one of the server's channels, delete the message
-  if (ctx.guild):
-    await ctx.message.delete()
-    return
-
-  db, cursor = get_db_cursor()
-  guild = bot.get_guild(GUILD)
-
-  row = get_db_row("tellings", donos_id)
-  if (row):
-    status = row["Status"]
-
-    if status == "TBD":
-
-      try:
-        update = f"UPDATE tellings SET Status = \"Blacklisted\" WHERE ID =\"{donos_id}\""
-        cursor.execute(update)
-        db.commit()
-
-      except Exception as e:
-        print(e)
-        db.rollback()
-        await ctx.send(f"<@!{ctx.author.id}>, ошибка обновления статуса доноса!")
-        return
-
-      await ctx.send(f"<@!{ctx.author.id}>, донос рассмотрен!")
-
-      black_row = get_db_row("tellings_blacklist", row["Source"])
-      user = bot.get_user(row["Source"])
-
-      user_id = row['Source']
-      strikes = 0
-      name = user.name
-      now = datetime.datetime.now()
-
-      if black_row:
-        strikes = int(black_row["Strikes"])
-
-      unban_time = now + datetime.timedelta(days=7+strikes)
-
-      try:
-        update = f"REPLACE INTO tellings_blacklist(ID, Name, Strikes, Timestamp) VALUES(\"{user_id}\", \"{name}\", \"{strikes + 1}\", \"{unban_time}\")"
-        cursor.execute(update)
-        db.commit()
-
-      except Exception as e:
-        print(e)
-        db.rollback()
-        await ctx.send(f"<@!{ctx.author.id}>, ошибка обновления бракованных доносов!")
-        return
-
-      user = bot.get_user(row["Source"])
-      await user.create_dm()
-      iid = row["ID"]
-      await user.dm_channel.send(f"Ваш донос под номером {iid} был забракован модератором! Вы получаете бан на данную функцию на {7 + strikes} дней. Если вы считаете, что донос был забракован по ошибке, напишите Албанцу в личку.")
-
-
-    else:
-      await ctx.send(f"<@!{ctx.author.id}>, донос уже обработан! Вердикт — {status}")
-      return
-  else:
-    await ctx.send(f"<@!{ctx.author.id}>, такого доноса нет!")
-    return
 
 def get_description(id_to_search):
 
@@ -2393,10 +1442,13 @@ from status import Status
 from loops import Loops
 from voice import Voice 
 from static import Static
+from zettel import Zettel
 
 bot.add_cog(Status(bot))
 bot.add_cog(Loops(bot))
 bot.add_cog(Static(bot))
+bot.add_cog(Zettel(bot))
+
 # bot.add_cog(Nihon(bot))
 # bot.add_cog(Voice(bot))
 
