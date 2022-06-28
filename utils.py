@@ -648,6 +648,11 @@ def get_logs_compressed(id_to_search):
 
     def record_month_activity(curr_month_activity, res):
       if curr_month_activity:
+
+        if len(curr_month_activity) == 1:
+          record_row(curr_month_activity[0], res)
+          return
+
         monthly_row = {key: val for key, val in curr_month_activity[-1].items()}
         monthly_row["Amount"] = sum([sub_r["Amount"] for sub_r in curr_month_activity])
         monthly_row["Description"] = "Недельная активность (за месяц)"
