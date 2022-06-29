@@ -1,3 +1,4 @@
 .env
 .env.b64
 __pycache__/
+my_production.keystore

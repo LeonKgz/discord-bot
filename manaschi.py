@@ -9,7 +9,6 @@ from voice import Voice
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN_MANASCHI'))
-TOKEN = "OTQwMzIwMjM5MzQ0ODI0MzIw.YgFrdw.wSZF43In7vodS5G8cAOAYrhJaqg"
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
