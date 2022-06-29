@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands, tasks
 from voice import Voice
 from utils import status_update
-import random
+import os
 
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN_MANASCHI'))
