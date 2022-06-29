@@ -5,7 +5,7 @@
 import discord
 from discord.ext import commands, tasks
 from voice import Voice
-from utils import get_db_cursor, status_update
+from utils import status_update
 import random
 
 # retrieving Discord credentials
