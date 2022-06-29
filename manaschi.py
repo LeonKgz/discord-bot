@@ -19,7 +19,7 @@ async def on_ready():
   print(f'{bot.user.name} has connected to Discord!')
   await status_update(bot)
 
-@tasks.loop(seconds=3600.0)
+@tasks.loop(seconds=21600.0)
 async def status_update_loop():
   await status_update(bot)
 

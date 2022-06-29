@@ -140,7 +140,7 @@ class Loops(commands.Cog):
       ch = get_channel_by_name(self.bot, "погран-застава", "Russian")
       await ch.send(f"{content}")     
 
-  @tasks.loop(seconds=HOUR)
+  @tasks.loop(seconds=21600.0)
   async def status_update_loop(self):
     await status_update(self.bot)
 
