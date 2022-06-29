@@ -63,10 +63,13 @@ jobs:
           docker build -t mankurt --file Dockerfile_Mankurt .
           docker rm -fv mankurt_discord_bot 
           docker container prune --force
-          docker run --env-file my_production.keystore -d --name mankurt_discord_bot mankurt 
-
-		 	- name: Clean Up
-			  run: |
-				  docker rm $(docker ps --filter=status=exited --filter=status=dead -q)
-				  docker rmi $(docker images --filter dangling=true -q)
-				
+          docker run --env-file my_production.keystore -d --name mankurt_discord_bot mankurt
+      - name: Clean Up Containers
+        continue-on-error: true
+        run: |
+          docker rm -fv $(docker ps --filter=status=exited --filter=status=dead -q)
+          
+      - name: Clean Up Images
+        continue-on-error: true
+        run: |
+          docker rmi $(docker images --filter dangling=true -q)          
