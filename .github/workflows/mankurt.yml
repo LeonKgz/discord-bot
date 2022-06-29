@@ -66,5 +66,4 @@ jobs:
           docker run --env-file my_production.keystore -d --name mankurt_discord_bot mankurt
       - name: Clean Up
         run: | 
-          docker rm $(docker ps --filter=status=exited --filter=status=dead -q)
           docker rmi $(docker images --filter dangling=true -q)
