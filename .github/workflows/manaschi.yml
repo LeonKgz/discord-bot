@@ -47,9 +47,14 @@ jobs:
           docker rm -fv manaschi_discord_bot 
           docker container prune --force
           docker run --env-file my_production.keystore -d --name manaschi_discord_bot manaschi 
-      - name: Clean Up
+          
+      - name: Clean Up Containers
         continue-on-error: true
         run: |
           docker rm -fv $(docker ps --filter=status=exited --filter=status=dead -q)
-          docker rmi $(docker images --filter dangling=true -q)
+          
+      - name: Clean Up Images
+        continue-on-error: true
+        run: |
+          docker rmi $(docker images --filter dangling=true -q)          
           
