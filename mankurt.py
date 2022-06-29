@@ -2,10 +2,7 @@
 # vim: set fileencoding=utf-8:
 # coding=utf-8
 
-# testing new remote 7
-
 import asyncio
-from http.client import REQUEST_URI_TOO_LONG
 import os
 import discord
 from discord.ext import commands
@@ -18,10 +15,13 @@ from requests import get
 from utils import *
 import numpy as np
 import sys
+from status import Status
+from loops import Loops
+from static import Static
+from zettel import Zettel
 
-# test comment
 # retrieving Discord credentials
-TOKEN = str(os.getenv('DISCORD_TOKEN'))
+TOKEN = str(os.getenv('DISCORD_TOKEN_MANKURT'))
 GUILD = int(str(os.getenv('DISCORD_GUILD'))) if sys.argv[1] == "prod" else int(str(os.getenv('TEST_DISCORD_GUILD')))
 TEST_USER = int(str(os.getenv('TEST_USER')))
 ME = int(os.getenv('ME'))
@@ -1439,23 +1439,10 @@ def load_anime():
 
   db.close()
 
-from status import Status
-from loops import Loops
-from voice import Voice 
-from static import Static
-from zettel import Zettel
-
 bot.add_cog(Status(bot))
 bot.add_cog(Loops(bot))
 bot.add_cog(Static(bot))
 bot.add_cog(Zettel(bot))
-
-# bot.add_cog(Nihon(bot))
-# bot.add_cog(Voice(bot))
-
-# # For now it's okay if an entry already exists in the cache. 
-# # This means that the previous code was redeemed yet.
-# # Potentially this accomodates for users who got a new telegram account.
 
 async def status_update():
     db, cursor = get_db_cursor()

@@ -4,10 +4,10 @@ name: CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     paths:
       - 'manaschi.py'
+      - 'voice.py'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -30,7 +30,20 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      - name: Echoing
+      - name: Install Dependencies
         run: |
-          echo "Hello, Manaschi!"
+          python3 -m pip install --upgrade pip
+          pip3 install -r requirements.txt
+
+      - name: Retrieving Environment Variables
+        run: |
+          echo "$KEYSTORE_BASE64"==== | fold -w 4 | sed '$ d' | tr -d '\n' | base64 --decode > my_production.keystore
+
+      # Runs a single command using the runners shell
+      - name: Running The Bot
+        run: | 
+          docker build -t manaschi --file Dockerfile_Manaschi .
+          docker rm -fv manaschi_discord_bot 
+          docker container prune --force
+          docker run --env-file my_production.keystore -d --name manaschi_discord_bot manaschi 
           

@@ -14,4 +14,4 @@ RUN apt-get -y install texlive-lang-cyrillic
 
 COPY . .
 
-CMD python3 main.py test 
+CMD python3 mankurt.py test 

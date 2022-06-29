@@ -231,7 +231,7 @@ class Donos(commands.Cog):
         await ctx.send(f"<@!{ctx.author.id}>, донос рассмотрен!")
 
         black_row = get_db_row("tellings_blacklist", row["Source"])
-        user = self.bot.get_user(row["Source"])
+        user = bot.get_user(row["Source"])
 
         user_id = row['Source']
         strikes = 0
@@ -254,7 +254,7 @@ class Donos(commands.Cog):
           await ctx.send(f"<@!{ctx.author.id}>, ошибка обновления бракованных доносов!")
           return
 
-        user = self.bot.get_user(row["Source"])
+        user = bot.get_user(row["Source"])
         await user.create_dm()
         iid = row["ID"]
         await user.dm_channel.send(f"Ваш донос под номером {iid} был забракован модератором! Вы получаете бан на данную функцию на {7 + strikes} дней. Если вы считаете, что донос был забракован по ошибке, напишите Албанцу в личку.")

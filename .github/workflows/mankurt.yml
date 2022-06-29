@@ -43,7 +43,7 @@ jobs:
       - name: Running the Tester Bot
         run: | 
           docker rm -fv zanshin_discord_bot
-          docker build -t zanshin --file Dockerfile_Test .
+          docker build -t zanshin --file Dockerfile_Mankurt_Test .
           docker run --env-file my_production.keystore -d --name zanshin_discord_bot zanshin
 
       - name: Running Tests
@@ -60,7 +60,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: Running The Bot
         run: | 
-          docker build -t mankurt .
+          docker build -t mankurt --file Dockerfile_Mankurt .
           docker rm -fv mankurt_discord_bot 
           docker container prune --force
           docker run --env-file my_production.keystore -d --name mankurt_discord_bot mankurt 
