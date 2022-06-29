@@ -8,6 +8,8 @@ from voice import Voice
 from utils import status_update
 import os
 
+
+
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN_MANASCHI'))
 
