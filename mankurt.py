@@ -20,6 +20,8 @@ from loops import Loops
 from static import Static
 from zettel import Zettel
 
+
+
 # retrieving Discord credentials
 TOKEN = str(os.getenv('DISCORD_TOKEN_MANKURT'))
 GUILD = int(str(os.getenv('DISCORD_GUILD'))) if sys.argv[1] == "prod" else int(str(os.getenv('TEST_DISCORD_GUILD')))
