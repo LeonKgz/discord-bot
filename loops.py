@@ -27,7 +27,7 @@ class Loops(commands.Cog):
     self.scan.start()
     self.important_info.start()
     self.update_channels_name.start()
-    self.status_update.start()
+    self.status_update_loop.start()
     ## self.deaths.start()
     ## self.births.start()
     self.meditations.start()
@@ -141,31 +141,8 @@ class Loops(commands.Cog):
       await ch.send(f"{content}")     
 
   @tasks.loop(seconds=HOUR)
-  async def status_update(self):
-    db, cursor = get_db_cursor()
-    try:
-      sql = f"SELECT COUNT(*) FROM media_records"
-      cursor.execute(sql)
-      counter = cursor.fetchone()['COUNT(*)']
-    except Exception as e:
-      print(e)
-      db.rollback()
-
-    try:
-      n = int(random.random() * counter)
-      sql = f"SELECT * FROM media_records ORDER BY Original LIMIT {n-1},1"
-      cursor.execute(sql)
-      row = cursor.fetchone()
-      name = row['Original']
-      type = row['DiscordType']
-      activity = discord.Activity(name=name, type=type)
-      await self.bot.change_presence(status=discord.Status.online, activity=activity)
-
-    except Exception as e:
-      print(e)
-      db.rollback()
-
-    db.close()
+  async def status_update_loop(self):
+    await status_update(self.bot)
 
   @tasks.loop(seconds=DAY)
   async def scan(self):

@@ -1444,30 +1444,4 @@ bot.add_cog(Loops(bot))
 bot.add_cog(Static(bot))
 bot.add_cog(Zettel(bot))
 
-async def status_update():
-    db, cursor = get_db_cursor()
-    try:
-      sql = f"SELECT COUNT(*) FROM media_records"
-      cursor.execute(sql)
-      counter = cursor.fetchone()['COUNT(*)']
-    except Exception as e:
-      print(e)
-      db.rollback()
-
-    try:
-      n = int(random.random() * counter)
-      sql = f"SELECT * FROM media_records ORDER BY Original LIMIT {n-1},1"
-      cursor.execute(sql)
-      row = cursor.fetchone()
-      name = row['Original']
-      type = row['DiscordType']
-      activity = discord.Activity(name=name, type=type)
-      await bot.change_presence(status=discord.Status.online, activity=activity)
-
-    except Exception as e:
-      print(e)
-      db.rollback()
-
-    db.close()
-
 bot.run(TOKEN)

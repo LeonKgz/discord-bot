@@ -55,7 +55,33 @@ def clear_db_table(table):
     db.rollback()
   
   db.close()
-  
+
+async def status_update(bot):
+    db, cursor = get_db_cursor()
+    try:
+      sql = f"SELECT COUNT(*) FROM media_records"
+      cursor.execute(sql)
+      counter = cursor.fetchone()['COUNT(*)']
+    except Exception as e:
+      print(e)
+      db.rollback()
+
+    try:
+      n = int(random.random() * counter)
+      sql = f"SELECT * FROM media_records ORDER BY Original LIMIT {n-1},1"
+      cursor.execute(sql)
+      row = cursor.fetchone()
+      name = row['Original']
+      type = row['DiscordType']
+      activity = discord.Activity(name=name, type=type)
+      await bot.change_presence(status=discord.Status.online, activity=activity)
+
+    except Exception as e:
+      print(e)
+      db.rollback()
+
+    db.close()
+
 def update_db_entry(table, field_name, new_val, id_val):
   if not DB == str(os.getenv('TEST_DB_DATABASE')):
     print("Can only rewrite tables in test mode!")
