@@ -33,3 +33,6 @@ GLD = {
   "prayer": "en",
   "молитва": "ru",
 }
+
+AMNESTY_START_DAY = 1
+AMNESTY_END_DAY = 5

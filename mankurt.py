@@ -520,7 +520,7 @@ async def on_message(message):
     # if int(message.author.id) != ME:
     if int(message.author.id) != ME and not "!донести" in message.content:
         await me.send("---------------------------------------\n *Сообщение от* **" + message.author.name + "**:\n\n\t\t" + message.content + "\n\n---------------------------------------")
-  elif 'погран' not in russian_name:
+  elif 'погран' not in russian_name and not is_apartid_in_amnesty(message.author.id):
   # elif 'погран' not in message.channel.name:
     name = message.author.name
     iid = message.author.id
@@ -528,7 +528,7 @@ async def on_message(message):
     db, cursor = get_db_cursor()
     row = get_db_row("cache", iid)
     # Check if this is the first message of the week for someone who wasnt sent to pogran-zastava on that monday; then +1 point
-    if not row and (not iid == ME):
+    if (not row) and (not iid == ME):
       status = await add_points_quick(source=ME, target=iid, type="Activity", amount=1, description="Недельная активность")
       await weekly_activity_notification(iid)
       if not status:
@@ -590,6 +590,8 @@ def convert_brief(message):
   desired_indent = 5
   actual_indent = 0
 
+
+
 @bot.command(
   name='пропуск',
 )
@@ -597,6 +599,10 @@ async def let_free(ctx):
   
   if not await check_rights(ctx, ['Апатрид']):
     return
+  
+  if is_apartid_in_amnesty(ctx.author.id):
+    await ctx.send(f"{mention(ctx.author.id)}, вы не можете пользоваться этой командой, во время амнистии ваша активность не мониторится.")
+    return 
 
   db, cursor = get_db_cursor()
   name = ctx.author.name
@@ -1426,5 +1432,9 @@ bot.add_cog(Status(bot))
 bot.add_cog(Loops(bot))
 bot.add_cog(Static(bot))
 bot.add_cog(Zettel(bot))
+
+
+# get all membeers of Politzek and add to their roles Proletariat (while keeping apatrid)
+# during amnesty cannot use !propusk as an apatrid
 
 bot.run(MANKURT_TOKEN)

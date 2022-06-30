@@ -20,6 +20,7 @@ class Loops(commands.Cog):
     self.important_info.start()
     self.update_channels_name.start()
     self.status_update_loop.start()
+    self.monthly_amnesty.start()
     ## self.deaths.start()
     ## self.births.start()
     self.meditations.start()
@@ -35,6 +36,57 @@ class Loops(commands.Cog):
       if id == str(ch.id):
         return ch
     return False
+
+
+  @tasks.loop(seconds=HOUR)
+  async def monthly_amnesty(self):
+    
+    day = int(datetime.datetime.now().day)
+    start_day = AMNESTY_START_DAY
+    end_day = AMNESTY_END_DAY
+    guild = self.bot.get_guild(GUILD)
+
+    if guild and day == end_day:
+
+      proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+      rows = get_all_rows("amnesty")
+      
+      if rows:
+        for r in rows:
+          mem = guild.get_member(r['ID'])
+          await mem.remove_roles(proletariat)
+
+      clear_db_table("amnesty")
+
+      line = "--------------------------------------------"
+      nl = "\n"
+      msg2 = line + (nl * 2) + "***АМНИСТИЯ ЗАКОНЧЕНА***" + (nl * 2) + line
+      ch = get_channel_by_name(self.bot, "объявления", "Russian")
+      await ch.send(msg2)
+
+    if guild and day == start_day:
+      
+      proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+      apatrid = discord.utils.get(guild.roles, name='Апатрид')
+      mention_all = []
+
+      for mem in apatrid.members:
+        insert_row("amnesty", fields=["ID"], values=[mem.id])
+        await mem.add_roles(proletariat)
+        mention_all.append(mention(mem.id))
+
+      if mention_all:
+        line = "--------------------------------------------"
+        nl = "\n"
+        msg1 = line + (nl * 2) + "Граждане" + ", ".join(mention_all) + " :" + (nl * 2) + "***ОБЪЯВЛЯЕТСЯ ЕЖЕМЕСЯЧНАЯ МАССОВАЯ АМНИСТИЯ: НА 5 ДНЕЙ ВСЕМ АПАТРИДАМ ПРИСУЖДАЕТСЯ РОЛЬ ПРОЛЕТАРИАТА.\nАКТИВНОСТЬ НА СЕРВЕРЕ В ЭТОТ ПЕРИОД МОНИТОРИТЬСЯ НЕ БУДЕТ!***" + (nl * 2) + line
+
+        ch = get_channel_by_name(self.bot, "погран-застава", "Russian")
+        await ch.send(msg1)
+
+      msg2 = line + (nl * 2) + "***ОБЪЯВЛЯЕТСЯ ЕЖЕМЕСЯЧНАЯ МАССОВАЯ АМНИСТИЯ: НА 5 ДНЕЙ ВСЕМ АПАТРИДАМ ПРИСУЖДАЕТСЯ РОЛЬ ПРОЛЕТАРИАТА.\nАКТИВНОСТЬ АПАТРИДОВ НА СЕРВЕРЕ В ЭТОТ ПЕРИОД МОНИТОРИТЬСЯ НЕ БУДЕТ!***" + (nl * 2) + line
+      ch = get_channel_by_name(self.bot, "объявления", "Russian")
+      await ch.send(msg2)
+
 
   @tasks.loop(seconds=HOUR)
   async def update_channels_name(self):

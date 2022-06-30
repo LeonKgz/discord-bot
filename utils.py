@@ -15,6 +15,7 @@ import random
 import string
 from bs4 import BeautifulSoup
 from env import *
+import datetime
 
 id_repository = {
   "glasnost_channel": "894988536305033228",
@@ -30,10 +31,6 @@ def get_db_cursor():
   return db, db.cursor()
 
 def clear_db_table(table):
-  if not DB == str(os.getenv('TEST_DB_DATABASE')):
-    print("Can only clear tables in test mode!")
-    return 
-
   db, cursor = get_db_cursor()
   sql = f"DELETE FROM {table}" 
   try:
@@ -98,6 +95,23 @@ def get_db_row(db_name, id_to_search):
       row = cursor.fetchone()
       db.close()
       return row
+      
+    except Exception as e:
+      print(e)
+      db.rollback()
+      db.close()
+      return False
+
+def get_all_rows(db_name):
+    db, cursor = get_db_cursor()
+
+    select = f"SELECT * from {db_name}"
+
+    try:
+      cursor.execute(select)
+      rows = cursor.fetchall()
+      db.close()
+      return rows
       
     except Exception as e:
       print(e)
@@ -609,6 +623,22 @@ def get_file(bot, mem):
 #  embed.add_field(name="Валюта", value="Шанырак - 12", inline=True)
   return embed
 
+def insert_row(table, fields, values):
+  
+  db, cursor = get_db_cursor()
+  fs = ", ".join(fields)
+  vs = ", ".join([f"\"{v}\"" for v in values])
+  sql = f"INSERT INTO {table}({fs}) VALUES({vs})"
+  
+  try: 
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    print(e)
+    db.rollback()
+
+  db.close()
+
 def record_logs(timestamp, source, target, type, sign, amount, description):
   db, cursor = get_db_cursor()
   sql = f"INSERT INTO logs(Timestamp, Source, Target, Type, Sign, Amount, Description) VALUES(\"{timestamp}\",\"{source}\", \"{target}\", \"{type}\", \"{sign}\", \"{amount}\", \'{description}\')"
@@ -906,6 +936,18 @@ def get_word_info_deprecated(word):
     meaning = meaning1
 
     return mixed, furigana, meaning
+
+def is_apartid_in_amnesty(iid):
+  day = int(datetime.datetime.now().day)
+  if AMNESTY_START_DAY <= day <= AMNESTY_END_DAY:
+      rows = get_all_rows("amnesty")
+      print([r['ID'] for r in rows])
+      if int(iid) in [r['ID'] for r in rows]:
+        return True
+
+  return False
+
+
 
 def get_channel_name_languages():
   db, cursor = get_db_cursor()
