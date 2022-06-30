@@ -589,7 +589,7 @@ def get_file(bot, mem):
     main_field += f"На гражданина донесено *{counter} {get_times_str(counter)}*"
   if imprisoned > 0:
     nn = "\n\n" if main_field else ""
-    main_field += f"{nn} Заключён в ГУЛАГ *{imprisoned} {get_times_str(imprisoned)}*"
+    main_field += f"{nn}Заключён в ГУЛАГ *{imprisoned} {get_times_str(imprisoned)}*"
   
   nn = "\n\n" if main_field else ""
   main_field += f"{nn}Социальный Рейтинг — *{points} ( {num}-е место )*" 
