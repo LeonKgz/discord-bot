@@ -1,33 +1,16 @@
 # Thiis file holds the functionality of the bot in regards to the status of the server
 
 import discord
-import os
-from discord.ext import commands, tasks
-from discord.ext.commands import Bot
-from discord.utils import get
+from discord.ext import commands
 import pymysql.cursors
-import sys
-
-# retrieving JAWSDB credentials
-HOST = str(os.getenv('DB_HOST'))
-USER = str(os.getenv('DB_USER'))
-PASSWORD = str(os.getenv('DB_PASSWORD'))
-DB = str(os.getenv('DB_DATABASE')) if sys.argv[1] == "prod" else str(os.getenv('TEST_DB_DATABASE'))
+from env import *
+from utils import *
 
 class Status(commands.Cog):
 
   def __init__(self, bot):
     self.bot = bot
   
-  def get_db_cursor(self):
-    db = pymysql.connect(host=HOST,
-												 user=USER,
-												 password=PASSWORD,
-												 db=DB,
-												 charset='utf8mb4',
-												 cursorclass=pymysql.cursors.DictCursor)
-    return db, db.cursor()
-
   def get_channel(self, guild, name):
     for ch in guild.channels:
       if name in ch.name:
@@ -40,7 +23,7 @@ class Status(commands.Cog):
     if (member.guild.name != "ТМГ"):
       return
 
-    db, cursor = self.get_db_cursor()
+    db, cursor = get_db_cursor()
 
     apatrid = discord.utils.get(member.guild.roles, name='Апатрид')
     await member.add_roles(apatrid)

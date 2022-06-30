@@ -3,7 +3,6 @@
 # coding=utf-8
 
 import asyncio
-import os
 import discord
 from discord.ext import commands
 from discord.utils import get as du_get
@@ -13,31 +12,13 @@ import secrets
 import datetime
 from requests import get
 from utils import *
+from env import *
 import numpy as np
 import sys
 from status import Status
 from loops import Loops
 from static import Static
 from zettel import Zettel
-
-
-
-# retrieving Discord credentials
-TOKEN = str(os.getenv('DISCORD_TOKEN_MANKURT'))
-GUILD = int(str(os.getenv('DISCORD_GUILD'))) if sys.argv[1] == "prod" else int(str(os.getenv('TEST_DISCORD_GUILD')))
-TEST_USER = int(str(os.getenv('TEST_USER')))
-ME = int(os.getenv('ME'))
-MANASCHI = int(os.getenv('MANASCHI'))
-
-# retrieving JAWSDB credentials
-HOST = str(os.getenv('DB_HOST'))
-USER = str(os.getenv('DB_USER'))
-PASSWORD = str(os.getenv('DB_PASSWORD'))
-
-QUOTES = str(os.getenv('QUOTES_KEY'))
-FOOD_KEY = str(os.getenv('FOOD_KEY'))
-
-seneca_api = str(os.getenv('SENECA_API_TOKEN'))
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
@@ -477,7 +458,7 @@ async def mems(ctx, role, text):
               chat_id = row["Telegram_Chat_ID"]
               msg = msg.replace("*", "")
               msg = msg.replace("`", "")
-              request = f"https://api.telegram.org/bot{seneca_api}/sendMessage?chat_id={chat_id}&text={msg}"
+              request = f"https://api.telegram.org/bot{SENECA_API}/sendMessage?chat_id={chat_id}&text={msg}"
               print(request)
               ret = requests.get(request)
         except Exception as e:
@@ -1446,4 +1427,4 @@ bot.add_cog(Loops(bot))
 bot.add_cog(Static(bot))
 bot.add_cog(Zettel(bot))
 
-bot.run(TOKEN)
+bot.run(MANKURT_TOKEN)

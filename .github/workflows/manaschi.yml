@@ -8,6 +8,7 @@ on:
     paths:
       - 'manaschi.py'
       - 'voice.py'
+      - 'manaschi.yml'
       - 'Dockerfile_Manaschi'
 
   # Allows you to run this workflow manually from the Actions tab

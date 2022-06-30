@@ -3,12 +3,30 @@
 name: CI
 
 # Controls when the workflow will run
+# on:
+#   # Triggers the workflow on push or pull request events but only for the "main" branch
+#   push:
+#     branches: [ "main" ]
+#   pull_request:
+#     branches: [ "main" ]
+
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    paths:
+      - 'mankurt.py'
+      - 'mankurt.yml'
+      - 'donos.py'
+      - 'env.py'
+      - 'loops.py'
+      # - 'nihon.py'
+      - 'run_tests.py'
+      - 'static.py'
+      - 'status.py'
+      - 'utils.py'
+      - 'zettel.py'
+      - 'Dockerfile_Mankurt'
+      - 'Dockerfile_Mankurt_Test'
+      - 'Dockerfile_Tester'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:

@@ -1,25 +1,14 @@
 from discord.ext import commands
 import requests
 from utils import * 
+from env import * 
 from googletrans import Translator
 
 class Zettel(commands.Cog):
 
   def __init__(self, bot):
     self.bot = bot 
-    self.global_languages_dictionary = {
-      "remedies": "en",
-      "remedy": "en",
-      "средства": "ru",
-      "средство": "ru",
-      "prayer": "en",
-      "молитва": "ru",
-    }
-  
-  # @commands.command(name="манифест")
-  # async def manifest(self, ctx):
-  #   await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => https://albenz.xyz/files/tractatus.pdf")
-
+    
   @commands.command(name="долг")
   async def duty(self, ctx, issue):
     url = f"http://albenz.xyz:6969/duty?issue={issue}"
@@ -48,7 +37,7 @@ class Zettel(commands.Cog):
     }
 
     invoked = ctx.invoked_with
-    lang = self.global_languages_dictionary[invoked]
+    lang = GLD[invoked]
 
     url = f"http://albenz.xyz:6969/remedy?issue={issue}"
 
@@ -81,7 +70,7 @@ class Zettel(commands.Cog):
     }
 
     invoked = ctx.invoked_with
-    lang = self.global_languages_dictionary[invoked]
+    lang = GLD[invoked]
 
     await ctx.channel.send(response_options[lang]["hold"])
 
@@ -182,7 +171,7 @@ class Zettel(commands.Cog):
       }
     }
     invoked = ctx.invoked_with
-    lang = self.global_languages_dictionary[invoked]
+    lang = GLD[invoked]
 
     url = f"http://albenz.xyz:6969/remedies"
     response = requests.get(url)

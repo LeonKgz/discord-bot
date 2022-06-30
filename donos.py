@@ -1,8 +1,7 @@
 from discord.ext import commands
 import datetime
 from utils import *
-
-GUILD = int(str(os.getenv('DISCORD_GUILD'))) if sys.argv[1] == "prod" else int(str(os.getenv('TEST_DISCORD_GUILD')))
+from env import *
 
 class Donos(commands.Cog):
 

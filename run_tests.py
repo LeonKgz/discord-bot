@@ -8,13 +8,9 @@ from distest import run_dtest_bot
 from utils import clear_db_table, get_db_row, mention, generate_text, update_db_entry
 import random
 import sys
-import os
 import datetime
 import json
-
-TEST_USER = int(str(os.getenv('TEST_USER')))
-TEST_USER_TOKEN = str(os.getenv('TEST_USER_TOKEN'))
-TEST_USER_NAME = 'Zanshin'
+from env import *
 
 # The tests themselves
 

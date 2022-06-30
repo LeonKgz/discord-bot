@@ -6,10 +6,7 @@ import discord
 from discord.ext import commands, tasks
 from voice import Voice
 from utils import status_update
-import os
-
-# retrieving Discord credentials
-TOKEN = str(os.getenv('DISCORD_TOKEN_MANASCHI'))
+from env import *
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
@@ -25,4 +22,4 @@ async def status_update_loop():
 
 bot.add_cog(Voice(bot))
 status_update_loop.start()
-bot.run(TOKEN)
+bot.run(MANASCHI_TOKEN)
