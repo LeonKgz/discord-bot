@@ -338,6 +338,9 @@ def mention_author(ctx):
 def mention(id):
   return f"<@!{id}>"
 
+def mention_role(id):
+  return f"<@&{id}>"
+
 def get_channel_by_name(bot, name, language):
   guild = bot.get_guild(GUILD)
   db, cursor = get_db_cursor()
@@ -787,6 +790,11 @@ def invoke(action, **params):
     if response['error'] is not None:
         raise Exception(response['error'])
     return response['result']
+
+def get_random_element(arr):
+  if arr:
+    return arr[int(random.random() * len(arr))]
+  return False
 
 def get_kanji_info(kanji):
     # open a connection to a URL using urllib
