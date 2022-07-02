@@ -36,7 +36,7 @@ class Voice(commands.Cog):
       if number < len(self.staroe_stations):
         await ctx.send(f"Включаю `{self.staroe_stations[number][0]}`")
         dir = self.staroe_stations[number][2]
-        if dir:
+        if dir != None:
           await ctx.send(f"Сейчас играет *\"{get_staroe_radio_info(dir)}\"*")
         player.play(FFmpegPCMAudio(self.staroe_stations[number][1]))
       else:
