@@ -5,7 +5,7 @@
 import discord
 from discord.ext import commands, tasks
 from voice import Voice
-from utils import status_update
+from utils import get_staroe_radio_info, status_update
 from env import *
 
 intents = discord.Intents.all()

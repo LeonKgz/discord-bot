@@ -5,7 +5,7 @@
 import asyncio
 import requests
 from discord import FFmpegPCMAudio
-from utils import disconnect
+from utils import disconnect, get_staroe_radio_info
 from youtube_dl import YoutubeDL
 from discord import FFmpegPCMAudio
 from discord.ext import commands
@@ -14,15 +14,15 @@ class Voice(commands.Cog):
 
   def __init__(self, bot):
     self.bot = bot  
-    self.stations = [
-      ("Старое Радио (Музыка)", "http://server.audiopedia.su:8000/music128"),
-      ("Старое Радио (Стихи, Пьесы, Рассказы, Программы)", "http://server.audiopedia.su:8000/ices128"),
-      ("Детское Радио", "http://server.audiopedia.su:8000/detskoe128"),
+    self.staroe_stations = [
+      ("Старое Радио (Музыка)", "http://server.audiopedia.su:8000/music128", None),
+      ("Старое Радио (Стихи, Пьесы, Рассказы, Программы)", "http://server.audiopedia.su:8000/ices128", ""),
+      ("Детское Радио", "http://server.audiopedia.su:8000/detskoe128", "detskoe"),
     ]
 
   @commands.command(name='radio')
   async def radio(self, ctx: commands.Context):
-    ss = [f"`  {i} => {self.stations[i][0]}`" for i in range(len(self.stations))]
+    ss = [f"`  {i} => {self.staroe_stations[i][0]}`" for i in range(len(self.staroe_stations))]
     joiner = "\n"
     stations = joiner.join(ss)
     await ctx.send(f"Вот список доступных радиостанций:\n{joiner}{stations}")
@@ -33,9 +33,12 @@ class Voice(commands.Cog):
       channel = ctx.message.author.voice.channel
       player = await channel.connect()
       number = int(number)
-      if number < len(self.stations):
-        await ctx.send(f"Включаю `{self.stations[number][0]}")
-        player.play(FFmpegPCMAudio(self.stations[number][1]))
+      if number < len(self.staroe_stations):
+        await ctx.send(f"Включаю `{self.staroe_stations[number][0]}`")
+        dir = self.staroe_stations[number][2]
+        if dir:
+          await ctx.send(f"Сейчас играет *\"{get_staroe_radio_info(dir)}\"*")
+        player.play(FFmpegPCMAudio(self.staroe_stations[number][1]))
       else:
         await ctx.send(f"Такой радиостанции не существует.")
         return 

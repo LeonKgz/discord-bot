@@ -856,6 +856,22 @@ def get_kanji_info(kanji):
 
     return on, kun, meanings
 
+def get_staroe_radio_info(dir=""):
+  try:
+    webUrl = urllib.request.urlopen(f'http://www.staroeradio.ru/program/{dir}')
+  except Exception as e:
+    print(e)
+    return None, None, str(e)
+
+  # read the data from the URL and print it
+  data = (webUrl.read())
+  data = data.decode('Utf-8')
+  soup = BeautifulSoup(data, 'html.parser')
+  soup = soup.find("div", {"class": "mp3list grid_9"})
+  soup = soup.find("a")
+  soup = soup.find("td", {"class": "mp3name1"})
+  return soup.get_text().strip()
+
 def get_word_info(word):
     # open a connection to a URL using urllib
     print(word)
