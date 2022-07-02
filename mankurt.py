@@ -287,15 +287,29 @@ async def include(ctx):
   help='Убирает роль Пролетария и даёт роль Политзаключённого. Можно заполнить протокол, который сохраняется в базе данных. Задержанный может ознакомиться с протоколом после задержания. Пользоваться командой могут Политбюро и ВЧК. '
 )
 async def jail(ctx, poor_guy, protocol):
+
+  guild = bot.get_guild(GUILD) 
+  # print([discord.utils.get(ctx.guild.roles, id=r.id) for r in curr_roles])
+
   if not await check_rights(ctx, ['Политбюро ЦКТМГ', 'ВЧК']):
     return
+  
   db, cursor = get_db_cursor()
+
   for mem in ctx.guild.members:
     if (mem.id == get_id(poor_guy)):
-      proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
+      # proletariat = discord.utils.get(ctx.guild.roles, name='Пролетарий')
+      curr_roles = [r for r in guild.get_member(get_id(poor_guy)).roles]
       politzek = discord.utils.get(ctx.guild.roles, name='Политзаключённый')
+
       await mem.add_roles(politzek)
-      await mem.remove_roles(proletariat)
+
+      for r in curr_roles:
+        try:
+          await mem.remove_roles(r)
+        except Exception as e:
+          print(e)
+          print(r)
 
       status = None
 
@@ -321,21 +335,7 @@ async def jail(ctx, poor_guy, protocol):
         status = statuses[0]
         imprisonment_cnt = 1 
 
-      #sql = f"SELECT * from prisoners WHERE ID={mem_id};"
-
-      #try:
-      #  cursor.execute(sql)
-      #  res = cursor.fetchone()['Status']
-      #  newidx = statuses.index(res) + 1
-      #  if (newidx == len(statuses)):
-      #    newidx = 0
-      #  status = statuses[newidx]
-      #  
-      #except Exception as e:
-      #  status = statuses[0]
-      
       length = lengths[status]
-
 
       ch = get_channel_by_name(bot, "гулаг", 'Russian')
       res = f"Заключённый <@!{mem_id}>! Ваше заключение составит {words[status]}. \nУзнать свой протокол можно с помощью команды « !начальник »"
@@ -353,8 +353,13 @@ async def jail(ctx, poor_guy, protocol):
       await asyncio.sleep(length * 60)
 
       await ctx.send(f"Заключённый <@!{mem_id}> свободен!")
-      await mem.add_roles(proletariat)
       await mem.remove_roles(politzek)
+
+      for r in curr_roles:
+        try:
+          await mem.add_roles(r)
+        except Exception as e:
+          print(e)
 
 @bot.command(
   name='начальник',

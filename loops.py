@@ -76,7 +76,6 @@ class Loops(commands.Cog):
       await ch.send(msg2)
 
     if guild and day == start_day and not rows:
-      
       proletariat = discord.utils.get(guild.roles, name='Пролетарий')
       apatrid = discord.utils.get(guild.roles, name='Апатрид')
       mention_all = []
@@ -89,8 +88,7 @@ class Loops(commands.Cog):
       if mention_all:
         line = "--------------------------------------------"
         nl = "\n"
-        # msg1 = line + (nl * 2) + "Граждане" + ", ".join(mention_all) + " :" + (nl * 2) + "***ОБЪЯВЛЯЕТСЯ ЕЖЕМЕСЯЧНАЯ МАССОВАЯ АМНИСТИЯ: НА 3 ДНЯ ВСЕМ АПАТРИДАМ ПРИСУЖДАЕТСЯ РОЛЬ ПРОЛЕТАРИАТА.\nАКТИВНОСТЬ НА СЕРВЕРЕ В ЭТОТ ПЕРИОД МОНИТОРИТЬСЯ НЕ БУДЕТ!***" + (nl * 2) + line
-        msg1 = line + (nl * 2) + "Граждане" + mention_role(apatrid.id) + " :" + (nl * 2) + "***ОБЪЯВЛЯЕТСЯ ЕЖЕМЕСЯЧНАЯ МАССОВАЯ АМНИСТИЯ: НА 3 ДНЯ ВСЕМ АПАТРИДАМ ПРИСУЖДАЕТСЯ РОЛЬ ПРОЛЕТАРИАТА.\nАКТИВНОСТЬ НА СЕРВЕРЕ В ЭТОТ ПЕРИОД МОНИТОРИТЬСЯ НЕ БУДЕТ!***" + (nl * 2) + line
+        msg1 = line + (nl * 2) + "Граждане" + mention_role(apatrid.id) + ":" + (nl * 2) + "***ОБЪЯВЛЯЕТСЯ ЕЖЕМЕСЯЧНАЯ МАССОВАЯ АМНИСТИЯ: НА 3 ДНЯ ВСЕМ АПАТРИДАМ ПРИСУЖДАЕТСЯ РОЛЬ ПРОЛЕТАРИАТА.\nАКТИВНОСТЬ НА СЕРВЕРЕ В ЭТОТ ПЕРИОД МОНИТОРИТЬСЯ НЕ БУДЕТ!***" + (nl * 2) + line
 
         ch = get_channel_by_name(self.bot, "погран-застава", "Russian")
         await ch.send(msg1)
