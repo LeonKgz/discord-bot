@@ -341,6 +341,13 @@ def mention(id):
 def mention_role(id):
   return f"<@&{id}>"
 
+async def disconnect(bot, ctx):
+  for x in bot.voice_clients:
+    if(x.guild == ctx.message.guild):
+      await x.disconnect()
+      return True
+  return False
+
 def get_channel_by_name(bot, name, language):
   guild = bot.get_guild(GUILD)
   db, cursor = get_db_cursor()

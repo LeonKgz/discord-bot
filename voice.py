@@ -5,6 +5,7 @@
 import asyncio
 import requests
 from discord import FFmpegPCMAudio
+from utils import disconnect
 from youtube_dl import YoutubeDL
 from discord import FFmpegPCMAudio
 from discord.ext import commands
@@ -14,8 +15,20 @@ class Voice(commands.Cog):
   def __init__(self, bot):
     self.bot = bot  
 
+  @commands.command(name='radio')
+  async def radio(self, ctx: commands.Context):
+    ss = [
+      "`  0 => Старое Радио (Музыка)`",
+      "`  1 => Старое Радио (Стихи, Пьесы, Рассказы, Программы)`",
+      "`  2 => Детское Радио`",
+    ]
+    joiner = "\n"
+    stations = joiner.join(ss)
+    await ctx.send(f"Вот список доступных радиостанций:\n{joiner}{stations}")
+
   @commands.command(name='on')
   async def on(self, ctx: commands.Context, number):
+      await disconnect(self.bot, ctx)
       channel = ctx.message.author.voice.channel
       player = await channel.connect()
       number = int(number)
@@ -169,11 +182,12 @@ class Voice(commands.Cog):
 
   @commands.command(name='off', pass_context = True)
   async def off(self, ctx):
-      for x in self.bot.voice_clients:
-          if(x.guild == ctx.message.guild):
-              return await x.disconnect()
-
-      return await ctx.send("I am not connected to any voice channel on this server!")
+      # for x in self.bot.voice_clients:
+      #     if(x.guild == ctx.message.guild):
+      #         return await x.disconnect()
+      res = await disconnect(self.bot, ctx)
+      if not res:
+        return await ctx.send("I am not connected to any voice channel on this server!")
 
 def setup(bot):
   bot.add_cog(Voice(bot))
