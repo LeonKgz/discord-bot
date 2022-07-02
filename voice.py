@@ -14,14 +14,15 @@ class Voice(commands.Cog):
 
   def __init__(self, bot):
     self.bot = bot  
+    self.stations = [
+      ("Старое Радио (Музыка)", "http://server.audiopedia.su:8000/music128"),
+      ("Старое Радио (Стихи, Пьесы, Рассказы, Программы)", "http://server.audiopedia.su:8000/ices128"),
+      ("Детское Радио", "http://server.audiopedia.su:8000/detskoe128"),
+    ]
 
   @commands.command(name='radio')
   async def radio(self, ctx: commands.Context):
-    ss = [
-      "`  0 => Старое Радио (Музыка)`",
-      "`  1 => Старое Радио (Стихи, Пьесы, Рассказы, Программы)`",
-      "`  2 => Детское Радио`",
-    ]
+    ss = [f"`  {i} => {self.stations[i][0]}`" for i in range(len(self.stations))]
     joiner = "\n"
     stations = joiner.join(ss)
     await ctx.send(f"Вот список доступных радиостанций:\n{joiner}{stations}")
@@ -32,15 +33,12 @@ class Voice(commands.Cog):
       channel = ctx.message.author.voice.channel
       player = await channel.connect()
       number = int(number)
-      if (number == 0):
-        # Музыка
-        player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/music128'))
-      elif number == 1:  
-        # Старое радио
-        player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/ices128'))
-      elif number == 2:  
-        # Детское радио
-        player.play(FFmpegPCMAudio('http://server.audiopedia.su:8000/detskoe128'))
+      if number < len(self.stations):
+        await ctx.send(f"Включаю `{self.stations[number][0]}")
+        player.play(FFmpegPCMAudio(self.stations[number][1]))
+      else:
+        await ctx.send(f"Такой радиостанции не существует.")
+        return 
 
   @commands.command(name='rec')
   async def rec(self, ctx: commands.Context):
