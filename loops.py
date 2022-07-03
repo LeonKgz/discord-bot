@@ -101,9 +101,10 @@ class Loops(commands.Cog):
   async def update_channels_name(self):
     
     hour = int(datetime.datetime.now().hour)
+    weekday = int(datetime.datetime.now().weekday())
     guild = self.bot.get_guild(GUILD)
 
-    if hour == 6 and guild:
+    if guild and weekday == 1 and hour == 6:
 
       langs = get_channel_name_languages() 
 
