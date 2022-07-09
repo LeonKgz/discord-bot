@@ -68,6 +68,20 @@ async def status_update(bot):
 
     db.close()
 
+def delete_row(table, id_val):
+  db, cursor = get_db_cursor()
+  sql = f"DELETE FROM {table} WHERE ID = \"{id_val}\""  
+  try:
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    print(e)
+    db.rollback()
+  
+  db.close()
+
+
+
 def update_db_entry(table, field_name, new_val, id_val):
   if not DB == str(os.getenv('TEST_DB_DATABASE')):
     print("Can only rewrite tables in test mode!")
@@ -341,6 +355,23 @@ def mention(id):
 def mention_role(id):
   return f"<@&{id}>"
 
+async def check_rights(bot, ctx, acceptable_roles, tell=True):
+  #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
+  super_roles = acceptable_roles
+
+  try:
+    res_roles = ctx.author.roles
+  except Exception as e:
+    res_roles = bot.get_user(ctx.author.id).roles
+
+  for role in list(map(str, res_roles)):
+    if (role in super_roles):
+      return True
+  if tell:
+    response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(du_get(bot.emojis, name='peepoClown'))
+    await ctx.send(response)
+  return False
+
 async def disconnect(bot, ctx):
   for x in bot.voice_clients:
     if(x.guild == ctx.message.guild):
@@ -609,28 +640,17 @@ def get_file(bot, mem):
   else: 
     main_field = "⠀\n" + main_field
 
-
-  # logs = get_logs(id_to_search)
   logs = get_logs_compressed(id_to_search)
 
   if logs[-1]:
     main_field += f"\n\nАктивность:"
-    embed.add_field(name=main_field, value=f"⠀\n{logs[0]}\n⠀", inline=False)
-    # print(len(logs[0]))
+    embed.add_field(name=main_field, value=f"⠀\n{logs[0]}", inline=False)
     for l in logs[1:]:
-      embed.add_field(name="⠀", value=f"⠀\n{l}\n⠀", inline=False)
+      embed.add_field(name="⠀", value=f"{l}", inline=False)
 
   else:
     embed.add_field(name=main_field, value="⠀", inline=False)
   
-  # if logs:
-  # embed.add_field(name=main_field, value="⠀", inline=False)
-    # main_field += f"⠀\n{logs}"
-    # embed.add_field(name="Logs", value=logs, inline=False)
-  # embed.add_field(name=main_field, value="⠀", inline=False)
-
-  # attach moshna печать
-#  embed.add_field(name="Валюта", value="Шанырак - 12", inline=True)
   return embed
 
 def insert_row(table, fields, values):
@@ -716,6 +736,7 @@ def get_logs_compressed(id_to_search):
     for r in ret:
       # TODO add additional check in the futura addition od descriptions in other languages e.g. english
       curr_month = r['Timestamp'].month
+      curr_time = r['Timestamp']
       if is_weekly(r):
         if curr_month_activity and curr_month_activity[-1]['Timestamp'].month == curr_month:
           curr_month_activity.append(r)
@@ -724,7 +745,7 @@ def get_logs_compressed(id_to_search):
           curr_month_activity = [r]
 
       else:        
-        if is_weekly(prev_row) and curr_month != curr_month_activity[-1]['Timestamp'].month:
+        if is_weekly(prev_row) and curr_time > curr_month_activity[-1]['Timestamp']:
           record_month_activity(curr_month_activity, res)
           curr_month_activity = []
 
@@ -856,6 +877,23 @@ def get_kanji_info(kanji):
 
     return on, kun, meanings
 
+def get_staroe_radio_name_and_link(link):
+  try:
+    webUrl = urllib.request.urlopen(link)
+  except Exception as e:
+    print(e)
+    return None, None, str(e)
+
+  # read the data from the URL and print it
+  data = (webUrl.read())
+  data = data.decode('Utf-8')
+  soup = BeautifulSoup(data, 'html.parser')
+  player = soup.find("audio", {"id": "radio-player"})
+  link = player.get('src')
+  header = soup.find("h1").get_text().strip()
+
+  return header, link
+
 def get_staroe_radio_info(dir=""):
   try:
     webUrl = urllib.request.urlopen(f'http://www.staroeradio.ru/program/{dir}')
@@ -978,8 +1016,6 @@ def is_apartid_in_amnesty(iid):
 
   return False
 
-
-
 def get_channel_name_languages():
   db, cursor = get_db_cursor()
   sql = "SHOW COLUMNS FROM tmg_channels"
@@ -1001,4 +1037,3 @@ async def check_rights_dm(ctx):
   response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(du_get(bot.emojis, name='peepoClown'))
   await ctx.send(response)
   return False
-
