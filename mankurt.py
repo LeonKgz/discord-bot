@@ -19,6 +19,7 @@ from status import Status
 from loops import Loops
 from static import Static
 from zettel import Zettel
+from health import Health
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
@@ -309,7 +310,6 @@ async def jail(ctx, poor_guy, protocol):
           await mem.remove_roles(r)
         except Exception as e:
           print(e)
-          print(r)
 
       status = None
 
@@ -1213,6 +1213,23 @@ async def check_japanese(ctx):
     await ctx.send("Remote Nihon Cog is disconnected!")
     print(e)
 
+@bot.command(name='setlang')
+async def setlang(ctx, lang):
+
+  if (not await check_rights(ctx, ['Политбюро ЦКТМГ'])):
+    return
+    
+  guild = bot.get_guild(GUILD)
+  for ch in guild.channels:
+    row = get_db_row("tmg_channels", str(ch.id))
+    if not row:
+      print(f"{ch.name} was not found!")
+      continue
+    
+    res = row['Prefix'] + row[lang]
+    await ch.edit(name=res)
+  await ctx.send(f"{mention_author(ctx)}, все каналы обновлены!")
+
 @bot.command(name='рассказать')
 async def confess(ctx, *, args=None):
     name = ctx.author.name
@@ -1437,7 +1454,7 @@ bot.add_cog(Status(bot))
 bot.add_cog(Loops(bot))
 bot.add_cog(Static(bot))
 bot.add_cog(Zettel(bot))
-
+# bot.add_cog(Health(bot))
 
 # get all membeers of Politzek and add to their roles Proletariat (while keeping apatrid)
 # during amnesty cannot use !propusk as an apatrid

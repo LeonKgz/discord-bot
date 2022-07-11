@@ -20,7 +20,7 @@ class Status(commands.Cog):
   @commands.Cog.listener()
   async def on_member_join(self, member):
     
-    if (member.guild.name != "ТМГ"):
+    if ("ТМГ" not in member.guild.name and "TMG Zanshin" not in member.guild.name):
       return
 
     db, cursor = get_db_cursor()
@@ -28,8 +28,10 @@ class Status(commands.Cog):
     apatrid = discord.utils.get(member.guild.roles, name='Апатрид')
     await member.add_roles(apatrid)
 
-    ch = self.get_channel(member.guild, "погран")
-    manifesto = self.get_channel(member.guild, "manifesto")
+    # ch = self.get_channel(member.guild, "погран")
+    ch = get_channel_by_name(self.bot, "погран-застава", 'Russian')
+    # manifesto = self.get_channel(member.guild, "manifesto")
+    manifesto = get_channel_by_name(self.bot, "манифест", 'Russian')
     await ch.send(f"<@!{member.id}>, добро пожаловать в ТМГ!\n\nЭто пограничная застава, охраняющая суверенитет Мошны.\n В канале {manifesto.mention} ты найдёшь Трактат о Мошне — основополагающий документ сего сообщества.\nЧтобы получить доступ ко всем остальным каналам сервера и стать полноценным гражданином, вам нужно рассказать о себе. Для полных инструкций, введите команду « **!пропуск** ». \n\nДа прибудет с тобой Мошна!")
 
     ch = self.get_channel(member.guild, "карандаш")
