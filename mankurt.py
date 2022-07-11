@@ -19,7 +19,7 @@ from status import Status
 from loops import Loops
 from static import Static
 from zettel import Zettel
-from health import Health
+# from health import Health
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
