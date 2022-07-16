@@ -18,6 +18,10 @@ class Static(commands.Cog):
   async def plays(self, ctx):
     await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => https://albenz.xyz/plays/allplays/")
 
+  @commands.command(name="очки")
+  async def score(self, ctx):
+    await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => http://albenz.xyz:6969/score")
+
   @commands.command(name="песни")
   async def songs(self, ctx):
     await ctx.send(f"<@!{ctx.author.id}>, тебе сюда => https://www.albenz.xyz/songs/allartists/")
