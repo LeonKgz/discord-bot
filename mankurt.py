@@ -456,8 +456,11 @@ async def mems(ctx, role, text):
         try:  
             await member.create_dm()
             await member.dm_channel.send("--------------------------------------------------------------------------\n*Сообщение от* **" + str(ctx.author.name) + "**!\n\n\t" + text + "\n\n[*Сообщения боту автоматически пересылаются Албанцу*]\n--------------------------------------------------------------------------")
+        except Exception as e:
+            print(e)
+
+        try:  
             msg = "--------------------------------------------------------------------------\nСообщение от " + str(ctx.author.name) + "!\n\n\t" + text + "\n\n--------------------------------------------------------------------------"
-            print(member.id)
             row = get_db_row("telegram_integration", str(member.id))
             if row:
               chat_id = row["Telegram_Chat_ID"]
@@ -466,6 +469,7 @@ async def mems(ctx, role, text):
               request = f"https://api.telegram.org/bot{SENECA_API}/sendMessage?chat_id={chat_id}&text={msg}"
               print(request)
               ret = requests.get(request)
+
         except Exception as e:
             print(e)
 
