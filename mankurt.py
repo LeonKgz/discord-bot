@@ -459,6 +459,7 @@ async def mems(ctx, role, text):
         except Exception as e:
             print(e)
 
+
         try:  
             msg = "--------------------------------------------------------------------------\nСообщение от " + str(ctx.author.name) + "!\n\n\t" + text + "\n\n--------------------------------------------------------------------------"
             row = get_db_row("telegram_integration", str(member.id))
@@ -750,76 +751,95 @@ async def evaluate(ctx, mem, points):
     except Exception as e:
       print(e)
 
+
+    async def get_embed():
     ############################################################################################################ 
-    embed = discord.Embed(title=f"Модераторы рассмотрели новое описание") 
-    embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
+      embed = discord.Embed(title=f"Модераторы рассмотрели новое описание") 
+      embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
 
-    pepes = [
-      "https://cdn.betterttv.net/emote/5d324913ff6ed36801311fd2/3x",
-      "https://cdn.betterttv.net/emote/57850b9df1bf2c1003a88644/3x",
-      "https://cdn.betterttv.net/emote/59f27b3f4ebd8047f54dee29/3x",
-      "https://cdn.betterttv.net/emote/5ec39a9db289582eef76f733/3x",
-      "https://cdn.betterttv.net/emote/5aa16eb65d4a424654d7e3e5/3x",
-      "https://cdn.betterttv.net/emote/5c0e1a3c6c146e7be4ff5c0c/3x",
-      "https://cdn.betterttv.net/emote/5baa5b59f17b9f6ab0f3e84f/3x",
-      "https://cdn.betterttv.net/emote/5590b223b344e2c42a9e28e3/3x",
-      "https://cdn.betterttv.net/emote/5ec059009af1ea16863b2dec/3x",
-      "https://cdn.betterttv.net/emote/58ae8407ff7b7276f8e594f2/2x",
-      "https://cdn.betterttv.net/emote/5aea37908f767c42ce1e0293/3x",
-    ]
+      pepes = [
+        "https://cdn.betterttv.net/emote/5d324913ff6ed36801311fd2/3x",
+        "https://cdn.betterttv.net/emote/57850b9df1bf2c1003a88644/3x",
+        "https://cdn.betterttv.net/emote/59f27b3f4ebd8047f54dee29/3x",
+        "https://cdn.betterttv.net/emote/5ec39a9db289582eef76f733/3x",
+        "https://cdn.betterttv.net/emote/5aa16eb65d4a424654d7e3e5/3x",
+        "https://cdn.betterttv.net/emote/5c0e1a3c6c146e7be4ff5c0c/3x",
+        "https://cdn.betterttv.net/emote/5baa5b59f17b9f6ab0f3e84f/3x",
+        "https://cdn.betterttv.net/emote/5590b223b344e2c42a9e28e3/3x",
+        "https://cdn.betterttv.net/emote/5ec059009af1ea16863b2dec/3x",
+        "https://cdn.betterttv.net/emote/58ae8407ff7b7276f8e594f2/2x",
+        "https://cdn.betterttv.net/emote/5aea37908f767c42ce1e0293/3x",
+      ]
 
-    amount = int(curr_mean)
-    
-    embed.set_thumbnail(url=pepes[amount])
+      amount = int(curr_mean)
+      
+      embed.set_thumbnail(url=pepes[amount])
 
-    if amount == 0 or (amount >= 5 and amount <= 10):
-      points_word = "очков"
-    elif amount == 1:
-      points_word = "очко"
-    else:
-      points_word = "очка"
+      if amount == 0 or (amount >= 5 and amount <= 10):
+        points_word = "очков"
+      elif amount == 1:
+        points_word = "очко"
+      else:
+        points_word = "очка"
 
-    # light green, same as СовНарМод
-    embed.color = 0xff0000 
-    embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает **{amount} {points_word}** обновив описание!", inline=False)
+      # light green, same as СовНарМод
+      embed.color = 0xff0000 
+      embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает **{amount} {points_word}** обновив описание!", inline=False)
 
-    db, cursor = get_db_cursor()
-    sql = f"SET @row_number = 0; SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC"
+      db, cursor = get_db_cursor()
+      sql = f"SET @row_number = 0; SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC"
 
-    guild = bot.get_guild(GUILD)
-    try:
-      #cursor.execute(sql)
-      cursor.execute("SET @row_number = 0;")
-      cursor.execute(f"SELECT num, ID, Name, Points FROM (SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC) a WHERE ID = {id_to_search}")
+      guild = bot.get_guild(GUILD)
+      try:
+        #cursor.execute(sql)
+        cursor.execute("SET @row_number = 0;")
+        cursor.execute(f"SELECT num, ID, Name, Points FROM (SELECT (@row_number:=@row_number + 1) AS num, ID, Name, Points FROM raiting ORDER BY Points DESC) a WHERE ID = {id_to_search}")
 
-      res = cursor.fetchone()
-      num = res["num"]
-      points = res["Points"]
-      #db.commit()
-    except Exception as e:
-      print(e)
-      db.rollback()
+        res = cursor.fetchone()
+        num = res["num"]
+        points = res["Points"]
+        #db.commit()
+      except Exception as e:
+        print(e)
+        db.rollback()
 
-      ch = get_channel_by_name(bot, "технический", 'Russian')
-      await ch.send(f"Cant display activity log for **{mem.display_name}** !")
-      return 
+        ch = get_channel_by_name(bot, "технический", 'Russian')
+        await ch.send(f"Cant display activity log for **{mem.display_name}** !")
+        return None
 
-    embed.set_footer(text="Смотрите как зарабатывать очки в Манифесте")
-    main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
-    embed.add_field(name=main_field, value="⠀", inline=False)
+      embed.set_footer(text="Смотрите как зарабатывать очки в Манифесте")
+      main_field = f"⠀\nСоциальный Рейтинг — *{points} ( {num}-е место )*"
+      embed.add_field(name=main_field, value="⠀", inline=False)
+      return embed
+
     ############################################################################################################ 
     # If all the mods have marked this user, remove from unmarked_confessions table
     if (len(mods) == 0):
       sql = f"DELETE FROM unmarked_confessions WHERE ID=\"{id_to_search}\""
       ch = get_channel_by_name(bot, "гласность", 'Russian')
       # await ch.send(f"Все Модераторы оценили описание гражданина <@!{mem.id}>!\n\n\t\t Окончательная оценка — **{int(curr_mean)}**\n\n----------------------------------------------------------------------")
-      await ch.send(embed=embed)
+      # await ch.send(embed=embed)
 
       # Once all mods marked the description. record the result into logs table and add the points 
 
       # await remove_points_quick(id_to_search, prev_mean)
-      await remove_points_quick(source=ME, target=mem.id, type="Description", amount=prev_mean, description="Корректировка оценки описания")
+      
+      db1, cursor1 = get_db_cursor()
+      try:
+        sql_filter = f"SELECT * FROM logs WHERE Target={mem.id} AND Type=\'Description\'"
+        cursor1.execute(sql_filter)
+        ret = cursor1.fetchone()
+        # that means there are logs where Ll moderators already marked someones description fully, hence curr evaluation should be corrected now
+        if ret:
+          await remove_points_quick(source=ME, target=mem.id, type="Description", amount=prev_mean, description="Корректировка оценки описания")
+      except Exception as e:
+        print(e)
+        db1.rollback()
+
       await add_points_quick(source=ME, target=mem.id, type="Description", amount=curr_mean, description="Обновление описания")
+
+      embed = await get_embed()
+      await ch.send(embed=embed)
     
     else:  
       mods = ", ".join([str(m) for m in mods])
