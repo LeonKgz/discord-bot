@@ -75,6 +75,11 @@ class Loops(commands.Cog):
       ch = get_channel_by_name(self.bot, "объявления", "Russian")
       await ch.send(msg2)
 
+      # Bringing the priority of Apatrid role back up (HARDCODED third from the top)
+      apatrid = discord.utils.get(guild.roles, name='Апатрид')
+      a_idx = len(guild.roles) - 3
+      await apatrid.edit(position=a_idx)
+
     if guild and day == start_day and not rows:
       proletariat = discord.utils.get(guild.roles, name='Пролетарий')
       apatrid = discord.utils.get(guild.roles, name='Апатрид')
@@ -96,6 +101,13 @@ class Loops(commands.Cog):
       msg2 = line + (nl * 2) + "***ОБЪЯВЛЯЕТСЯ ЕЖЕМЕСЯЧНАЯ МАССОВАЯ АМНИСТИЯ: НА 3 ЗНЯ ВСЕМ АПАТРИДАМ ПРИСУЖДАЕТСЯ РОЛЬ ПРОЛЕТАРИАТА.\nАКТИВНОСТЬ АПАТРИДОВ НА СЕРВЕРЕ В ЭТОТ ПЕРИОД МОНИТОРИТЬСЯ НЕ БУДЕТ!***" + (nl * 2) + line
       ch = get_channel_by_name(self.bot, "объявления", "Russian")
       await ch.send(msg2)
+
+      # Temporarily bringing the priority of Apatrid role below Proletariat
+      proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+      p_idx = proletariat.position
+      apatrid = discord.utils.get(guild.roles, name='Апатрид')
+      await apatrid.edit(position=p_idx)
+
 
   @tasks.loop(seconds=HOUR)
   async def update_channels_name(self):
