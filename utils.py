@@ -560,12 +560,20 @@ def get_file(bot, mem):
     "Апатрид": "apatrid",
   }
 
+  
+  day = int(datetime.datetime.now().day)
+  start_day = AMNESTY_START_DAY
+  end_day = AMNESTY_END_DAY
+  is_amnesty = start_day <= day < end_day
+
   guild = bot.get_guild(GUILD) 
   for member in guild.members:
     if (member.id == id_to_search):
       mem_roles = list(map(str, member.roles))
       for role in roles_names_list:
         if role in mem_roles:
+          if is_amnesty and role == "Апатрид":
+            continue
           embed.set_thumbnail(url=thumbs[roles_names_to_code[role]])
           embed.color = colours[roles_names_to_code[role]]
 
