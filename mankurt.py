@@ -141,7 +141,7 @@ async def telegram_registration_notification(id_to_search):
   embed = discord.Embed(title=f"Роскомнадзор хочет знать ваше местоположение") 
   embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
   embed.set_thumbnail(url="https://sun9-19.userapi.com/s/v1/if1/dFyFjrD1QetbjHomAaHQvt_SxGIOuuykqptAyKBFVIzyZ8p07QXbB2Lp22_1-JkFm2Xcj_7A.jpg?size=200x200&quality=96&crop=47,0,764,764&ava=1")
-  # light green, same as СовНарМод
+  # light blue 
   embed.color = 0x039be5
   embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает очки подключив телеграм!\n(Удобная альтернатива рассылке в дискорде)", inline=False)
 
@@ -911,16 +911,22 @@ async def add_points_quick(source, target, type, amount, description):
       if (not row):
         #return False
         curr = 0
+        curr_money = 0
       else:
         curr = row["Points"]
+        curr_money = row["Money"]
 
       end = curr + amount
+      end_money = curr_money + amount
 
       if (end < 0):
         end = 0
 
+      if (end_money < 0):
+        end_money = 0
+
       db, cursor = get_db_cursor()
-      sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target}\""
+      sql = f"UPDATE raiting SET Points = \"{end}\", Money = \"{end_money}\" WHERE ID=\"{target}\""
 
       try:
         cursor.execute(sql)
@@ -968,9 +974,14 @@ async def remove_points(ctx, target_id, points):
             await ctx.send(f"<@!{ctx.message.author.id}>, произошла ошибка соединения! Попробуйте ещё раз.")
 
           curr = row["Points"]
+          # curr_money = row["Money"]
           end = curr - points
+          # end_money = curr_money - points
           if (end < 0):
             end = 0
+
+          # if (end_money < 0):
+          #   end_money = 0
 
           db, cursor = get_db_cursor()
           sql = f"UPDATE raiting SET Points = \"{end}\" WHERE ID=\"{target_id}\""
