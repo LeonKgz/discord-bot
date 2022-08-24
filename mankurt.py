@@ -947,6 +947,18 @@ async def add_points_quick(source, target, type, amount, description):
 
   return True
 
+@bot.command(name="баланс")
+async def check_money(ctx):
+  row = get_db_row("raiting", str(ctx.author.id))
+  
+  if not row:
+    await ctx.send(f"{mention_author(ctx)}, произошла ошибка! Обратитесь к Албанцу.")
+    return
+
+  amount = row["Money"]   
+  await ctx.send(f"{mention_author(ctx)}, на вашем счету {amount} {get_money_str(amount)}!")
+
+
 @bot.command(name="remove")
 async def remove_points(ctx, target_id, points):
   if (not await check_rights_dm(ctx)):
