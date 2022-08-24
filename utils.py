@@ -10,7 +10,6 @@ import numpy as np
 import os
 import pymysql.cursors
 import urllib.request
-import urllib.request
 import random
 import string
 from bs4 import BeautifulSoup
@@ -320,15 +319,30 @@ async def parse_zettel_json(ctx, data):
       f.close()
       os.remove(filename)
 
-# depending on the number returns the currect russian analogue of «times» i.e. раза/раза
+def get_money_str(num):
+  mod = num % 10
+  counter_str = "шекелей"
+  
+  if mod == 1:
+    counter_str = "шекель"
+
+  if mod > 1 and mod < 5:
+    counter_str = "шекеля"
+
+  return counter_str
+
 def get_times_str(num):
   mod = num % 10
+
+  
   counter_str = "раз"
   
   if mod > 1 and mod < 5:
     counter_str = "раза"
 
   return counter_str
+
+
 
 def get_channel_names(bot, id):
   db, cursor = get_db_cursor()
