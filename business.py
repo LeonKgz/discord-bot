@@ -12,7 +12,7 @@ class Business(commands.Cog):
     self.rename_purchase_queue.start()
   
 
-  @tasks.loop(seconds=60.0)
+  @tasks.loop(seconds=HOUR)
   async def rename_purchase_queue(self):
     period, units, unitstr = EFFECTS["rename"]
     now = datetime.datetime.now()
