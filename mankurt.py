@@ -3,11 +3,13 @@
 # coding=utf-8
 
 import asyncio
+from business import Business
 import discord
 from discord.ext import commands
 from discord.utils import get as du_get
 import json
 import requests
+from googletrans import Translator
 import secrets
 import datetime
 from requests import get
@@ -947,18 +949,6 @@ async def add_points_quick(source, target, type, amount, description):
 
   return True
 
-@bot.command(name="баланс")
-async def check_money(ctx):
-  row = get_db_row("raiting", str(ctx.author.id))
-  
-  if not row:
-    await ctx.send(f"{mention_author(ctx)}, произошла ошибка! Обратитесь к Албанцу.")
-    return
-
-  amount = row["Money"]   
-  await ctx.send(f"{mention_author(ctx)}, на вашем счету {amount} {get_money_str(amount)}!")
-
-
 @bot.command(name="remove")
 async def remove_points(ctx, target_id, points):
   if (not await check_rights_dm(ctx)):
@@ -1273,7 +1263,14 @@ async def setlang(ctx, lang):
       print(f"{ch.name} was not found!")
       continue
     
-    res = row['Prefix'] + row[lang]
+    if lang in row:
+      res = row['Prefix'] + row[lang]
+    else:
+      russian = row['Russian']
+      tr = Translator()
+      # google translate from russian to the 'lang' via google translate
+      res = row['Prefix'] + tr.translate(russian, dest=LANGUAGE_CODES[lang.lower()]).text
+
     await ch.edit(name=res)
   await ctx.send(f"{mention_author(ctx)}, все каналы обновлены!")
 
@@ -1501,6 +1498,7 @@ bot.add_cog(Status(bot))
 bot.add_cog(Loops(bot))
 bot.add_cog(Static(bot))
 bot.add_cog(Zettel(bot))
+bot.add_cog(Business(bot))
 # bot.add_cog(Health(bot))
 
 # get all membeers of Politzek and add to their roles Proletariat (while keeping apatrid)

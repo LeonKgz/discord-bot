@@ -3,11 +3,14 @@
 # coding=utf-8
 
 import base64
+import requests
 import discord
 from discord.utils import get as du_get
+from googletrans import Translator
 import json
 import numpy as np
 import os
+import pickle
 import pymysql.cursors
 import urllib.request
 import random
@@ -28,6 +31,20 @@ def get_db_cursor():
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
   return db, db.cursor()
+
+async def respond(ctx, response):
+  return await ctx.send(f"{mention_author(ctx)}, {response}")
+
+async def respond_pkl(bot, pklctx, response):
+  
+  guild = bot.get_guild(GUILD)
+  id_to_search = pklctx.channel_id
+  
+  for ch in guild.channels:
+    if (str(ch.id) == str(id_to_search)):
+      return await ch.send(f"<@!{pklctx.author_id}>, {response}")
+
+  return None
 
 def clear_db_table(table):
   db, cursor = get_db_cursor()
@@ -79,7 +96,18 @@ def delete_row(table, id_val):
   
   db.close()
 
+def remove_balance(id, amount):
+  row = get_db_row("raiting", id)
+  
+  if not row:
+    return False
+  curr = row["Money"]
+  
+  if amount > curr:
+    return False
 
+  new = curr - amount
+  update_db_entry("raiting", "Money", new, id)
 
 def update_db_entry(table, field_name, new_val, id_val):
   if not DB == str(os.getenv('TEST_DB_DATABASE')):
@@ -96,6 +124,141 @@ def update_db_entry(table, field_name, new_val, id_val):
     db.rollback()
   
   db.close()
+
+async def rename_all_channels(bot, ctx, lang):
+
+    message = await respond_pkl(bot, ctx, "переименовываю все каналы! Это займёт несколько секунд...")
+    guild = bot.get_guild(GUILD)
+    is_random = lang.lower() == "random"
+    tr = Translator()
+
+    curr_lang_name_in_russian = tr.translate(lang + " language", dest='ru').text.lower()
+    if "язык" in curr_lang_name_in_russian:
+      curr_lang_name_in_russian = curr_lang_name_in_russian.replace("язык", "").strip()
+
+    for ch in guild.channels:
+      row = get_db_row("tmg_channels", str(ch.id))
+      if not row:
+        print(f"{ch.name} was not found!")
+        continue
+      
+      russian = row['Russian']
+      if lang in row:
+        res = row['Prefix'] + row[lang]
+      elif is_random:
+        lang = random.choice(list(LANGUAGE_CODES.keys()))
+        res = row['Prefix'] + tr.translate(russian, dest=LANGUAGE_CODES[lang]).text
+      else:
+        # google translate from russian to the 'lang' via google translate
+        res = row['Prefix'] + tr.translate(russian, dest=LANGUAGE_CODES[lang.lower()]).text
+
+      if is_random:     
+        curr_lang_name_in_russian = tr.translate(lang + " language", dest='ru').text.lower()
+        if "язык" in curr_lang_name_in_russian:
+          curr_lang_name_in_russian = curr_lang_name_in_russian.replace("язык", "").strip()
+
+      await ch.edit(name=res, topic=f"{russian} ({curr_lang_name_in_russian})")
+      # break
+
+    await message.delete()
+    await respond_pkl(bot, ctx, "все каналы переименованы!")
+    lang_name = tr.translate(lang, dest='ru').text
+
+    lcode = "random" if is_random else LANGUAGE_CODES[lang.lower()]
+    if "-" in lcode:
+      lcode = lcode.split("-")[0].strip()
+
+    url = f"http://albenz.xyz:6969/flag?code={lcode}"
+    response = requests.get(url)
+    thumb = response.json()["url"]
+    
+    if not thumb:
+      thumb = "https://c.tenor.com/KEceaHH8vkkAAAAM/%D0%BC%D0%BE%D1%80%D0%B3%D0%B5%D0%BD%D0%B0%D0%BB.gif"
+    
+    if is_random:
+      curr_lang_name_in_russian = "Случайный" 
+    
+    embed = await get_simple_embed(
+            title=f"запрещает вам срать!",
+            message=f"Названия всех каналов переведены на **{curr_lang_name_in_russian.title()}** язык!",
+            thumbnail_url=thumb,
+            color_hex_code=0x000000,
+            footer=""
+          )
+    embed.set_author(name=ctx.display_name, icon_url=ctx.avatar_url)
+    gl = get_channel_by_name(bot, "гласность", 'Russian')
+    await gl.send(embed=embed)
+
+def get_str_hour(num):
+  counter_str = "часов"
+  if 11 <= num <= 20:
+    return counter_str
+
+  mod = num % 10
+
+  if mod == 1:
+    counter_str = "час"
+
+  if mod > 1 and mod < 5:
+    counter_str = "часа"
+
+  return counter_str     
+
+def get_str_minute(num):
+  counter_str = "минут"
+  if 11 <= num <= 20:
+    return counter_str
+    
+  mod = num % 10
+
+  if mod == 1:
+    counter_str = "минуту"
+
+  if mod > 1 and mod < 5:
+    counter_str = "минуты"
+
+  return counter_str
+
+def save_pickle(dictionary, filename):
+  outfile = open(filename, 'wb')
+  pickle.dump(dictionary, outfile)
+  outfile.close()
+
+def load_pickle(filename):
+  dictionary = {}
+  if os.path.exists(filename):
+    infile = open(filename,'rb')
+    dictionary = pickle.load(infile)      
+    infile.close()
+  return dictionary
+
+def execute_custom(sql):
+  db, cursor = get_db_cursor()
+  try:
+    cursor.execute(sql)
+    db.commit()
+    db.close()
+    return True
+    
+  except Exception as e:
+    print(e)
+    db.rollback()
+    db.close()
+  return False
+
+def get_rows_custom(sql):
+  db, cursor = get_db_cursor()
+  try:
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    db.close()
+    return rows
+    
+  except Exception as e:
+    print(e)
+    db.rollback()
+    db.close()
+    return False
 
 def get_db_row(db_name, id_to_search):
 
@@ -328,6 +491,15 @@ def get_money_str(num):
 
   if mod > 1 and mod < 5:
     counter_str = "шекеля"
+
+  return counter_str
+
+def get_humans_str(num):
+  mod = num % 10
+  counter_str = "человек"
+
+  if mod > 1 and mod < 5:
+    counter_str = "человека"
 
   return counter_str
 
@@ -685,11 +857,20 @@ def insert_row(table, fields, values):
   try: 
     cursor.execute(sql)
     db.commit()
+    ret = cursor.lastrowid
   except Exception as e:
+    ret = None
     print(e)
     db.rollback()
 
   db.close()
+
+  return ret
+
+def record_purchase(source, target, timestamp, type, item, amount, status):
+  # TODO if type in objects like 'waifu', then also record in fn_basket
+  # oterhwise if its something like 'Rename' no need to record it, since you cannot trade it really (at least yet)
+  return insert_row("fn_purchase", ["Source", "Target", "Timestamp", "Type", "Item", "Amount", "Status"], [source, target, timestamp, type, item, amount, status])
 
 def record_logs(timestamp, source, target, type, sign, amount, description):
   db, cursor = get_db_cursor()

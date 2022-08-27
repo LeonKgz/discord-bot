@@ -1,5 +1,6 @@
 import os
 import sys
+import googletrans
 
 # retrieving Discord credentials
 MANKURT_TOKEN = str(os.getenv('DISCORD_TOKEN_MANKURT'))
@@ -23,6 +24,7 @@ SENECA_API = str(os.getenv('SENECA_API_TOKEN'))
 TEST_USER = int(str(os.getenv('TEST_USER')))
 TEST_USER_TOKEN = str(os.getenv('TEST_USER_TOKEN'))
 TEST_USER_NAME = 'Zanshin'
+DOWN = str(os.getenv('DOWN'))
 
 # Global Languages Dictionary, mapping each command name to its respective language code
 GLD = {
@@ -37,5 +39,42 @@ GLD = {
 AMNESTY_START_DAY = 1
 AMNESTY_END_DAY = 4
 
+SECOND = 1.0
+MINUTE = 60.0
+HOUR = 3600.0
+DAY = 86400.0
+
+MONDAY = 0
+TUESDAY = 1
+WEDNESDAY = 2 
+THURSDAY = 3
+FRIDAY = 4
+SATURDAY = 5
+SUNDAY = 6
+
 HEALTH_CHECK_UP_START_DAY = 0
 HEALTH_CHECK_UP_END_DAY = 6
+
+HEALTH_CHECK_UP_NUMBER = 10
+ROOM_NUMBER_LIMIT = 10000
+
+HEALTH_NOTIFY = {
+  "принять": "вам нужно принять лекарство",
+  "справка": "вам нужно получить справку",
+  "анализ": "вам нужно провести анализ крови",
+  "рентген": "вам нужно сделать рентген",
+  "узи": "вам нужно сделать узи",
+}
+
+LANGUAGE_CODES = googletrans.LANGCODES
+
+PRICES = {
+  "rename": 2,
+  "waifu": 10
+}
+
+# Effects of temporary service purchases in HOURS e.g. renaming a channel is locked in for 6 hour period after executed 
+EFFECTS = {
+  "rename": (6, HOUR, "HOUR")
+  # "rename": (6, MINUTE, "MINUTE")
+}

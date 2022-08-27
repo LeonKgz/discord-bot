@@ -7,10 +7,6 @@ import requests
 from utils import *
 from env import *
 
-SECOND = 1.0
-HOUR = 3600.0
-DAY = 86400.0
-
 class Loops(commands.Cog):
 
   def __init__(self, bot):
@@ -107,7 +103,6 @@ class Loops(commands.Cog):
       p_idx = proletariat.position
       apatrid = discord.utils.get(guild.roles, name='Апатрид')
       await apatrid.edit(position=p_idx)
-
 
   @tasks.loop(seconds=HOUR)
   async def update_channels_name(self):
@@ -210,7 +205,7 @@ class Loops(commands.Cog):
   async def status_update_loop(self):
     await status_update(self.bot)
 
-  @tasks.loop(seconds=DAY)
+  @tasks.loop(seconds=HOUR)
   async def scan(self):
 
     db, cursor = get_db_cursor()
