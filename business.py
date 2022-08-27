@@ -70,7 +70,7 @@ class Business(commands.Cog):
     pass
 
   @commands.command(name="баланс")
-  async def check_money(ctx):
+  async def check_money(self, ctx):
     row = get_db_row("raiting", str(ctx.author.id))
     
     if not row:
