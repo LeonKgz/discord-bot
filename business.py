@@ -71,6 +71,7 @@ class Business(commands.Cog):
 
   @commands.command(name="баланс")
   async def check_money(self, ctx):
+      
     row = get_db_row("raiting", str(ctx.author.id))
     
     if not row:
@@ -83,6 +84,10 @@ class Business(commands.Cog):
   # TODO add option to list channel IDS that you want to rename 
   @commands.command(name="rename")
   async def rename(self, ctx, lang):
+
+    if (await check_rights_dm(ctx)):
+      return
+      
     msg = await respond(ctx, "секунду...")
     # Check if user has money
     row = get_db_row("raiting", ctx.author.id)
