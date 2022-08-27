@@ -21,6 +21,7 @@ on:
       # - 'nihon.py'
       - 'run_tests.py'
       - 'static.py'
+      - 'business.py'
       - 'status.py'
       - 'utils.py'
       - 'zettel.py'
