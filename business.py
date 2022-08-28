@@ -84,10 +84,10 @@ class Business(commands.Cog):
   # TODO add option to list channel IDS that you want to rename 
   @commands.command(name="rename")
   async def rename(self, ctx, lang):
-
-    if (await check_rights_dm(ctx)):
+    if not ctx.guild:
+      print("Ignore")
       return
-      
+
     msg = await respond(ctx, "секунду...")
     # Check if user has money
     row = get_db_row("raiting", ctx.author.id)
