@@ -704,7 +704,6 @@ async def evaluate(ctx, mem, points):
 
       # not adding points yet until all moderators have marked it
 
-      # status1 = await remove_points_quick(id_to_search, prev_mean)
       # status2 = await add_points_quick(source=ME, target=id_to_search, type="Description", amount=curr_mean, description="Обновление описания")
       # status2 = await add_points_quick(id_to_search, curr_mean)
 
@@ -726,7 +725,7 @@ async def evaluate(ctx, mem, points):
     #confession = confession.replace("\'", "\\\'")
     #time = row["Timestamp"]
 
-    #replace = f"REPLACE INTO confessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{id_to_search}\", \"{name}\", \"{confession}\", \"{time}\", \"{data}\")"
+    #replace = f"REPLACE INTO onfessions(ID, Name, Confession, Timestamp, Points) VALUES(\"{id_to_search}\", \"{name}\", \"{confession}\", \"{time}\", \"{data}\")"
     update = f"UPDATE confessions SET Points = \"{data}\" WHERE ID =\"{id_to_search}\""
 
     try:
@@ -1088,7 +1087,8 @@ async def add_points(ctx, target, type, amount, description):
                                 member=member, 
                                 title="За заслуги перед Мошной", 
                                 message=f"Модераторы начисляют **{amount} {points_word}** социального рейтинга гражданину {member.display_name} за *{description}*.", 
-                                thumbnail_url="", 
+                                thumbnail_url="https://i.quotev.com/xphy3hm5mcjq.jpg",
+                                image_url="https://pbs.twimg.com/media/ExKKOtpW8AERSOc.jpg", 
                                 color_hex_code=0x7621b8)
         await ch.send(embed=embed)
 

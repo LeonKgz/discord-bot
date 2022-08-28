@@ -612,9 +612,9 @@ def get_waifu_embed(title, thumbnail_url, item):
   # embed.set_thumbnail(url=thumbnail_url)
   # light green, same as СовНарМод
   embed.color = 0xffb6c1
-  embed.add_field(name="Item ID", value=item, inline=False)
+  # embed.add_field(name="Item ID", value=item, inline=False)
   embed.set_image(url=thumbnail_url)
-  # embed.set_footer(text=footer)
+  embed.set_footer(text=f"Item ID: {item}")
   # embed.add_field(name=main_field, value="⠀", inline=False)
   return embed
 
@@ -632,10 +632,11 @@ async def get_simple_embed(title, message, thumbnail_url, color_hex_code, footer
   return embed
 
 # simple beacause it has one field, to convey one message regarding a server member
-async def get_simple_member_embed(bot, member, title, message, thumbnail_url, color_hex_code):
+async def get_simple_member_embed(bot, member, title, message, thumbnail_url, image_url="", color_hex_code=None):
   embed = discord.Embed(title=title) 
   embed.set_author(name=member.display_name, icon_url=member.avatar_url)
   embed.set_thumbnail(url=thumbnail_url)
+  embed.set_image(url=image_url)
 
   # light green, same as СовНарМод
   embed.color = color_hex_code 

@@ -136,7 +136,6 @@ class Business(commands.Cog):
   async def random_waifu(self, ctx):
 
     # check waifu limit
-
     res = await pay_up(self.bot, ctx, "waifu")
     if not res:
       return
