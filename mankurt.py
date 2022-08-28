@@ -1088,7 +1088,7 @@ async def add_points(ctx, target, type, amount, description):
                                 title="За заслуги перед Мошной", 
                                 message=f"Модераторы начисляют **{amount} {points_word}** социального рейтинга гражданину {member.display_name} за *{description}*.", 
                                 thumbnail_url="https://i.quotev.com/xphy3hm5mcjq.jpg",
-                                image_url="https://pbs.twimg.com/media/ExKKOtpW8AERSOc.jpg", 
+                                image_url="", 
                                 color_hex_code=0x7621b8)
         await ch.send(embed=embed)
 
