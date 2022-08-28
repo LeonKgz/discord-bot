@@ -1,5 +1,6 @@
 import os
 import sys
+from urllib import response
 import googletrans
 
 # retrieving Discord credentials
@@ -77,4 +78,8 @@ PRICES = {
 EFFECTS = {
   "rename": (6, HOUR, "HOUR")
   # "rename": (6, MINUTE, "MINUTE")
+}
+
+RESPONSES = {
+  "mistake": "произошла ошибка! Обратитесь к Албанцу."
 }

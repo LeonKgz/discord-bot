@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import asyncio
 from utils import *
 from env import *
+from russian_names import RussianNames
 
 class Business(commands.Cog):
 
@@ -72,53 +73,26 @@ class Business(commands.Cog):
   @commands.command(name="баланс")
   async def check_money(self, ctx):
       
-    row = get_db_row("raiting", str(ctx.author.id))
+    amount = get_money(ctx.author.id)  
     
-    if not row:
-      await ctx.send(f"{mention_author(ctx)}, произошла ошибка! Обратитесь к Албанцу.")
-      return
+    if not amount:
+      await respond(ctx, RESPONSES["mistake"])
 
-    amount = row["Money"]   
     await ctx.send(f"{mention_author(ctx)}, на вашем счету {amount} {get_money_str(amount)}!")
 
   # TODO add option to list channel IDS that you want to rename 
   @commands.command(name="rename")
   async def rename(self, ctx, lang):
-    if not ctx.guild:
-      print("Ignore")
-      return
-
-    msg = await respond(ctx, "секунду...")
-    # Check if user has money
-    row = get_db_row("raiting", ctx.author.id)
-    if not row:
-      await respond(ctx, "произошла ошибка! Обратитесь к Албанцу.")
-      return
-    
-    balance = row["Money"]
-    price = PRICES["rename"]
-    manifesto = get_channel_by_name(self.bot, "манифест", 'Russian')
-    if balance < price:
-      await msg.delete()
-      await respond(ctx, f"у вас недостаточно средств! Стоимость услуги — ` {price} `; на вашем счету — ` {balance} `.\nСмотрите, как зарабатывать очки в {manifesto.mention}")
-      return
-
+     
     # Check that language is valid 
     if lang.lower() not in LANGUAGE_CODES and lang.lower() != "random":
-      await msg.delete()
       await respond(ctx, f"языка под названием *\"{lang}\"* не существует в базе сервиса Google translate! \n\n` !langs ` чтобы посмотреть все доступные варианты.")
       return
-    
-    # Check in the queue of purchased server effects with the 6 hour period if no others, then simply rename, otherwise, submit in the queue
-    # SCHEMA
-    # list all rows with the same type (all Renames would have Period '6' and Units 'HOURS')
-    # order rows in the order of ID (AUTOINCREMENT) earliest would come FIRST
-    
-    # need to tell user when his request will be executed
-    # need to get the last row get its timetstamp and just add the effect length
 
-    remove_balance(ctx.author.id, PRICES["rename"])
-
+    res = await pay_up(self.bot, ctx, "rename")
+    if not res:
+      return
+    
     now = datetime.datetime.now()
     rows = get_rows_custom("SELECT * from fn_effects_queue WHERE Type=\"Rename\"")
     
@@ -126,7 +100,6 @@ class Business(commands.Cog):
     pklctx = PickleContext(chid, aid, adn, avu)
 
     if not rows:
-      await msg.delete()
       purchase_id = record_purchase(ctx.author.id, GUILD, now, "Rename", lang, PRICES["rename"], "Finished")
       insert_row("fn_effects_queue", fields=["Purchase", "Type", "Due"], values=[purchase_id, "Rename", now])
       await respond(ctx, "вы первый в очереди! Ваш запрос будет удовлетворён незамедлительно!")
@@ -150,7 +123,6 @@ class Business(commands.Cog):
       if minute:
         due_str += (" " if hour else "") + str(minute) + " " + get_str_minute(minute)
 
-      await msg.delete()
       await respond(ctx, f"придётся подождать, перед вами {len(rows)} {get_humans_str(len(rows))}! Ваш запрос будет удовлетворён через {due_str}.")
       purchase_id = record_purchase(ctx.author.id, GUILD, now, "Rename", lang, PRICES["rename"], "Hanging")
       insert_row("fn_effects_queue", fields=["Purchase", "Type", "Due"], values=[purchase_id, "Rename", curr_due])
@@ -159,6 +131,33 @@ class Business(commands.Cog):
     purchase_to_context = load_pickle("purchase_to_context.pkl")
     purchase_to_context[int(purchase_id)] = (chid, aid, adn, avu)
     save_pickle(purchase_to_context, "purchase_to_context.pkl")
+ 
+  @commands.command(name="waifu")
+  async def random_waifu(self, ctx):
+
+    # check waifu limit
+
+    res = await pay_up(self.bot, ctx, "waifu")
+    if not res:
+      return
+
+    # await respond(ctx, "")
+
+    url = f"http://albenz.xyz:6969/waifu_file"
+    response = requests.get(url)
+    response = response.json()
+    if "file" not in response:
+      await respond(ctx, RESPONSES["mistake"])
+    
+    filename = response["file"]
+    url = f"http://albenz.xyz:6969/waifu_jpg?file={filename}"
+    name = str(RussianNames(count=1, transliterate=False, patronymic=False, surname=False, gender=0.0).get_batch()[0])
+    now = datetime.datetime.now()
+    item_id = ctx.message.id
+    purchase_id = record_purchase(ctx.author.id, GUILD, now, "Waifu", item_id, PRICES["waifu"], "Finished")
+    update_basket(ctx.author.id, item_id, 'Waifu', {"image-url": url, "name": name})
+    embed = get_waifu_embed(name, url, item_id)
+    await ctx.send(embed=embed)
 
 def setup(bot):
   bot.add_cog(Business(bot))

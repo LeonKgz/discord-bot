@@ -584,6 +584,41 @@ def get_channel_by_name(bot, name, language):
   db.close()
   return False  
 
+async def   pay_up(bot, ctx, type):
+  if not ctx.guild:
+    print("Ignore")
+    return False
+
+  msg = await respond(ctx, "секунду...")
+  row = get_db_row("raiting", ctx.author.id)
+  if not row:
+    await respond(ctx, RESPONSES["mistake"])
+    return False
+
+  balance = row["Money"]
+  price = PRICES[type]
+  manifesto = get_channel_by_name(bot, "манифест", 'Russian')
+  if balance < price:
+    await respond(ctx, f"у вас недостаточно средств! Стоимость услуги — ` {price} `; на вашем счету — ` {balance} `.\nСмотрите, как зарабатывать очки в {manifesto.mention}")
+    return False
+
+  remove_balance(ctx.author.id, PRICES[type])
+  curr = get_money(ctx.author.id)
+  await respond(ctx, f"На вашем счету остаётся ` {curr} ` шекелей.")
+  return True
+
+def get_waifu_embed(title, thumbnail_url, item):
+  embed = discord.Embed(title=title) 
+  # embed.set_thumbnail(url=thumbnail_url)
+  # light green, same as СовНарМод
+  embed.color = 0xffb6c1
+  embed.add_field(name="Item ID", value=item, inline=False)
+  embed.set_image(url=thumbnail_url)
+  # embed.set_footer(text=footer)
+  # embed.add_field(name=main_field, value="⠀", inline=False)
+  return embed
+
+
 async def get_simple_embed(title, message, thumbnail_url, color_hex_code, footer):
   embed = discord.Embed(title=title) 
   embed.set_thumbnail(url=thumbnail_url)
@@ -591,7 +626,6 @@ async def get_simple_embed(title, message, thumbnail_url, color_hex_code, footer
   # light green, same as СовНарМод
   embed.color = color_hex_code 
   embed.add_field(name="⠀", value=message, inline=False)
-
   embed.set_footer(text=footer)
   # embed.add_field(name=main_field, value="⠀", inline=False)
 
@@ -866,6 +900,11 @@ def insert_row(table, fields, values):
   db.close()
 
   return ret
+
+def update_basket(ID, item_id, type, details):
+  data = json.dumps(details)
+  data = data.replace("\"", "\\\"")
+  return insert_row("fn_basket", ["ID", "Item_ID", "Item_Type", "Details"], [ID, item_id, type, data])
 
 def record_purchase(source, target, timestamp, type, item, amount, status):
   # TODO if type in objects like 'waifu', then also record in fn_basket
@@ -1218,6 +1257,17 @@ def is_apartid_in_amnesty(iid):
         return True
 
   return False
+
+def get_money(id):
+  row = get_db_row("raiting", str(id))
+  
+  if not row:
+    return False
+  if "Money" not in row:
+    return False
+  
+  amount = row["Money"] 
+  return amount
 
 def get_channel_name_languages():
   db, cursor = get_db_cursor()
