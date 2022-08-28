@@ -97,7 +97,7 @@ def delete_row(table, id_val):
   db.close()
 
 def remove_balance(id, amount):
-  row = get_db_row("raiting", id)
+  row = get_db_row("raiting", str(id))
   
   if not row:
     return False
@@ -110,9 +110,9 @@ def remove_balance(id, amount):
   update_db_entry("raiting", "Money", new, id)
 
 def update_db_entry(table, field_name, new_val, id_val):
-  if not DB == str(os.getenv('TEST_DB_DATABASE')):
-    print("Can only rewrite tables in test mode!")
-    return 
+  # if not DB == str(os.getenv('TEST_DB_DATABASE')):
+  #   print("Can only rewrite tables in test mode!")
+  #   return 
 
   db, cursor = get_db_cursor()
   sql = f"UPDATE {table} SET {field_name} = \"{new_val}\" WHERE ID = \"{id_val}\""  
@@ -584,7 +584,7 @@ def get_channel_by_name(bot, name, language):
   db.close()
   return False  
 
-async def   pay_up(bot, ctx, type):
+async def pay_up(bot, ctx, type):
   if not ctx.guild:
     print("Ignore")
     return False
