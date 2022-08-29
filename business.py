@@ -13,8 +13,9 @@ class Business(commands.Cog):
     self.rename_purchase_queue.start()
   
 
-  @tasks.loop(seconds=HOUR)
+  @tasks.loop(seconds=EFFECTS["rename"][1])
   async def rename_purchase_queue(self):
+    
     period, units, unitstr = EFFECTS["rename"]
     now = datetime.datetime.now()
     nowstr = "\'" + now.strftime('%Y-%m-%d %H:%M:%S') + "\'"
@@ -38,20 +39,26 @@ class Business(commands.Cog):
     filename = "purchase_to_context.pkl"
     if expiring_row:
       execute_custom(f"DELETE FROM fn_effects_queue WHERE ID={expiring_row[0]['ID']}")
-
       row = get_db_row("fn_purchase", expiring_row[0]['Purchase'])
       if not row:
         return 
 
-      purchase_to_context = load_pickle(filename)
-      del purchase_to_context[int(expiring_row[0]['Purchase'])] 
-      save_pickle(purchase_to_context, filename)
+      purchase_to_delete = int(expiring_row[0]['Purchase'])
+      execute_custom(f"DELETE FROM fn_rename_context WHERE Purchase = \'{purchase_to_delete}\'")
+      # purchase_to_context = load_pickle(filename)
+      # del purchase_to_context[int(expiring_row[0]['Purchase'])] 
+      # save_pickle(purchase_to_context, filename)
 
     if incoming_row:
 
-      # No need to save pickle afterwards since we did not write to it
-      purchase_to_context = load_pickle(filename)
-      chid, aid, adn, avu = purchase_to_context[incoming_row[0]['Purchase']]
+      purchase = incoming_row[0]['Purchase']
+      row = get_db_row("fn_rename_context", purchase, "Purchase")
+      if not row:
+        print(f"ERROR: purchase {purchase} not found in fn_rename_context!")
+
+      # purchase_to_context = load_pickle(filename)
+      # chid, aid, adn, avu = purchase_to_context[incoming_row[0]['Purchase']]
+      chid, aid, adn, avu =  row["Channel"], row["Author"], row["Display_Name"], row["Avatar_Url"]
       
       # Retrieving necessary context data after the period of time has passed
       pklctx = PickleContext(chid, aid, adn, avu)
@@ -128,9 +135,10 @@ class Business(commands.Cog):
       insert_row("fn_effects_queue", fields=["Purchase", "Type", "Due"], values=[purchase_id, "Rename", curr_due])
 
     # Saving necessary context data for the row when it will be executed in the future (channel id, original author information etc.)
-    purchase_to_context = load_pickle("purchase_to_context.pkl")
-    purchase_to_context[int(purchase_id)] = (chid, aid, adn, avu)
-    save_pickle(purchase_to_context, "purchase_to_context.pkl")
+    # purchase_to_context = load_pickle("purchase_to_context.pkl")
+    # purchase_to_context[int(purchase_id)] = (chid, aid, adn, avu)
+    # save_pickle(purchase_to_context, "purchase_to_context.pkl")
+    insert_row("fn_rename_context", ["Purchase", "Channel", "Author", "Display_Name", "Avatar_Url"], [int(purchase_id), int(chid), int(aid), adn, avu])
  
   @commands.command(name="waifu")
   async def random_waifu(self, ctx):
@@ -151,6 +159,7 @@ class Business(commands.Cog):
     filename = response["file"]
     url = f"http://albenz.xyz:6969/waifu_jpg?file={filename}"
     name = str(RussianNames(count=1, transliterate=False, patronymic=False, surname=False, gender=0.0).get_batch()[0])
+    # name = str(RussianNames(count=1, transliterate=False, gender=0.0).get_batch()[0])
     now = datetime.datetime.now()
     item_id = ctx.message.id
     purchase_id = record_purchase(ctx.author.id, GUILD, now, "Waifu", item_id, PRICES["waifu"], "Finished")
