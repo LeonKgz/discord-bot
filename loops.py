@@ -205,12 +205,13 @@ class Loops(commands.Cog):
   async def status_update_loop(self):
     await status_update(self.bot)
 
-  @tasks.loop(seconds=HOUR)
+  @tasks.loop(seconds=DAY)
   async def scan(self):
 
     db, cursor = get_db_cursor()
     guild = self.bot.get_guild(GUILD) 
     day = int(datetime.datetime.today().weekday())
+
 
     if (guild):
       super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
