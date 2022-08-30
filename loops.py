@@ -14,7 +14,7 @@ class Loops(commands.Cog):
     self.news_alert.start()
     self.scan.start()
     self.important_info.start()
-    self.update_channels_name.start()
+    # self.update_channels_name.start()
     self.status_update_loop.start()
     self.monthly_amnesty.start()
     ## self.deaths.start()
