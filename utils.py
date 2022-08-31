@@ -260,11 +260,11 @@ def get_rows_custom(sql):
     db.close()
     return False
 
-def get_db_row(db_name, id_to_search):
+def get_db_row(db_name, id_to_search, id_field="ID"):
 
     db, cursor = get_db_cursor()
 
-    select = f"SELECT * from {db_name} WHERE ID={id_to_search};"
+    select = f"SELECT * from {db_name} WHERE {id_field}={id_to_search};"
 
     try:
       cursor.execute(select)
