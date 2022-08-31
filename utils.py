@@ -48,7 +48,8 @@ async def respond_pkl(bot, pklctx, response):
 
 def clear_db_table(table):
   db, cursor = get_db_cursor()
-  sql = f"DELETE FROM {table}" 
+  # sql = f"DELETE * FROM {table}" 
+  sql = f"DELETE FROM {table} WHERE TRUE;" 
   try:
     cursor.execute(sql)
     db.commit()
@@ -57,6 +58,64 @@ def clear_db_table(table):
     db.rollback()
   
   db.close()
+
+async def send_patient_from_assylum(bot, guild, id):
+  shiz = discord.utils.get(guild.roles, name='Шиз')
+  mem = guild.get_member(id)
+  row = get_db_row("health", id)
+  
+  await mem.remove_roles(shiz)
+
+  if row:
+    roles = row["Roles"].split(",")
+    for r in roles:
+      try:
+        await mem.add_roles(guild.get_role(int(r.strip())))
+      except Exception as e:
+        print(e)
+    
+  execute_custom(f"DELETE FROM durka WHERE ID = \'{id}\'")
+  execute_custom(f"DELETE FROM health WHERE ID = \'{id}\'")
+
+async def send_patient_to_assylum(bot, guild, id):
+  patient = discord.utils.get(guild.roles, name='Пациент')
+  shiz = discord.utils.get(guild.roles, name='Шиз')
+  mem = guild.get_member(id)
+  await mem.remove_roles(patient)
+  await mem.add_roles(shiz)
+
+  glasnost = get_channel_by_name(bot, "гласность", "Russian")
+
+  embed = await get_simple_embed(
+    title="Вы кого вызвали? Вы чё угараете?", 
+    message=f"Непутёвый пациент {mention(id)} госпитализирован на {DURKA_PERIOD} {get_day_str(DURKA_PERIOD)} — будет нейролептики пить...", 
+    thumbnail_url="https://coub-attachments.akamaized.net/coub_storage/coub/simple/cw_timeline_pic/497c1263d13/7520efd95c241c2ce402f/ios_large_1585153948_image.jpg", 
+    color_hex_code=0xfc4e03, 
+    footer="Another one bites the dust...")
+
+  await glasnost.send(embed=embed)
+  durka = get_channel_by_name(bot, "дурка", "Russian")
+  await durka.send(f"{mention(id)}, вы госпитализированы на {DURKA_PERIOD} {get_day_str(DURKA_PERIOD)} по поводу вашего странного поведения (скорее всего на диспансеризации)!")
+  # await durka.send(f"{mention(id)}, вы госпитализированы на {DURKA_PERIOD} {get_day_str(DURKA_PERIOD)} по поводу вашего странного поведения (скорее всего на диспансеризации)!\nВы можете передавать записки через решётку на «волю» (`!записка`).")
+  now = datetime.datetime.now()
+  # due = now + datetime.timedelta(days={DURKA_PERIOD})
+  due = now + datetime.timedelta(seconds=60)
+  insert_row("durka", ["ID", "Due"], [str(id), due])
+
+  execute_custom(f"DELETE FROM weird_behaviour WHERE ID = \'{id}\'")
+
+def register_weird_behaviour(id):
+  row = get_db_row("weird_behaviour", id)
+  if not row:
+    insert_row("weird_behaviour", ['ID', "Counter"], [str(id), 1])
+    return True
+
+  curr = row["Counter"] + 1
+  if curr == WEIRD_BEHAVIOUR_LIMIT:
+    return True
+
+  update_db_entry("weird_behaviour", "Counter", curr, id)
+  return False
 
 async def status_update(bot):
     db, cursor = get_db_cursor()
@@ -493,6 +552,19 @@ def get_money_str(num):
     counter_str = "шекеля"
 
   return counter_str
+
+def get_day_str(num):
+  mod = num % 10
+  counter_str = "дней"
+  
+  if mod == 1:
+    counter_str = "день"
+
+  if mod > 1 and mod < 5:
+    counter_str = "дня"
+
+  return counter_str
+
 
 def get_humans_str(num):
   mod = num % 10

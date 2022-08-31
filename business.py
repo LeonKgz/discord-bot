@@ -55,6 +55,7 @@ class Business(commands.Cog):
       row = get_db_row("fn_rename_context", purchase, "Purchase")
       if not row:
         print(f"ERROR: purchase {purchase} not found in fn_rename_context!")
+        return
 
       # purchase_to_context = load_pickle(filename)
       # chid, aid, adn, avu = purchase_to_context[incoming_row[0]['Purchase']]
