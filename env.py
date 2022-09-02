@@ -78,6 +78,10 @@ PRICES = {
   "waifu": 10
 }
 
+LIMITS = {
+  "waifu": 3
+}
+
 # Effects of temporary service purchases in HOURS e.g. renaming a channel is locked in for 6 hour period after executed 
 EFFECTS = {
   "rename": (6, HOUR, "HOUR")
