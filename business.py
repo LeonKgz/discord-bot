@@ -139,10 +139,17 @@ class Business(commands.Cog):
     # purchase_to_context = load_pickle("purchase_to_context.pkl")
     # purchase_to_context[int(purchase_id)] = (chid, aid, adn, avu)
     # save_pickle(purchase_to_context, "purchase_to_context.pkl")
-    insert_row("fn_rename_context", ["Purchase", "Channel", "Author", "Display_Name", "Avatar_Url"], [int(purchase_id), int(chid), int(aid), adn, avu])
+    insert_row("fn_rename_context", fields=["Purchase", "Channel", "Author", "Display_Name", "Avatar_Url"], values=[int(purchase_id), int(chid), int(aid), adn, avu])
  
   @commands.command(name="waifu")
   async def random_waifu(self, ctx):
+
+    # check if currently owns 3 wives already
+    rows = get_rows_custom(f"SELECT * FROM fn_basket WHERE ID = \'{ctx.author.id}\' AND Item_Type = \'Waifu\'")
+    limit = LIMITS["waifu"]
+    if rows and len(rows) == limit:
+      await respond(ctx, f"в вашем ивентаре уже {limit} кошкожены!")
+      return
 
     # check waifu limit
     res = await pay_up(self.bot, ctx, "waifu")
