@@ -135,7 +135,7 @@ class Zettel(commands.Cog):
   @commands.command(name="стих")
   async def poem(self, ctx, issue):
 
-    if (str(ctx.author.id) == "423476785959665671" or str(ctx.author.id) == "384492518043287555") and str(issue) == "Глупость":
+    if str(ctx.author.id) == "423476785959665671" and str(issue) == "Глупость":
 
       embed = discord.Embed(title="Рубаи. Омар Хаям", description="450", color=0xa87f32) #creates embed
       embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
