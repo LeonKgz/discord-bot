@@ -135,6 +135,16 @@ class Zettel(commands.Cog):
   @commands.command(name="стих")
   async def poem(self, ctx, issue):
 
+    if (str(ctx.author.id) == "423476785959665671" or str(ctx.author.id) == "384492518043287555") and str(issue) == "Глупость":
+
+      embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+      embed = discord.Embed(title="Рубаи. Омар Хаям", description="450", color=0xa87f32) #creates embed
+      embed.set_thumbnail(url="https://obrazovaka.ru/wp-content/uploads/2021/02/omar-hayyam-e1614119392242.jpg")
+      embed.set_image(url="https://i.imgur.com/aqfPdkJ.gif")
+      embed.set_footer(text="Дураки мудрецом почитают меня...")
+      await ctx.send(embed=embed)
+      return 
+
     url = f"http://albenz.xyz:6969/poem?issue={issue}"
 
     response = requests.get(url)
@@ -196,3 +206,6 @@ class Zettel(commands.Cog):
 
     ret_str = ", ".join(data)
     await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
+
+def setup(bot):
+  bot.add_cog(Zettel(bot))
