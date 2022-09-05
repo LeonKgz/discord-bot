@@ -1,6 +1,7 @@
 import os
 import sys
 from urllib import response
+
 import googletrans
 
 # retrieving Discord credentials
@@ -79,7 +80,11 @@ PRICES = {
 }
 
 LIMITS = {
-  "waifu": 3
+  "waifu": 6
+}
+
+INVENTORY_NAMES = {
+  "waifu": "👩"
 }
 
 # Effects of temporary service purchases in HOURS e.g. renaming a channel is locked in for 6 hour period after executed 

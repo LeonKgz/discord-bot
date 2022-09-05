@@ -230,19 +230,6 @@ async def logs(ctx, mem):
 
   return 
 
-def get_id(ref):
-
-  try:
-    ret = int(ref)
-    return ret
-  except Exception as e:
-    if(str(ref)[2] == '!' or str(ref)[2] == '&'): 
-      a = int(str(ref)[3:-1])
-    else:
-      a = int(str(ref)[2:-1])
-
-    return a
-
 @bot.command(
   name='изтруппы',
   brief='Убирает роль Драм Труппы, возвращает в запас',

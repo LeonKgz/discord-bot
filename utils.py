@@ -2,6 +2,7 @@
 # vim: set fileencoding=utf-8:
 # coding=utf-8
 
+from asyncio import FastChildWatcher
 import base64
 import requests
 import discord
@@ -98,8 +99,8 @@ async def send_patient_to_assylum(bot, guild, id):
   await durka.send(f"{mention(id)}, вы госпитализированы на {DURKA_PERIOD} {get_day_str(DURKA_PERIOD)} по поводу вашего странного поведения (скорее всего на диспансеризации)!")
   # await durka.send(f"{mention(id)}, вы госпитализированы на {DURKA_PERIOD} {get_day_str(DURKA_PERIOD)} по поводу вашего странного поведения (скорее всего на диспансеризации)!\nВы можете передавать записки через решётку на «волю» (`!записка`).")
   now = datetime.datetime.now()
-  # due = now + datetime.timedelta(days={DURKA_PERIOD})
-  due = now + datetime.timedelta(seconds=60)
+  due = now + datetime.timedelta(days={DURKA_PERIOD})
+  # due = now + datetime.timedelta(seconds=60)
   insert_row("durka", ["ID", "Due"], [str(id), due])
 
   execute_custom(f"DELETE FROM weird_behaviour WHERE ID = \'{id}\'")
@@ -168,13 +169,22 @@ def remove_balance(id, amount):
   new = curr - amount
   update_db_entry("raiting", "Money", new, id)
 
-def update_db_entry(table, field_name, new_val, id_val):
+def add_balance(id, amount):
+  row = get_db_row("raiting", str(id))
+  
+  if not row:
+    return False
+  curr = row["Money"]
+  new = curr + amount
+  update_db_entry("raiting", "Money", new, id)
+
+def update_db_entry(table, field_name, new_val, id_val, id_field="ID"):
   # if not DB == str(os.getenv('TEST_DB_DATABASE')):
   #   print("Can only rewrite tables in test mode!")
   #   return 
 
   db, cursor = get_db_cursor()
-  sql = f"UPDATE {table} SET {field_name} = \"{new_val}\" WHERE ID = \"{id_val}\""  
+  sql = f"UPDATE {table} SET {field_name} = \"{new_val}\" WHERE {id_field} = \"{id_val}\""  
   try:
     cursor.execute(sql)
     db.commit()
@@ -304,6 +314,26 @@ def execute_custom(sql):
     db.rollback()
     db.close()
   return False
+
+def get_id(ref):
+
+  try:
+    ret = int(ref)
+    return ret
+  except Exception as e:
+    if(str(ref)[2] == '!' or str(ref)[2] == '&'): 
+      a = int(str(ref)[3:-1])
+    else:
+      a = int(str(ref)[2:-1])
+
+    return a
+
+def item_in_posession(member_id, item):
+  id = str(member_id)
+  item = str(item)
+  # rows = get_rows_custom("SELECT * FROM fn_basket WHERE Item_ID = \'{item}\'")
+  row = get_db_row("fn_basket", item, "Item_ID")
+  return row and str(row['ID']) ==  id
 
 def get_rows_custom(sql):
   db, cursor = get_db_cursor()
@@ -553,6 +583,18 @@ def get_money_str(num):
 
   return counter_str
 
+def get_item_str(num):
+  mod = num % 10
+  counter_str = "предметов"
+  
+  if mod == 1:
+    counter_str = "предмет"
+
+  if mod > 1 and mod < 5:
+    counter_str = "предмета"
+
+  return counter_str
+
 def get_day_str(num):
   mod = num % 10
   counter_str = "дней"
@@ -564,7 +606,6 @@ def get_day_str(num):
     counter_str = "дня"
 
   return counter_str
-
 
 def get_humans_str(num):
   mod = num % 10
@@ -585,8 +626,6 @@ def get_times_str(num):
     counter_str = "раза"
 
   return counter_str
-
-
 
 def get_channel_names(bot, id):
   db, cursor = get_db_cursor()
@@ -656,31 +695,50 @@ def get_channel_by_name(bot, name, language):
   db.close()
   return False  
 
-async def pay_up(bot, ctx, type):
+async def pay_up(bot, ctx, target, type, price=None):
   if not ctx.guild:
     print("Ignore")
     return False
 
-  msg = await respond(ctx, "секунду...")
+  # msg = await respond(ctx, "секунду...")
   row = get_db_row("raiting", ctx.author.id)
   if not row:
     await respond(ctx, RESPONSES["mistake"])
     return False
 
   balance = row["Money"]
-  price = PRICES[type]
+  if not price:
+    price = PRICES[type]
+
   manifesto = get_channel_by_name(bot, "манифест", 'Russian')
   if balance < price:
     await respond(ctx, f"у вас недостаточно средств! Стоимость услуги — ` {price} `; на вашем счету — ` {balance} `.\nСмотрите, как зарабатывать очки в {manifesto.mention}")
     return False
 
-  remove_balance(ctx.author.id, PRICES[type])
+  remove_balance(ctx.author.id, price)
   curr = get_money(ctx.author.id)
   await respond(ctx, f"На вашем счету остаётся ` {curr} ` шекелей.")
+
+  # guild = bot.get_guild(GUILD) 
+  if str(target) != str(GUILD):
+    add_balance(str(target), price)
+    curr = get_money(target)
+    await ctx.send(f"{mention(target)}, на вашем счету теперь ` {curr} ` шекелей.")
+
   return True
+
+def get_item_embed(row):
+
+  if row["Item_Type"] == "Waifu":
+    title = row["Name"]
+    details = json.loads(row["Details"])
+    url = details["image-url"]
+    item = row['Item_ID']
+    return get_waifu_embed(title, url, item)
 
 def get_waifu_embed(title, thumbnail_url, item):
   embed = discord.Embed(title=title) 
+
   # embed.set_thumbnail(url=thumbnail_url)
   # light green, same as СовНарМод
   embed.color = 0xffb6c1
@@ -690,6 +748,81 @@ def get_waifu_embed(title, thumbnail_url, item):
   # embed.add_field(name=main_field, value="⠀", inline=False)
   return embed
 
+def get_deal_embed(bot, deal_id):
+  row = get_db_row("fn_market", deal_id)
+  if not row:
+    print(f"Deal {deal_id} is not found!")
+    return
+
+  item = row["Item"]
+  item = get_rows_custom(f"SELECT * FROM fn_basket WHERE Item_ID = \'{item}\'")
+  if not item:
+    return False
+  item = item[0]
+
+  src = row["Source"]
+  mem = bot.get_user(src)
+
+  embed = discord.Embed(title=f"Договор купли-продажи №{deal_id}") 
+  embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
+  embed.set_thumbnail(url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw0yuzgzxlfLd4WyaABRzbuCwyd-iev3t7Yw&usqp=CAU")
+  embed.color = 0xf6ff00
+
+  embed.add_field(name="⠀", value="⠀", inline=False)
+  
+  # Target field
+  tgt = int(row["Target"])
+  if tgt == 0:
+    tgt = "Все"
+  else:
+    mem = bot.get_user(tgt)
+    tgt = mem.display_name.title()
+  embed.add_field(name=f"Покупатель", value=tgt, inline=True)
+
+  # Item field
+  type = INVENTORY_NAMES[item["Item_Type"].lower()]
+  name = item["Name"]
+  item_id = item["Item_ID"]
+  embed.add_field(name=f"Итем", value=f"{type} {name} — ` id: {item_id} `", inline=True)
+
+  # Price field
+  price = row["Price"]
+  embed.add_field(name=f"Цена", value=price, inline=True)
+
+  # Expiry field
+  timestamp = row["Timestamp"]
+  expiry = timestamp + datetime.timedelta(seconds=DAY) 
+  expstr = expiry.strftime('%Y-%m-%d %H:%M:%S')
+  embed.add_field(name="⠀", value="⠀", inline=False)
+  # embed.add_field(name=f"Срок Истечения Договора", value=expstr, inline=True)
+  embed.set_footer(text=f"Срок Истечения Договора — {expstr}\nПосмотреть данный итем — !item {item_id}\nПринять договор — !accept {deal_id}")
+
+  return embed
+
+def get_inventory_embed(ctx):
+  items = get_rows_custom(f"SELECT * FROM fn_basket WHERE ID = \'{str(ctx.author.id)}\'")
+
+  if not items:
+    return False
+
+  embed = discord.Embed(title="Мошна (Инвентарь)") 
+  embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+  # embed.set_thumbnail(url="https://i.imgur.com/EWy4kLv.png")
+  embed.set_thumbnail(url="https://i.imgur.com/KOMAOzA.png")
+  embed.color = 0xcf1d1d
+
+  embed.add_field(name="⠀", value="⠀", inline=False)
+  for i in items:
+    type = INVENTORY_NAMES[i["Item_Type"].lower()]
+    details = json.loads(i["Details"])
+    name = i["Name"]
+    item_id = i["Item_ID"]
+    embed.add_field(name=f"{type} {name}", value=f"Item ID: {item_id}", inline=True)
+  embed.add_field(name="⠀", value="⠀", inline=False)
+  embed.set_footer(text="Зритель наш шутами избалован — жаждет смеха он, тряхнув мошной...")
+  # embed.add_field(name=main_field, value="⠀", inline=False)
+
+  return embed
 
 async def get_simple_embed(title, message, thumbnail_url, color_hex_code, footer):
   embed = discord.Embed(title=title) 
@@ -974,10 +1107,11 @@ def insert_row(table, fields, values):
 
   return ret
 
-def update_basket(ID, item_id, type, details):
+def update_basket(ID, type, name, details):
   data = json.dumps(details)
   data = data.replace("\"", "\\\"")
-  return insert_row("fn_basket", ["ID", "Item_ID", "Item_Type", "Details"], [ID, item_id, type, data])
+  item_id = insert_row("fn_basket", ["ID", "Item_Type", "Name", "Details"], [ID, name, type, data])
+  return item_id
 
 def record_purchase(source, target, timestamp, type, item, amount, status):
   # TODO if type in objects like 'waifu', then also record in fn_basket
@@ -1325,7 +1459,7 @@ def is_apartid_in_amnesty(iid):
   day = int(datetime.datetime.now().day)
   if AMNESTY_START_DAY <= day <= AMNESTY_END_DAY:
       rows = get_all_rows("amnesty")
-      print([r['ID'] for r in rows])
+      # print([r['ID'] for r in rows])
       if int(iid) in [r['ID'] for r in rows]:
         return True
 
