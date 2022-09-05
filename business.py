@@ -107,7 +107,7 @@ class Business(commands.Cog):
       await respond(ctx, f"языка под названием *\"{lang}\"* не существует в базе сервиса Google translate! \n\n` !langs ` чтобы посмотреть все доступные варианты.")
       return
 
-    res = await pay_up(self.bot, ctx, "rename")
+    res = await pay_up(self.bot, ctx, GUILD, "rename")
     if not res:
       return
     
