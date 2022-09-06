@@ -318,7 +318,7 @@ class Business(commands.Cog):
       return
     
     if str(ctx.author.id) != str(row["ID"]):
-      await respond(ctx, "этот итем не в вашем инвентаре!")
+      await respond(ctx, "этот итем не в вашем инвентаре! Если хотите увидеть его — попросите владельца.")
       return
 
     embed = get_item_embed(row) 
