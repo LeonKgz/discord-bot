@@ -749,6 +749,7 @@ def get_waifu_embed(title, thumbnail_url, item):
   return embed
 
 def get_deal_embed(bot, deal_id):
+
   row = get_db_row("fn_market", deal_id)
   if not row:
     print(f"Deal {deal_id} is not found!")
@@ -767,6 +768,11 @@ def get_deal_embed(bot, deal_id):
   embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
   embed.set_thumbnail(url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw0yuzgzxlfLd4WyaABRzbuCwyd-iev3t7Yw&usqp=CAU")
   embed.color = 0xf6ff00
+
+  # set image if it exists!
+  details = json.loads(item["Details"])
+  if "image-url" in details:
+    embed.set_image(url=str(details["image-url"]))
 
   embed.add_field(name="⠀", value="⠀", inline=False)
   

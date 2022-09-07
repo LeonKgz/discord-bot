@@ -176,9 +176,15 @@ class Business(commands.Cog):
     row = get_db_row("fn_basket", item, "Item_ID")
     item_type = row["Item_Type"].lower()
     valid_price = PRICES[item_type]
-    # i.e. must be: 1 <= price <= valid_price
-    if int(price) < 1 or int(price) > valid_price:
-      await respond(ctx, f"цена должна быть между ` 1 ` и ` {valid_price} ` (включительно).")
+
+    # DEPRECATED: i.e. must be: 1 <= price <= valid_price
+    # if int(price) < 1 or int(price) > valid_price:
+    #   await respond(ctx, f"цена должна быть между ` 1 ` и ` {valid_price} ` (включительно).")
+    #   return
+
+    # must be >= 1
+    if int(price) < 1 :
+      await respond(ctx, f"цена должна быть положительным числом!")
       return
 
     # extract target
