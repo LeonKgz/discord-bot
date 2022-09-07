@@ -802,7 +802,6 @@ def get_deal_embed(bot, deal_id):
   # expstr = expiry.strftime('%Y-%m-%d %H:%M:%S')
   expstr = expiry.astimezone(pytz.timezone('Europe/Moscow')).strftime('%Y-%m-%d %H:%M:%S %Z%z')
   embed.add_field(name="⠀", value="⠀", inline=False)
-  # embed.add_field(name=f"Срок Истечения Договора", value=expstr, inline=True)
   # embed.set_footer(text=f"Срок Истечения Договора — {expstr}\nПосмотреть данный итем — !item {item_id}\nПринять договор — !accept {deal_id}")
   embed.set_footer(text=f"Срок Истечения Договора — {expstr}\nПринять договор — !accept {deal_id}")
 
