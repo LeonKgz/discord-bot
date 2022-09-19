@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 import datetime
+import pytz
 import wikipediaapi
 import random
 import requests
@@ -205,13 +206,17 @@ class Loops(commands.Cog):
   async def status_update_loop(self):
     await status_update(self.bot)
 
-  @tasks.loop(seconds=DAY)
+  @tasks.loop(seconds=10.0)
   async def scan(self):
 
     db, cursor = get_db_cursor()
     guild = self.bot.get_guild(GUILD) 
-    day = int(datetime.datetime.today().weekday())
+    msktime = datetime.datetime.now().astimezone(pytz.timezone('Europe/Moscow'))
+    msk_hour = msktime.hour
+    msk_day = msktime.weekday()
 
+    # day = int(datetime.datetime.today().weekday())
+    # hour = int(datetime.datetime.now().hour)
 
     if (guild):
       super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
@@ -245,7 +250,7 @@ class Loops(commands.Cog):
         if(len(spiski) > 0):
           await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшие сутки: \n\n\t{quotes}")
 
-    if (guild and day == 0):
+    if (guild and msk_day == 0 and msk_hour == 0):
 
       super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
 
