@@ -206,7 +206,7 @@ class Loops(commands.Cog):
   async def status_update_loop(self):
     await status_update(self.bot)
 
-  @tasks.loop(seconds=10.0)
+  @tasks.loop(seconds=3600.0)
   async def scan(self):
 
     db, cursor = get_db_cursor()
