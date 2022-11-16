@@ -211,6 +211,9 @@ class Loops(commands.Cog):
 
     db, cursor = get_db_cursor()
     guild = self.bot.get_guild(GUILD) 
+    hour = datetime.datetime.now().hour
+    weekday = datetime.datetime.now().weekday()
+
     msktime = datetime.datetime.now().astimezone(pytz.timezone('Europe/Moscow'))
     msk_hour = msktime.hour
     msk_day = msktime.weekday()
@@ -250,7 +253,8 @@ class Loops(commands.Cog):
         if(len(spiski) > 0):
           await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшие сутки: \n\n\t{quotes}")
 
-    if (guild and msk_day == 0 and msk_hour == 0):
+    # if (guild and msk_day == 0 and msk_hour == 0):
+    if (guild and hour == 0 and weekday == 0):
 
       super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
 
