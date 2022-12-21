@@ -1,7 +1,21 @@
 from discord.ext import commands
 import pymysql.cursors
+import requests
 from utils import *
 from env import *
+
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import os
+import shutil
+import json
+import urllib.request
+
+down= "/mnt/c/Users/Халметов Юрий/Downloads/"
 
 class Nihon(commands.Cog):
 
@@ -67,6 +81,109 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new kanji is finished! Anki updated. Don't forget to synchronize!")
 
+  #####################################################################################################################################
+
+  # create webdriver object
+  def process_word(self, phrase, timerr, default_filename=False):
+
+    png_dir = f"./pngs/{phrase}.png" if not default_filename else "./pngs/png.png"
+    wav_dir = f"./wavs/{phrase}.wav" if not default_filename else "./wavs/wav.wav"
+
+    # remove all sound files in download directory first
+    for file in os.listdir(down):
+      if ".wav" in file:
+        os.remove(f"{down}{file}")
+
+    pngfile = f"./pngs/{phrase}.png"   
+    wavfile = f"./wavs/{phrase}.wav"
+
+    try:
+      os.remove(pngfile)
+      os.remove(wavfile)
+    except Exception as e:
+      # print(e)
+      pass
+
+    driver = webdriver.Firefox()
+    try:
+      # get google.co.in
+      driver.get("https://www.gavo.t.u-tokyo.ac.jp/ojad/phrasing/index")
+
+      element = driver.find_element(By.ID,"PhrasingText")
+      submit_wrapper = driver.find_element(By.ID,"phrasing_submit_wrapper")
+      submit_button = submit_wrapper.find_element(By.CLASS_NAME, "submit")
+      element.send_keys(phrase)
+      #element.send_keys(phrase + "は")
+
+      #print(submit_button.rect)
+
+      action = ActionChains(driver)
+      driver.execute_script("window.scrollTo(0,200)")
+      action.move_to_element(submit_button)
+      action.click()
+      action.perform()
+
+      WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "phrasing_main")))
+      driver.execute_script("window.scrollTo(0,700)")
+
+      phrase = driver.find_element(By.CLASS_NAME,"phrasing_phrase_wrapper")
+
+      phrase.screenshot(png_dir)
+      driver.implicitly_wait(1)
+
+      phrasing_main = driver.find_element(By.ID,"phrasing_main")
+      driver.execute_script("window.scrollTo(0,700)")
+      
+      generate_button = phrasing_main.find_element(By.XPATH, "//input[@value='作成']")
+      action = ActionChains(driver)
+      time.sleep(1)
+      action.move_to_element(generate_button).click().perform()
+
+      driver.implicitly_wait(1)
+      WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//input[@value='保存']")))
+      save_audio_button = phrasing_main.find_element(By.XPATH, "//input[@value='保存']")
+      action = ActionChains(driver)
+      action.move_to_element(save_audio_button)
+      action.click()
+      action.perform()
+      driver.implicitly_wait(1)
+      time.sleep(5)
+
+      # move all wavs from downloads int othe wavs directory
+      for file in os.listdir(down):
+        if ".wav" in file:
+          shutil.move(f"{down}{file}", wav_dir)
+
+      # remove all wavs from downloads
+
+    except Exception as e:
+      print(e)
+      driver.close()
+      raise Exception("Timeout")
+      # raise Exception("Timeout probably lol")
+
+    driver.implicitly_wait(10)
+    driver.close()
+
+  def request(action, **params):
+      return {'action': action, 'params': params, 'version': 6}
+
+  def invoke(action, **params):
+      requestJson = json.dumps(request(action, **params)).encode('utf-8')
+      response = json.load(urllib.request.urlopen(urllib.request.Request('http://localhost:8765', requestJson)))
+
+      if len(response) != 2:
+          raise Exception('response has an unexpected number of fields')
+      if 'error' not in response:
+          raise Exception('response is missing required error field')
+      if 'result' not in response:
+          raise Exception('response is missing required result field')
+      if response['error'] is not None:
+          raise Exception(response['error'])
+      return response['result']
+
+  #####################################################################################################################################
+
   @commands.command(name="words")
   async def words(self, ctx: commands.Context, *, args=None):
 
@@ -89,6 +206,10 @@ class Nihon(commands.Cog):
         print(original, furigana, meaning)
         errmsg = meaning
 
+
+
+
+        
         if original:
           
           # brackets = f" ({furigana})" if furigana else ""
@@ -117,21 +238,60 @@ class Nihon(commands.Cog):
             errmsg = f"{e}"
 
           if furigana and not kanjiless:
+
+            succ = False
+            curr_timer = 5
+            while not succ:
+              try:
+                self.process_word(original, curr_timer)
+                succ = True
+              except Exception as e:
+                # print(e)
+                curr_timer += 3
+
             note = {
-                  "deckName": "__________Reading",
-                  "modelName": "Основная",
-                  # "modelName": "Основная (+ обратные карточки)",
-                  "fields": {
-                    "вопрос": original,
-                    # "вопрос": original + brackets,
-                    "ответ": furigana,
-                  },
-                  "options": {
-                      "allowDuplicate": False,
-                      "duplicateScope": "deck",
-                  },
-                  "tags": [],
-              }
+                "deckName": "1 Reading",
+                # "modelName": "Основная (+ обратные карточки)",
+                "modelName": "Основная",
+                "fields": {
+                  "вопрос": original,
+                  "ответ": f"{furigana}<br><img src=\"{original}.png\"><br><br>[sound:{original}.wav]"
+                },
+                "options": {
+                    "allowDuplicate": True,
+                    "duplicateScope": "deck",
+                },
+                "audio": [{
+                    "filename": f"{original}.wav",
+                    # "path": f"C:\\Users\\Халметов Юрий\\Downloads\\selenium\\wavs\\{original}.wav",
+                    "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\{original}.wav",
+                    "fields": [
+                        "ответ"
+                    ]
+                }],
+                "picture": [{
+                    "filename": f"{original}.png",
+                    # "path": f"C:\\Users\\Халметов Юрий\\Downloads\\selenium\\pngs\\{original}.png",
+                    "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\{original}.png",
+                    "fields": [
+                        "ответ"
+                    ]
+                }],
+            }
+
+            # note = {
+            #       "deckName": "1 Reading",
+            #       "modelName": "Основная",
+            #       "fields": {
+            #         "вопрос": original,
+            #         "ответ": furigana,
+            #       },
+            #       "options": {
+            #           "allowDuplicate": False,
+            #           "duplicateScope": "deck",
+            #       },
+            #       "tags": [],
+            #   }
 
             errmsg = ""
             try:
@@ -160,12 +320,28 @@ class Nihon(commands.Cog):
         original = s.split("(")[0]
         interpret = s.split("(")[1].split(")")[0].strip()
 
+
+
+
+        ####################################
+
+
+        succ = False
+        curr_timer = 5
+        while not succ:
+          try:
+            self.process_word(original, curr_timer, default_filename=True)
+            succ = True
+          except Exception as e:
+            # print(e)
+            curr_timer += 3
+        ####################################
+
         note = {
-              "deckName": "__________Bunpou",
-              "modelName": "Основная",
+              "deckName": "1 Bunpou",
               "modelName": "Основная (+ обратные карточки)",
               "fields": {
-                "вопрос": original,
+                "вопрос": f"{original}<br><img src=\"{original}.png\"><br><br>[sound:{original}.wav]",
                 "ответ": interpret,
               },
               "options": {
@@ -173,6 +349,22 @@ class Nihon(commands.Cog):
                   "duplicateScope": "deck",
               },
               "tags": [],
+              "audio": [{
+                  "filename": f"{original}.wav",
+                  # "path": f"C:\\Users\\Халметов Юрий\\Downloads\\selenium\\wavs\\{original}.wav",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\wav.wav",
+                  "fields": [
+                      "ответ"
+                  ]
+              }],
+              "picture": [{
+                  "filename": f"{original}.png",
+                  # "path": f"C:\\Users\\Халметов Юрий\\Downloads\\selenium\\pngs\\{original}.png",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\png.png",
+                  "fields": [
+                      "ответ"
+                  ]
+              }],
           }
 
         success = False
@@ -188,6 +380,28 @@ class Nihon(commands.Cog):
           await ctx.send(ret)
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
+
+  @commands.command(name='get')
+  async def download_link(self, ctx: commands.Context, *, args=None):
+    if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
+      return
+    
+    links = str(args)
+    links = links.strip()
+    links= links.split()
+
+    for link in links:
+      try:
+        name, dl = get_staroe_radio_name_and_link(link)
+        msg = await ctx.send(f"*Сохраняю* файл => *\"{name}\"*")
+        response = requests.get(dl)
+        open(f"{DOWN}/{name}.mp3", "wb").write(response.content)
+        await msg.edit(content=f"Сохранён файл => *\"{name}\"*")
+      except Exception as e:
+        print(e)
+        await ctx.send(f"Проблема с сохранением файла => *\"{name}\"*")
+
+    await ctx.send(f"{mention_author(ctx)}　はい　終わりました。")
 
   async def check_rights(self, ctx, acceptable_roles, tell=True):
     #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
