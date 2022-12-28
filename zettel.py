@@ -11,7 +11,7 @@ class Zettel(commands.Cog):
     
   @commands.command(name="долг")
   async def duty(self, ctx, issue):
-    url = f"http://albenz.xyz:6969/duty?issue={issue}"
+    url = f"http://albenz.xyz:6969/duty?issue={issue.lower()}"
     
     #ret = await ctx.send("*Подождите...*")
     response = requests.get(url)
@@ -39,7 +39,7 @@ class Zettel(commands.Cog):
     invoked = ctx.invoked_with
     lang = GLD[invoked]
 
-    url = f"http://albenz.xyz:6969/remedy?issue={issue}"
+    url = f"http://albenz.xyz:6969/remedy?issue={issue.lower()}"
 
     response = requests.get(url)
     data = response.json()
@@ -145,7 +145,7 @@ class Zettel(commands.Cog):
       await ctx.send(embed=embed)
       return 
 
-    url = f"http://albenz.xyz:6969/poem?issue={issue}"
+    url = f"http://albenz.xyz:6969/poem?issue={issue.lower()}"
 
     response = requests.get(url)
     data = response.json()
@@ -167,8 +167,8 @@ class Zettel(commands.Cog):
 
     ret_str = ", ".join(data)
     await ctx.send(f"*<@!{ctx.author.id}>, вот список ключевых слов: \n\n\t{ret_str}.*")
-
   @commands.command(name="remedies", aliases=['средства'])
+
   async def remedies(self, ctx):
     response_options = { 
       "en": {
