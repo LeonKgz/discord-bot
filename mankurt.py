@@ -13,6 +13,7 @@ from googletrans import Translator
 import secrets
 import datetime
 from requests import get
+from heatmap import Heatmap
 from utils import *
 from env import *
 import numpy as np
@@ -1486,6 +1487,7 @@ bot.add_cog(Loops(bot))
 bot.add_cog(Static(bot))
 bot.add_cog(Zettel(bot))
 bot.add_cog(Business(bot))
+bot.add_cog(Heatmap(bot))
 # bot.add_cog(Health(bot))
 
 # get all membeers of Politzek and add to their roles Proletariat (while keeping apatrid)
