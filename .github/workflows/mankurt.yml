@@ -25,6 +25,7 @@ on:
       - 'status.py'
       - 'utils.py'
       - 'zettel.py'
+      - 'heatmap.py'
       - 'Dockerfile_Mankurt'
       - 'Dockerfile_Mankurt_Test'
       - 'Dockerfile_Tester'
