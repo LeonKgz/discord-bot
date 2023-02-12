@@ -81,9 +81,11 @@ class Heatmap(commands.Cog):
     title = self.command_map[invoked]["title"]
     table = self.command_map[invoked]["table"]
     items_allowed = self.command_map[invoked]["items_allowed"]
-    
-    items = ""
     value = 1
+    if not items_allowed:
+      value = 5
+
+    items = ""
     date=str(datetime.datetime.now().strftime('%-Y-%-m-%-d'))
 
     args = str(args).strip()
