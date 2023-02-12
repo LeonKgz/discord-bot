@@ -81,6 +81,7 @@ class Heatmap(commands.Cog):
     title = self.command_map[invoked]["title"]
     table = self.command_map[invoked]["table"]
     items_allowed = self.command_map[invoked]["items_allowed"]
+    
     items = ""
     value = 1
     date=str(datetime.datetime.now().strftime('%-Y-%-m-%-d'))
@@ -122,7 +123,7 @@ class Heatmap(commands.Cog):
       if items_present:
         items = item_name
         value = len(item_name.split(", "))
-        
+
       ret = insert_row(
         table=table, 
         fields=["my_schema", "title", "my_date", "items", "value"], 
