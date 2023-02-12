@@ -82,7 +82,7 @@ class Heatmap(commands.Cog):
     table = self.command_map[invoked]["table"]
     items_allowed = self.command_map[invoked]["items_allowed"]
     value = 1
-    if not items_allowed:
+    if not items_allowed or schema == "books_finished":
       value = 5
 
     items = ""
