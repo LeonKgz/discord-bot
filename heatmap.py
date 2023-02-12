@@ -20,6 +20,18 @@ class Heatmap(commands.Cog):
         "table": "heatmap",
         "items_allowed": False,
       },
+      "clean": {
+        "schema": "forbidden",
+        "title": "Forbidden",
+        "table": "heatmap",
+        "items_allowed": False,
+      },
+      "look": {
+        "schema": "forbidden_looks",
+        "title": "Forbidden Looks",
+        "table": "heatmap",
+        "items_allowed": False,
+      },
       "sleep": {
         "schema": "8_hours",
         "title": "8 hours of sleep",
@@ -68,7 +80,7 @@ class Heatmap(commands.Cog):
 												 cursorclass=pymysql.cursors.DictCursor)
     return db, db.cursor()
 
-  @commands.command(name="food", aliases=["kendo", "sleep", "read", "finished", "code", "go", "nippon"])
+  @commands.command(name="food", aliases=["kendo", "sleep", "read", "finished", "code", "go", "nippon", "clean", "look"])
   async def heatmap_command(self, ctx, *, args=None):
   # async def heatmap_command(self, ctx, item_name=None, date=None, value=1):
 
@@ -112,7 +124,8 @@ class Heatmap(commands.Cog):
     entry_exists = len(rows) > 0
     if entry_exists:
       row = rows[0]
-      value = int(row['value']) + len(item_name.split(", "))
+      if not schema == "books_finished":
+        value = int(row['value']) + len(item_name.split(", "))
       
       if items_allowed:
         if row['items']:
@@ -124,7 +137,8 @@ class Heatmap(commands.Cog):
     if not entry_exists:
       if items_present:
         items = item_name
-        value = len(item_name.split(", "))
+        if not schema == "books_finished":
+          value = len(item_name.split(", "))
 
       ret = insert_row(
         table=table, 
