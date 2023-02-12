@@ -119,8 +119,10 @@ class Heatmap(commands.Cog):
       # item_name = items
     
     if not entry_exists:
-      items = item_name
-      value = len(item_name.split(", "))
+      if items_present:
+        items = item_name
+        value = len(item_name.split(", "))
+        
       ret = insert_row(
         table=table, 
         fields=["my_schema", "title", "my_date", "items", "value"], 
