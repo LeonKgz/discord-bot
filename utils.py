@@ -801,7 +801,7 @@ def get_deal_embed(bot, deal_id):
   expiry = timestamp + datetime.timedelta(days=1) 
   # expstr = expiry.strftime('%Y-%m-%d %H:%M:%S')
   expstr = expiry.astimezone(pytz.timezone('Europe/Moscow')).strftime('%Y-%m-%d %H:%M:%S %Z%z')
-  embed.add_field(name="⠀", value="⠀", inline=False)
+  embed.add_field(name="u", value="⠀", inline=False)
   # embed.set_footer(text=f"Срок Истечения Договора — {expstr}\nПосмотреть данный итем — !item {item_id}\nПринять договор — !accept {deal_id}")
   embed.set_footer(text=f"Срок Истечения Договора — {expstr}\nПринять договор — !accept {deal_id}")
 
@@ -1098,10 +1098,10 @@ def get_file(bot, mem):
 def insert_row(table, fields, values):
   
   db, cursor = get_db_cursor()
+  fields = [f"`{field}`" for field in fields]
   fs = ", ".join(fields)
   vs = ", ".join([f"\"{v}\"" for v in values])
   sql = f"INSERT INTO {table}({fs}) VALUES({vs})"
-  
   try: 
     cursor.execute(sql)
     db.commit()

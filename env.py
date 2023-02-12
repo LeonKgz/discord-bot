@@ -27,6 +27,7 @@ TEST_USER = int(str(os.getenv('TEST_USER')))
 TEST_USER_TOKEN = str(os.getenv('TEST_USER_TOKEN'))
 TEST_USER_NAME = 'Zanshin'
 DOWN = str(os.getenv('DOWN'))
+down = str(os.getenv('DOWN'))
 
 # Global Languages Dictionary, mapping each command name to its respective language code
 GLD = {
