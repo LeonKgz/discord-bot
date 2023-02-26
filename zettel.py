@@ -100,7 +100,7 @@ class Zettel(commands.Cog):
 
   \\begin{document}
 
-  \\begin{multicols}{2}""" + "".join(["\\section{" + v["remedy"] + "}" + "\n\n".join(v["content"].split("\n\n")[1:]).replace("  ", " ").strip().replace("\n\n", "\\\\\n\n") for v in verses]) + """
+  \\begin{multicols}{2}""" + "".join(["\\section{" + v["remedy"].title() + "}" + "\n\n".join(v["content"].split("\n\n")[1:]).replace("  ", " ").strip().replace("\n\n", "\\\\\n\n") for v in verses]) + """
 
   \\end{multicols}
 
