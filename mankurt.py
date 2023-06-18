@@ -32,6 +32,7 @@ bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
 async def on_ready():
   print(f'{bot.user.name} has connected to Discord!')
   await status_update(bot)
+  pass
 
 # Command to connect a telegram account
 @bot.command(name="telegram")
