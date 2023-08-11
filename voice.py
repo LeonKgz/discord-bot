@@ -5,7 +5,7 @@
 import asyncio
 import requests
 from discord import FFmpegPCMAudio
-from utils import disconnect, get_staroe_radio_info
+from utils import disconnect, get_staroe_radio_info, get_staroe_radio_name_and_link, mention_author
 from youtube_dl import YoutubeDL
 from discord import FFmpegPCMAudio
 from discord.ext import commands
@@ -31,8 +31,11 @@ class Voice(commands.Cog):
   async def on(self, ctx: commands.Context, number):
       await disconnect(self.bot, ctx)
       channel = ctx.message.author.voice.channel
+      print(channel)
       player = await channel.connect()
+      print(player)
       number = int(number)
+      print(number)
       if number < len(self.staroe_stations):
         await ctx.send(f"Включаю `{self.staroe_stations[number][0]}`")
         dir = self.staroe_stations[number][2]
@@ -55,7 +58,7 @@ class Voice(commands.Cog):
           try: requests.get(arg)
           except: info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries']
           else: info = ydl.extract_info(arg, download=False)
-
+      
       es = [dict(i) for i in info["entries"]]
       ret = []
       for i in es:
