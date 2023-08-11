@@ -15,7 +15,7 @@ import shutil
 import json
 import urllib.request
 
-down= "/mnt/c/Users/Халметов Юрий/Downloads/"
+# down= "/mnt/c/Users/Халметов Юрий/Downloads/"
 
 class Nihon(commands.Cog):
 
@@ -53,7 +53,8 @@ class Nihon(commands.Cog):
       for kanji in kanjis:
         on, kun, meanings = get_kanji_info(kanji)
         note = {
-              "deckName": "__________Kanji",
+              # "deckName": "__________Kanji",
+              "deckName": "N5 Kanji",
               "modelName": "Основная",
               # "modelName": "Основная (+ обратные карточки)",
               "fields": {
@@ -84,7 +85,7 @@ class Nihon(commands.Cog):
   #####################################################################################################################################
 
   # create webdriver object
-  def process_word(self, phrase, timerr, default_filename=False):
+  def process_word(self, phrase, timerr, default_filename=False, add_particle=False):
 
     png_dir = f"./pngs/{phrase}.png" if not default_filename else "./pngs/png.png"
     wav_dir = f"./wavs/{phrase}.wav" if not default_filename else "./wavs/wav.wav"
@@ -96,12 +97,14 @@ class Nihon(commands.Cog):
 
     pngfile = f"./pngs/{phrase}.png"   
     wavfile = f"./wavs/{phrase}.wav"
+    allpngfile = f"./pngs/*.png"   
+    allwavfile = f"./wavs/*.wav"
 
     try:
-      os.remove(pngfile)
-      os.remove(wavfile)
+      [os.remove(f"./pngs/{f}") for f in os.listdir("./pngs/")]
+      [os.remove(f"./wavs/{f}") for f in os.listdir("./wavs/")]
     except Exception as e:
-      # print(e)
+      print(e)
       pass
 
     driver = webdriver.Firefox()
@@ -112,8 +115,7 @@ class Nihon(commands.Cog):
       element = driver.find_element(By.ID,"PhrasingText")
       submit_wrapper = driver.find_element(By.ID,"phrasing_submit_wrapper")
       submit_button = submit_wrapper.find_element(By.CLASS_NAME, "submit")
-      element.send_keys(phrase)
-      #element.send_keys(phrase + "は")
+      element.send_keys((phrase + "は") if add_particle else phrase)
 
       #print(submit_button.rect)
 
@@ -165,6 +167,10 @@ class Nihon(commands.Cog):
     driver.implicitly_wait(10)
     driver.close()
 
+    # if not default_filename:
+    #   os.remove(png_dir)
+    #   os.remove(wav_dir)
+  
   def request(action, **params):
       return {'action': action, 'params': params, 'version': 6}
 
@@ -205,17 +211,14 @@ class Nihon(commands.Cog):
         original, furigana, meaning = get_word_info(word)
         print(original, furigana, meaning)
         errmsg = meaning
-
-
-
-
         
         if original:
           
           # brackets = f" ({furigana})" if furigana else ""
           tags = ["simple"] if kanjiless else []
           note = {
-                "deckName": "__________Kotoba",
+                # "deckName": "__________Kotoba",
+                "deckName": "N5 Kotoba",
                 # "modelName": "Основная",
                 "modelName": "Основная (+ обратные карточки)",
                 "fields": {
@@ -243,26 +246,29 @@ class Nihon(commands.Cog):
             curr_timer = 5
             while not succ:
               try:
-                self.process_word(original, curr_timer)
+                self.process_word(original, curr_timer, add_particle=True)
                 succ = True
               except Exception as e:
                 # print(e)
                 curr_timer += 3
 
+
+
             note = {
-                "deckName": "1 Reading",
+                # "deckName": "__________Reading",
+                "deckName": "N5 Reading",
                 # "modelName": "Основная (+ обратные карточки)",
                 "modelName": "Основная",
                 "fields": {
                   "вопрос": original,
-                  "ответ": f"{furigana}<br><img src=\"{original}.png\"><br><br>[sound:{original}.wav]"
+                  "ответ": f"{furigana}<br><img src=\"{original}_n5.png\"><br><br>[sound:{original}_n5.wav]"
                 },
                 "options": {
                     "allowDuplicate": True,
                     "duplicateScope": "deck",
                 },
                 "audio": [{
-                    "filename": f"{original}.wav",
+                    "filename": f"{original}_n5.wav",
                     # "path": f"C:\\Users\\Халметов Юрий\\Downloads\\selenium\\wavs\\{original}.wav",
                     "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\{original}.wav",
                     "fields": [
@@ -270,7 +276,7 @@ class Nihon(commands.Cog):
                     ]
                 }],
                 "picture": [{
-                    "filename": f"{original}.png",
+                    "filename": f"{original}_n5.png",
                     # "path": f"C:\\Users\\Халметов Юрий\\Downloads\\selenium\\pngs\\{original}.png",
                     "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\{original}.png",
                     "fields": [
@@ -306,6 +312,76 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new words is finished! Anki updated. Don't forget to synchronize!")
 
+  @commands.command(name="names")
+  async def names(self, ctx: commands.Context, *, args=None):
+
+      if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
+        return
+      confession = str(args)
+      confession = confession.strip()
+      words = confession.split()
+
+      for word in words:
+        original = word.strip()
+        success = False
+        errmsg = ""
+        try:
+          invoke('addNote', note=note)
+          success = True
+        except Exception as e:
+          errmsg = f"{e}"
+
+        succ = False
+        curr_timer = 5
+        while not succ:
+          try:
+            self.process_word(original, curr_timer)
+            succ = True
+          except Exception as e:
+            # print(e)
+            curr_timer += 3
+
+        note = {
+            "deckName": "__________Names",
+            # "modelName": "Основная (+ обратные карточки)",
+            "modelName": "Основная",
+            "fields": {
+              "вопрос": original,
+              "ответ": f"<br><img src=\"{original}.png\"><br><br>[sound:{original}.wav]"
+            },
+            "options": {
+                "allowDuplicate": True,
+                "duplicateScope": "deck",
+            },
+            "audio": [{
+                "filename": f"{original}.wav",
+                "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\{original}.wav",
+                "fields": [
+                    "ответ"
+                ]
+            }],
+            "picture": [{
+                "filename": f"{original}.png",
+                "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\{original}.png",
+                "fields": [
+                    "ответ"
+                ]
+            }],
+        }
+
+        errmsg = ""
+        try:
+          invoke('addNote', note=note)
+          success = True
+        except Exception as e:
+          errmsg = f"{e}"
+
+        if not success:
+          ret = f"There was an error with {word}! ` {errmsg} `"
+          await ctx.send(ret)
+
+      await ctx.send("Processsing of new names is finished! Anki updated. Don't forget to synchronize!")
+
   @commands.command(name="grammar")
   async def grammar(self, ctx: commands.Context, *, args=None):
 
@@ -317,9 +393,8 @@ class Nihon(commands.Cog):
       ss = [s.strip() for s in confession.split("\n")]
 
       for s in ss:
-        original = s.split("(")[0]
+        original = s.split("(")[0].strip()
         interpret = s.split("(")[1].split(")")[0].strip()
-
 
 
 
@@ -333,12 +408,13 @@ class Nihon(commands.Cog):
             self.process_word(original, curr_timer, default_filename=True)
             succ = True
           except Exception as e:
-            # print(e)
+            print(e)
             curr_timer += 3
         ####################################
 
         note = {
-              "deckName": "1 Bunpou",
+              # "deckName": "__________Bunpou",
+              "deckName": "N5 Bunpou",
               "modelName": "Основная (+ обратные карточки)",
               "fields": {
                 "вопрос": f"{original}<br><img src=\"{original}.png\"><br><br>[sound:{original}.wav]",
@@ -351,7 +427,6 @@ class Nihon(commands.Cog):
               "tags": [],
               "audio": [{
                   "filename": f"{original}.wav",
-                  # "path": f"C:\\Users\\Халметов Юрий\\Downloads\\selenium\\wavs\\{original}.wav",
                   "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\wav.wav",
                   "fields": [
                       "ответ"
@@ -359,7 +434,6 @@ class Nihon(commands.Cog):
               }],
               "picture": [{
                   "filename": f"{original}.png",
-                  # "path": f"C:\\Users\\Халметов Юрий\\Downloads\\selenium\\pngs\\{original}.png",
                   "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\png.png",
                   "fields": [
                       "ответ"
