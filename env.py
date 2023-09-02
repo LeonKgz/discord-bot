@@ -27,7 +27,7 @@ TEST_USER = int(str(os.getenv('TEST_USER')))
 TEST_USER_TOKEN = str(os.getenv('TEST_USER_TOKEN'))
 TEST_USER_NAME = 'Zanshin'
 DOWN = str(os.getenv('DOWN'))
-down = str(os.getenv('DOWN'))
+down = str(os.getenv('DOWN')) + "/"
 
 # Global Languages Dictionary, mapping each command name to its respective language code
 GLD = {
@@ -39,8 +39,8 @@ GLD = {
   "молитва": "ru",
 }
 
-AMNESTY_START_DAY = 1
-AMNESTY_END_DAY = 4
+AMNESTY_START_DAY = 2
+AMNESTY_END_DAY = 5
 
 SECOND = 1.0
 MINUTE = 60.0
