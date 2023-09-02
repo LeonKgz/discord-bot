@@ -102,7 +102,7 @@ async def weekly_activity_notification(id_to_search):
   mem = bot.get_user(id_to_search)
   embed = discord.Embed(title=f"+15 Кремлебот") 
   embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
-  embed.set_thumbnail(url="https://thumbs.gfycat.com/CoordinatedBareAgouti-max-1mb.gif")
+  embed.set_thumbnail(url="https://media.tenor.com/XsL55KZx8ZcAAAAd/%D0%BA%D0%B0%D0%BC%D0%B8%D0%BA%D0%B0%D0%B4%D0%B7%D0%B5-angry.gif")
   # light green, same as СовНарМод
   embed.color = 0x2ecc71
   embed.add_field(name="⠀", value=f"{mem.display_name} зарабатывает очко оставаясь активным!", inline=False)
