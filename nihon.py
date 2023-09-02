@@ -222,7 +222,7 @@ class Nihon(commands.Cog):
                 # "modelName": "Основная",
                 "modelName": "Основная (+ обратные карточки)",
                 "fields": {
-                  "вопрос": furigana if kanjiless else original,
+                  "вопрос": f"{original} {furigana}" if kanjiless else original,
                   # "вопрос": original + brackets,
                   "ответ": meaning
                 },
@@ -240,7 +240,7 @@ class Nihon(commands.Cog):
           except Exception as e:
             errmsg = f"{e}"
 
-          if furigana and not kanjiless:
+          if furigana:
 
             succ = False
             curr_timer = 5
@@ -252,7 +252,10 @@ class Nihon(commands.Cog):
                 # print(e)
                 curr_timer += 3
 
+            reading_question = original
 
+            if kanjiless:
+              reading_question = f"{original} ({furigana})"
 
             note = {
                 # "deckName": "__________Reading",
@@ -260,7 +263,7 @@ class Nihon(commands.Cog):
                 # "modelName": "Основная (+ обратные карточки)",
                 "modelName": "Основная",
                 "fields": {
-                  "вопрос": original,
+                  "вопрос": reading_question,
                   "ответ": f"{furigana}<br><img src=\"{original}_n5.png\"><br><br>[sound:{original}_n5.wav]"
                 },
                 "options": {
