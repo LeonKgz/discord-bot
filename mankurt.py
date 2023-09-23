@@ -1074,7 +1074,7 @@ async def add_points(ctx, target, type, amount, description):
         member = bot.get_user(get_id(target))
         embed = await get_simple_member_embed(bot=bot, 
                                 member=member, 
-                                title="За заслуги перед Мошной", 
+                                title=f"+{amount} за заслуги перед Мошной", 
                                 message=f"Модераторы начисляют **{amount} {points_word}** социального рейтинга гражданину {member.display_name} за *{description}*.", 
                                 thumbnail_url="https://i.quotev.com/xphy3hm5mcjq.jpg",
                                 image_url="", 
