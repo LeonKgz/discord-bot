@@ -7,12 +7,16 @@ from discord.ext import commands, tasks
 from voice import Voice
 from utils import load_pickle, respond, save_pickle, status_update
 from env import *
+import sys
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, command_prefix="!")
 
 @bot.event
 async def on_ready():
+  print(sys.version)
+  print(sys.version)
+  print(sys.version)
   print(f'{bot.user.name} has connected to Discord!')
 
   await bot.add_cog(Voice(bot))

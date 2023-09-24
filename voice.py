@@ -9,6 +9,7 @@ from utils import disconnect, get_staroe_radio_info, get_staroe_radio_name_and_l
 from youtube_dl import YoutubeDL
 from discord import FFmpegPCMAudio
 from discord.ext import commands
+import sys
 
 class Voice(commands.Cog):
 
@@ -29,6 +30,10 @@ class Voice(commands.Cog):
 
   @commands.command(name='on')
   async def on(self, ctx: commands.Context, number):
+
+      print(sys.version)
+      print(sys.version)
+      print(sys.version)
       await disconnect(self.bot, ctx)
       player = await ctx.author.voice.channel.connect()
       number = int(number)
