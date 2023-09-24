@@ -4,10 +4,10 @@ RUN mkdir -p /usr/src/bot
 
 WORKDIR /usr/src/bot
 COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 RUN apt-get -y update
 RUN apt-get -y install ffmpeg
 
 COPY . .
 
-CMD [ "python3", "manaschi.py", "prod"]
+CMD [ "python", "manaschi.py", "prod"]
