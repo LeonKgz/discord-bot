@@ -30,8 +30,7 @@ class Voice(commands.Cog):
   @commands.command(name='on')
   async def on(self, ctx: commands.Context, number):
       await disconnect(self.bot, ctx)
-      channel = ctx.message.author.voice.channel
-      player = await channel.connect()
+      player = await ctx.author.voice.channel.connect()
       number = int(number)
       if number < len(self.staroe_stations):
         await ctx.send(f"Включаю `{self.staroe_stations[number][0]}`")
