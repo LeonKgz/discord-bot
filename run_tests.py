@@ -3,156 +3,161 @@ A functional demo of all possible test cases. This is the format you will want t
     Run with:
         python example_tests.py TARGET_NAME TESTER_TOKEN
 """
-from distest import TestCollector
-from distest import run_dtest_bot
-from utils import clear_db_table, get_db_row, mention, generate_text, update_db_entry
-import random
-import sys
-import datetime
-import json
-from env import *
 
-# The tests themselves
+# =============================================================== DEPRECATION START
 
-test_collector = TestCollector()
-created_channel = None
+# from distest import TestCollector
+# from distest import run_dtest_bot
+# from utils import clear_db_table, get_db_row, mention, generate_text, update_db_entry
+# import random
+# import sys
+# import datetime
+# import json
+# from env import *
 
-async def assert_reply(interface, actual, expected):
-  try:
-    ret_msg = await interface.assert_reply_contains(actual, expected)
-    assert ret_msg.content == expected
-    # print("Test is passed")
-  except Exception as e:
-    print(e)
-    exit(-1)
+# # The tests themselves
 
-@test_collector()
-async def test_submit_description(interface):
-  clear_db_table("confessions")
-  # clear_db_table("unmarked_confessions")
+# test_collector = TestCollector()
+# created_channel = None
 
-  msg = f"!рассказать \"{generate_text()}\""
-  expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
-  await assert_reply(interface, msg, expected)
+# async def assert_reply(interface, actual, expected):
+#   try:
+#     ret_msg = await interface.assert_reply_contains(actual, expected)
+#     assert ret_msg.content == expected
+#     # print("Test is passed")
+#   except Exception as e:
+#     print(e)
+#     exit(-1)
 
-  # # confirm there is an entry in unmarked_confessions
-  # ret = get_db_row("unmarked_confessions", TEST_USER)
-  # print(ret)
-  # # TODO: For now test user is also a marker
-  # assert ret, exit(-1)
-  # assert ret["Markers"] == str(TEST_USER), exit(-1)
+# @test_collector()
+# async def test_submit_description(interface):
+#   clear_db_table("confessions")
+#   # clear_db_table("unmarked_confessions")
 
-@test_collector()
-async def test_submit_bad_description_no_quotes(interface):
-  msg = f"!рассказать {generate_text()}"
-  expected = f"{mention(TEST_USER)} ты забыл(а) **кавычки**!"
-  await assert_reply(interface, msg, expected)
+#   msg = f"!рассказать \"{generate_text()}\""
+#   expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
+#   await assert_reply(interface, msg, expected)
 
-@test_collector()
-async def test_submit_bad_description_no_quotes_around(interface):
+#   # # confirm there is an entry in unmarked_confessions
+#   # ret = get_db_row("unmarked_confessions", TEST_USER)
+#   # print(ret)
+#   # # TODO: For now test user is also a marker
+#   # assert ret, exit(-1)
+#   # assert ret["Markers"] == str(TEST_USER), exit(-1)
 
-  # Inserting random single quote in text
-  text = generate_text()
-  idx = int(random.random() * len(text))
-  text = text[:idx] + "\"" + text[idx:]
-  msg = f"!рассказать {text}"
-  expected = f"{mention(TEST_USER)} **кавычки** должны быть вокруг!"
-  await assert_reply(interface, msg, expected)
+# @test_collector()
+# async def test_submit_bad_description_no_quotes(interface):
+#   msg = f"!рассказать {generate_text()}"
+#   expected = f"{mention(TEST_USER)} ты забыл(а) **кавычки**!"
+#   await assert_reply(interface, msg, expected)
 
-  # Inserting random single quote at the beginning 
-  text = generate_text()
-  text = "\"" + text
-  msg = f"!рассказать {text}"
-  expected = f"{mention(TEST_USER)} **кавычки** должны быть вокруг!"
-  await assert_reply(interface, msg, expected)
+# @test_collector()
+# async def test_submit_bad_description_no_quotes_around(interface):
 
-  # Inserting random single quote at the end
-  text = generate_text()
-  text = text + "\""
-  msg = f"!рассказать {text}"
-  expected = f"{mention(TEST_USER)} **кавычки** должны быть вокруг!"
-  await assert_reply(interface, msg, expected)
+#   # Inserting random single quote in text
+#   text = generate_text()
+#   idx = int(random.random() * len(text))
+#   text = text[:idx] + "\"" + text[idx:]
+#   msg = f"!рассказать {text}"
+#   expected = f"{mention(TEST_USER)} **кавычки** должны быть вокруг!"
+#   await assert_reply(interface, msg, expected)
 
-@test_collector()
-async def test_submit_bad_description_quotes_inside(interface):
+#   # Inserting random single quote at the beginning 
+#   text = generate_text()
+#   text = "\"" + text
+#   msg = f"!рассказать {text}"
+#   expected = f"{mention(TEST_USER)} **кавычки** должны быть вокруг!"
+#   await assert_reply(interface, msg, expected)
 
-  # Inserting random single quote in text
-  text = generate_text()
-  idx = int(random.random() * len(text))
-  text = text[:idx] + "\"" + text[idx:]
-  msg = f"!рассказать \"{text}\""
-  expected = f"{mention(TEST_USER)} если ты хочешь использовать **кавычки** в описании, нужно перед ними поставить **« \\\\ »**, то есть например:\nВместо \"Я работаю в комании \"Комплекс\" три года\" =>  \"Я работаю в комании \\\\\"Комплекс\\\\\" три года\""
-  await assert_reply(interface, msg, expected)
+#   # Inserting random single quote at the end
+#   text = generate_text()
+#   text = text + "\""
+#   msg = f"!рассказать {text}"
+#   expected = f"{mention(TEST_USER)} **кавычки** должны быть вокруг!"
+#   await assert_reply(interface, msg, expected)
 
-@test_collector()
-async def test_submit_bad_description_short(interface):
+# @test_collector()
+# async def test_submit_bad_description_quotes_inside(interface):
 
-  # Inserting random single quote in text
-  text = generate_text(text_size=1)
-  msg = f"!рассказать \"{text}\""
-  expected = f"{mention(TEST_USER)} твоё описание либо **слишком короткое** либо ты забыл(а) **кавычки**!"
-  await assert_reply(interface, msg, expected)
+#   # Inserting random single quote in text
+#   text = generate_text()
+#   idx = int(random.random() * len(text))
+#   text = text[:idx] + "\"" + text[idx:]
+#   msg = f"!рассказать \"{text}\""
+#   expected = f"{mention(TEST_USER)} если ты хочешь использовать **кавычки** в описании, нужно перед ними поставить **« \\\\ »**, то есть например:\nВместо \"Я работаю в комании \"Комплекс\" три года\" =>  \"Я работаю в комании \\\\\"Комплекс\\\\\" три года\""
+#   await assert_reply(interface, msg, expected)
 
-@test_collector()
-async def test_submit_bad_description_too_soon(interface):
-  clear_db_table("confessions")
-  msg = f"!рассказать \"{generate_text()}\""
-  expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
-  await assert_reply(interface, msg, expected)
+# @test_collector()
+# async def test_submit_bad_description_short(interface):
 
-  diff = int(random.random() * 7)
-  new_date = get_db_row("confessions", TEST_USER)['Timestamp'] - datetime.timedelta(days=diff)
-  update_db_entry("confessions", "Timestamp", new_date, TEST_USER)
+#   # Inserting random single quote in text
+#   text = generate_text(text_size=1)
+#   msg = f"!рассказать \"{text}\""
+#   expected = f"{mention(TEST_USER)} твоё описание либо **слишком короткое** либо ты забыл(а) **кавычки**!"
+#   await assert_reply(interface, msg, expected)
 
-  msg = f"!рассказать \"{generate_text()}\""
-  expected = f"{mention(TEST_USER)} своё описание можно обновлять максимум один раз в 7 дней! \n\n\t**Вы сможете обновить своё через {7 - diff}**"
-  await assert_reply(interface, msg, expected)
+# @test_collector()
+# async def test_submit_bad_description_too_soon(interface):
+#   clear_db_table("confessions")
+#   msg = f"!рассказать \"{generate_text()}\""
+#   expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
+#   await assert_reply(interface, msg, expected)
 
-@test_collector()
-async def test_submit_new_description(interface):
-  clear_db_table("confessions")
-  msg = f"!рассказать \"{generate_text()}\""
-  expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
-  await assert_reply(interface, msg, expected)
+#   diff = int(random.random() * 7)
+#   new_date = get_db_row("confessions", TEST_USER)['Timestamp'] - datetime.timedelta(days=diff)
+#   update_db_entry("confessions", "Timestamp", new_date, TEST_USER)
 
-  random_evaluation_value = int(random.random() * 10)
-  random_evaluation = {TEST_USER: random_evaluation_value}
-  random_evaluation = json.dumps(random_evaluation)
-  random_evaluation = random_evaluation.replace("\"", "\\\"")
+#   msg = f"!рассказать \"{generate_text()}\""
+#   expected = f"{mention(TEST_USER)} своё описание можно обновлять максимум один раз в 7 дней! \n\n\t**Вы сможете обновить своё через {7 - diff}**"
+#   await assert_reply(interface, msg, expected)
 
-  update_db_entry("confessions", "Points", random_evaluation, TEST_USER)
+# @test_collector()
+# async def test_submit_new_description(interface):
+#   clear_db_table("confessions")
+#   msg = f"!рассказать \"{generate_text()}\""
+#   expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
+#   await assert_reply(interface, msg, expected)
 
-  random_social_score = int(random.random() * 100) + random_evaluation_value
-  update_db_entry("raiting", "Points", random_social_score, TEST_USER)
+#   random_evaluation_value = int(random.random() * 10)
+#   random_evaluation = {TEST_USER: random_evaluation_value}
+#   random_evaluation = json.dumps(random_evaluation)
+#   random_evaluation = random_evaluation.replace("\"", "\\\"")
 
-  # set a random date between now and now + 7 days
-  diff = int(random.random() * 7) + 7
-  new_date = datetime.datetime.now() - datetime.timedelta(days=diff)
-  update_db_entry("confessions", "Timestamp", new_date, TEST_USER)
+#   update_db_entry("confessions", "Points", random_evaluation, TEST_USER)
 
-  msg = f"!рассказать \"{generate_text()}\""
-  expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
-  await assert_reply(interface, msg, expected)
+#   random_social_score = int(random.random() * 100) + random_evaluation_value
+#   update_db_entry("raiting", "Points", random_social_score, TEST_USER)
 
-  confessions_row = get_db_row("confessions", TEST_USER)
-  assert confessions_row, exit(-1)
-  assert confessions_row["Points"] == "{}", exit(-1)
+#   # set a random date between now and now + 7 days
+#   diff = int(random.random() * 7) + 7
+#   new_date = datetime.datetime.now() - datetime.timedelta(days=diff)
+#   update_db_entry("confessions", "Timestamp", new_date, TEST_USER)
 
-@test_collector()
-async def test_submit_retrieve_description(interface):
-  clear_db_table("confessions")
+#   msg = f"!рассказать \"{generate_text()}\""
+#   expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
+#   await assert_reply(interface, msg, expected)
 
-  random_text = generate_text()
-  msg = f"!рассказать \"{random_text}\""
-  expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
-  await assert_reply(interface, msg, expected)
+#   confessions_row = get_db_row("confessions", TEST_USER)
+#   assert confessions_row, exit(-1)
+#   assert confessions_row["Points"] == "{}", exit(-1)
 
-  msg = f"!кто {mention(TEST_USER)}"
-  # expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
+# @test_collector()
+# async def test_submit_retrieve_description(interface):
+#   clear_db_table("confessions")
 
-  expected = f"{mention(TEST_USER)}, вот что {TEST_USER_NAME} говорит о себе: \n\n\t*{random_text}*"
-  await assert_reply(interface, msg, expected)
+#   random_text = generate_text()
+#   msg = f"!рассказать \"{random_text}\""
+#   expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
+#   await assert_reply(interface, msg, expected)
 
+#   msg = f"!кто {mention(TEST_USER)}"
+#   # expected = f"{mention(TEST_USER)} ваше описание обновлено, проходите!"
+
+#   expected = f"{mention(TEST_USER)}, вот что {TEST_USER_NAME} говорит о себе: \n\n\t*{random_text}*"
+#   await assert_reply(interface, msg, expected)
+
+
+# =============================================================== DEPRECATION END
 
 # @test_collector()
 # async def test_description_delete(interface):
@@ -289,4 +294,5 @@ async def test_submit_retrieve_description(interface):
 # Actually run the bot
 
 if __name__ == "__main__":
-    run_dtest_bot(sys.argv, test_collector, timeout=10)
+    print("Currently deprecated due to distest latest version 0.6.2 being incompatible with discord==2.3.2")
+    # run_dtest_bot(sys.argv, test_collector, timeout=10)

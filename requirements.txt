@@ -10,7 +10,6 @@ wikipedia-api
 youtube-dl
 googletrans==3.1.0a0
 dpytest
-distest==0.6.2
 beautifulsoup4==4.10.0
 russian-names==0.1.2
 selenium==4.6.1
