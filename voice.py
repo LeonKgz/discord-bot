@@ -194,5 +194,5 @@ class Voice(commands.Cog):
       if not res:
         return await ctx.send("I am not connected to any voice channel on this server!")
 
-def setup(bot):
-  bot.add_cog(Voice(bot))
+async def setup(bot):
+  await bot.add_cog(Voice(bot))

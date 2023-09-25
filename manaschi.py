@@ -14,15 +14,10 @@ bot = commands.Bot(intents=intents, command_prefix="!")
 
 @bot.event
 async def on_ready():
-  print(sys.version)
-  print(sys.version)
-  print(sys.version)
   print(f'{bot.user.name} has connected to Discord!')
-
   await bot.add_cog(Voice(bot))
   await status_update(bot)
   await status_update_loop.start()
-  pass
 
 @bot.command(name="write")
 async def mina(ctx, key, value):
