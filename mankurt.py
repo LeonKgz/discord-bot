@@ -32,6 +32,15 @@ bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
 async def on_ready():
   print(f'{bot.user.name} has connected to Discord!')
   await status_update(bot)
+  await bot.add_cog(Status(bot))
+  await bot.add_cog(Loops(bot))
+  await bot.add_cog(Static(bot))
+  await bot.add_cog(Zettel(bot))
+  await bot.add_cog(Business(bot))
+  await bot.add_cog(Heatmap(bot))
+  # bot.add_cog(Health(bot))
+
+
   pass
 
 # Command to connect a telegram account
@@ -1482,14 +1491,6 @@ def load_anime():
       db.rollback()
 
   db.close()
-
-bot.add_cog(Status(bot))
-bot.add_cog(Loops(bot))
-bot.add_cog(Static(bot))
-bot.add_cog(Zettel(bot))
-bot.add_cog(Business(bot))
-bot.add_cog(Heatmap(bot))
-# bot.add_cog(Health(bot))
 
 # get all membeers of Politzek and add to their roles Proletariat (while keeping apatrid)
 # during amnesty cannot use !propusk as an apatrid
