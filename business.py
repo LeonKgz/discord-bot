@@ -114,7 +114,7 @@ class Business(commands.Cog):
     now = datetime.datetime.now()
     rows = get_rows_custom("SELECT * from fn_effects_queue WHERE Type=\"Rename\"")
     
-    chid, aid, adn, avu = str(ctx.channel.id), str(ctx.author.id), str(ctx.author.display_name), str(ctx.author.avatar_url)
+    chid, aid, adn, avu = str(ctx.channel.id), str(ctx.author.id), str(ctx.author.display_name), str(ctx.author.avatar.url)
     pklctx = PickleContext(chid, aid, adn, avu)
 
     if not rows:
