@@ -110,7 +110,7 @@ async def weekly_activity_notification(id_to_search):
 
   mem = bot.get_user(id_to_search)
   embed = discord.Embed(title=f"+15 Кремлебот") 
-  embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
+  embed.set_author(name=mem.display_name, icon_url=mem.avatar.url)
   embed.set_thumbnail(url="https://media.tenor.com/XsL55KZx8ZcAAAAd/%D0%BA%D0%B0%D0%BC%D0%B8%D0%BA%D0%B0%D0%B4%D0%B7%D0%B5-angry.gif")
   # light green, same as СовНарМод
   embed.color = 0x2ecc71
@@ -152,7 +152,7 @@ async def telegram_registration_notification(id_to_search):
 
   mem = bot.get_user(int(id_to_search))
   embed = discord.Embed(title=f"Роскомнадзор хочет знать ваше местоположение") 
-  embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
+  embed.set_author(name=mem.display_name, icon_url=mem.avatar.url)
   embed.set_thumbnail(url="https://sun9-19.userapi.com/s/v1/if1/dFyFjrD1QetbjHomAaHQvt_SxGIOuuykqptAyKBFVIzyZ8p07QXbB2Lp22_1-JkFm2Xcj_7A.jpg?size=200x200&quality=96&crop=47,0,764,764&ava=1")
   # light blue 
   embed.color = 0x039be5
@@ -764,7 +764,7 @@ async def evaluate(ctx, mem, points):
     async def get_embed():
     ############################################################################################################ 
       embed = discord.Embed(title=f"Модераторы рассмотрели новое описание") 
-      embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
+      embed.set_author(name=mem.display_name, icon_url=mem.avatar.url)
 
       pepes = [
         "https://cdn.betterttv.net/emote/5d324913ff6ed36801311fd2/3x",
@@ -1098,7 +1098,7 @@ async def add_points(ctx, target, type, amount, description):
                                 thumbnail_url="https://i.quotev.com/xphy3hm5mcjq.jpg",
                                 image_url="", 
                                 color_hex_code=0x7621b8)
-        await ch.send(embed=embed)
+        await ch.send(embed=embed)  
 
 def get_line(i):
   total = 50
@@ -1185,7 +1185,7 @@ async def who(ctx, mem):
     if (mem.lower() == "я"):
 
       embed = discord.Embed(title="Я знаю, кто ты...") 
-      embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+      embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar.url)
       embed.color = 0x64B82E
       embed.set_image(url="https://i.imgur.com/aqfPdkJ.gif")
       embed.set_footer(text="Манифест открой...")

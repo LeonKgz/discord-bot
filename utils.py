@@ -255,7 +255,7 @@ async def rename_all_channels(bot, ctx, lang):
             color_hex_code=0x000000,
             footer=""
           )
-    embed.set_author(name=ctx.display_name, icon_url=ctx.avatar_url)
+    embed.set_author(name=ctx.display_name, icon_url=ctx.avatar.url)
     gl = get_channel_by_name(bot, "гласность", 'Russian')
     await gl.send(embed=embed)
 
@@ -769,7 +769,7 @@ def get_deal_embed(bot, deal_id):
   mem = bot.get_user(src)
 
   embed = discord.Embed(title=f"Договор купли-продажи №{deal_id}") 
-  embed.set_author(name=mem.display_name, icon_url=mem.avatar_url)
+  embed.set_author(name=mem.display_name, icon_url=mem.avatar.url)
   embed.set_thumbnail(url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw0yuzgzxlfLd4WyaABRzbuCwyd-iev3t7Yw&usqp=CAU")
   embed.color = 0xf6ff00
 
@@ -804,7 +804,7 @@ def get_deal_embed(bot, deal_id):
   expiry = timestamp + datetime.timedelta(days=1) 
   # expstr = expiry.strftime('%Y-%m-%d %H:%M:%S')
   expstr = expiry.astimezone(pytz.timezone('Europe/Moscow')).strftime('%Y-%m-%d %H:%M:%S %Z%z')
-  embed.add_field(name="u", value="⠀", inline=False)
+  embed.add_field(name="⠀", value="⠀", inline=False)
   # embed.set_footer(text=f"Срок Истечения Договора — {expstr}\nПосмотреть данный итем — !item {item_id}\nПринять договор — !accept {deal_id}")
   embed.set_footer(text=f"Срок Истечения Договора — {expstr}\nПринять договор — !accept {deal_id}")
 
@@ -817,7 +817,7 @@ def get_inventory_embed(ctx):
     return False
 
   embed = discord.Embed(title="Мошна (Инвентарь)") 
-  embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+  embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar.url)
   # embed.set_thumbnail(url="https://i.imgur.com/EWy4kLv.png")
   embed.set_thumbnail(url="https://i.imgur.com/KOMAOzA.png")
   embed.color = 0xcf1d1d
@@ -850,7 +850,7 @@ async def get_simple_embed(title, message, thumbnail_url, color_hex_code, footer
 # simple beacause it has one field, to convey one message regarding a server member
 async def get_simple_member_embed(bot, member, title, message, thumbnail_url, image_url="", color_hex_code=None):
   embed = discord.Embed(title=title) 
-  embed.set_author(name=member.display_name, icon_url=member.avatar_url)
+  embed.set_author(name=member.display_name, icon_url=member.avatar.url)
   embed.set_thumbnail(url=thumbnail_url)
   embed.set_image(url=image_url)
 
@@ -960,7 +960,7 @@ def get_file(bot, mem):
   }
   
   #embed = discord.Embed(title=f"Досье", description=f"", color=0xa87f32, url="https://albenz.xyz", footer="Переводчик — модолец!") #creates embed
-  #embed.set_author(name=mem.display_name, url="https://twitter.com/RealDrewData", icon_url=mem.avatar_url)
+  #embed.set_author(name=mem.display_name, url="https://twitter.com/RealDrewData", icon_url=mem.avatar.url)
 
   # thumbnail has an icon for different roles, i.e. Proletari, SovNarMod
   #embed.set_thumbnail(url=thumb)
@@ -1545,3 +1545,5 @@ async def check_rights_dm(ctx):
   response = "**" + str(ctx.author.name) + "**, у тебя нет доступа к этой команде " + str(du_get(bot.emojis, name='peepoClown'))
   await ctx.send(response)
   return False
+
+print(get_staroe_radio_info())

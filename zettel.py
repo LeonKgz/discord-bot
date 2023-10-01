@@ -138,7 +138,7 @@ class Zettel(commands.Cog):
     if str(ctx.author.id) == "423476785959665671" and str(issue) == "Глупость":
 
       embed = discord.Embed(title="Рубаи. Омар Хаям", description="450", color=0xa87f32) #creates embed
-      embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+      embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar.url)
       embed.set_thumbnail(url="https://obrazovaka.ru/wp-content/uploads/2021/02/omar-hayyam-e1614119392242.jpg")
       embed.set_image(url="https://i.imgur.com/aqfPdkJ.gif")
       embed.set_footer(text="Дураки мудрецом почитают меня...")
