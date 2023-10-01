@@ -501,7 +501,7 @@ async def on_message(message):
 
   if message.author == bot.user:
   #if message.author == bot.user and "!кто" not in str(message.content):
-    return
+    return  
 
   me = bot.get_user(ME)
   if (message.author.bot):
@@ -566,6 +566,16 @@ async def on_message(message):
           await mem.add_roles(proletariat)
           await mem.remove_roles(politzek)
       await message.channel.send("The guy is free!")
+    
+  # if mentionig someone, send a super dm in discord and telegram  
+  if int(message.author.id) == ME:
+    mention_start = "<@"
+    ctx = await bot.get_context(message)
+    print(message.content)
+    if mention_start in message.content:
+      mentions = [word for word in message.content.split() if mention_start in word]
+      for mention in mentions:
+        await send_super_dm(ctx, mention, bot)
 
 #   await bot.process_commands(message)
   ctx = await bot.get_context(message)
