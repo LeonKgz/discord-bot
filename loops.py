@@ -219,6 +219,7 @@ class Loops(commands.Cog):
     msk_day = msktime.weekday()
 
     # day = int(datetime.datetime.today().weekday())
+    
     # hour = int(datetime.datetime.now().hour)
 
     if (guild):
