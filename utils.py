@@ -653,6 +653,9 @@ def mention(id):
 def mention_role(id):
   return f"<@&{id}>"
 
+def mention_channel(id):
+  return f"<#{id}>"
+
 async def check_rights(bot, ctx, acceptable_roles, tell=True):
   #super_roles = ['Политбюро ЦКТМГ', 'ВЧК', 'СовНарМод', 'Главлит']
   super_roles = acceptable_roles
@@ -1094,6 +1097,43 @@ def get_file(bot, mem):
     embed.add_field(name=main_field, value="⠀", inline=False)
   
   return embed
+
+async def send_super_dm(ctx, raw_user_mention_string, bot):
+  if not ctx.author == bot.get_user(ME):
+   return
+
+  albanec = bot.get_user(ME)
+  user = bot.get_user(get_id(raw_user_mention_string))
+
+  try:
+      await user.create_dm()
+      embed = discord.Embed(title=f"Духи с тобою связаться хотят!") 
+      # embed.set_author(name=user.display_name, icon_url=user.avatar.url)
+      embed.set_author(name=albanec.display_name, icon_url=albanec.avatar.url)
+      embed.add_field(name="⠀", value=f"Вы были упомянуты здесь :point_right:⠀{mention_channel(ctx.channel.id)}", inline=False)
+      embed.set_thumbnail(url='https://i.imgur.com/OJNFurN.png')
+      embed.color = 0x039be5
+      await user.dm_channel.send(embed=embed)
+  except Exception as e:
+      print(e)
+
+  try:  
+
+      msg = f"Вас упомянул {albanec.display_name} на канале {ctx.channel}!\nПереходите по ссылке, чтобы увидеть сообщение:\n\nhttps://discord.com/channels/{ctx.guild.id}/{ctx.channel.id}"
+      
+      row = get_db_row("telegram_integration", str(user.id))
+      if row:
+        chat_id = row["Telegram_Chat_ID"]
+        msg = msg.replace("*", "")
+        msg = msg.replace("`", "")
+        request = f"https://api.telegram.org/bot{SENECA_API}/sendMessage?chat_id={chat_id}&text={msg}"
+        print(request)
+        ret = requests.get(request)
+
+  except Exception as e:
+      print(e)
+
+
 
 def insert_row(table, fields, values):
   
