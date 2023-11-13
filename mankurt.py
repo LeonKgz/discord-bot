@@ -2,6 +2,7 @@
 # vim: set fileencoding=utf-8:
 # coding=utf-8
 
+
 import asyncio
 from business import Business
 import discord
@@ -385,9 +386,6 @@ async def nachalnik(ctx):
   await ctx.send(res)
   db.close()
 
-def is_me(m):
-  return True 
-
 @bot.command(name="clear")
 async def clear(ctx, num):
   if not await check_rights(ctx, ['Политбюро ЦКТМГ']):
@@ -438,6 +436,33 @@ async def free(ctx, lucky_guy):
       await mem.add_roles(proletariat)
       await mem.remove_roles(politzek)
 
+@bot.command(name='dm')
+async def send_super_dm(ctx, user, text):
+  if not ctx.author == bot.get_user(ME):
+   return
+
+  user = bot.get_user(ME)
+
+  try:
+      await user.create_dm()
+      await user.dm_channel.send("--------------------------------------------------------------------------\n*Сообщение от* **" + str(ctx.author.name) + "**!\n\n\t" + text + "\n\n[*Сообщения боту автоматически пересылаются Албанцу*]\n--------------------------------------------------------------------------")
+  except Exception as e:
+      print(e)
+
+  try:  
+      msg = "--------------------------------------------------------------------------\nСообщение от " + str(ctx.author.name) + "!\n\n\t" + text + "\n\n--------------------------------------------------------------------------"
+      row = get_db_row("telegram_integration", str(user.id))
+      if row:
+        chat_id = row["Telegram_Chat_ID"]
+        msg = msg.replace("*", "")
+        msg = msg.replace("`", "")
+        request = f"https://api.telegram.org/bot{SENECA_API}/sendMessage?chat_id={chat_id}&text={msg}"
+        print(request)
+        ret = requests.get(request)
+
+  except Exception as e:
+      print(e)
+
 @bot.command(
   name='рассылка',
   brief='Рассылка в лс по роли',
@@ -451,6 +476,7 @@ async def mems(ctx, role, text):
 
   send_to = get_id(role)
   for r in ctx.guild.roles:
+
     if (r.id == send_to):
       for member in r.members:
         try:  
