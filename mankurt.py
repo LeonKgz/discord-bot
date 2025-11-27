@@ -5,6 +5,7 @@
 
 import asyncio
 from business import Business
+from donos import Donos
 import discord
 from discord.ext import commands
 from discord.utils import get as du_get
@@ -31,14 +32,18 @@ bot = commands.Bot(intents=intents, command_prefix=["!", "！"])
 
 @bot.event
 async def on_ready():
-  print(f'{bot.user.name} has connected to Discord!')
-  await status_update(bot)
-  await bot.add_cog(Status(bot))
-  await bot.add_cog(Loops(bot))
-  await bot.add_cog(Static(bot))
-  await bot.add_cog(Zettel(bot))
-  await bot.add_cog(Business(bot))
-  await bot.add_cog(Heatmap(bot))
+  try:
+    print(f'{bot.user.name} has connected to Discord!')
+    await status_update(bot)
+    await bot.add_cog(Status(bot))
+    await bot.add_cog(Loops(bot))
+    await bot.add_cog(Static(bot))
+    await bot.add_cog(Zettel(bot))
+    await bot.add_cog(Business(bot))
+    await bot.add_cog(Heatmap(bot))
+    await bot.add_cog(Donos(bot))
+  except Exception as e:
+    print(e)
   # bot.add_cog(Health(bot))
 
 
@@ -1250,7 +1255,7 @@ async def check_japanese(ctx):
   try:
     # Trying to connect to the AnkiConnect endpoint, for now only work locally
     response = json.load(urllib.request.urlopen(urllib.request.Request('http://localhost:8765', json.dumps({}).encode('utf-8'))))
-    bot.add_cog(nihon)
+    await bot.add_cog(nihon)
     await ctx.send("Local Nihon Cog is connected!")
   except Exception as e:
     bot.remove_cog(nihon)
