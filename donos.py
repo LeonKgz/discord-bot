@@ -142,7 +142,7 @@ class Donos(commands.Cog):
         }
 
 
-        ch = get_channel_by_name(bot, "гласность", 'Russian')
+        ch = get_channel_by_name(self.bot, "гласность", 'Russian')
         user = self.bot.get_user(row["Target"])
         await ch.send(f"Модераторы рассмотрели донос на гражданина <@!{user.id}>!\n\n\t\t Дело рассмотрено по статье: *{wording1[priority]} — {wording2[priority]}*\n\n\t\t*Материалы дела* — {evidence}\n\n----------------------------------------------------------------------")
 
@@ -265,3 +265,6 @@ class Donos(commands.Cog):
     else:
       await ctx.send(f"<@!{ctx.author.id}>, такого доноса нет!")
       return
+
+# def setup(bot):
+  # bot.add_cog(Donos(bot))
