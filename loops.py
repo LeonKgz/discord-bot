@@ -255,6 +255,7 @@ class Loops(commands.Cog):
           await sovok.dm_channel.send(f"Товарищ Народный Модератор! Вот ваша квота **описаний** за прошедшие сутки: \n\n\t{quotes}")
 
     # if (guild and msk_day == 0 and msk_hour == 0):
+
     if (guild and hour == 0 and weekday == 0):
 
       super_roles = ['Политбюро ЦКТМГ', 'NPC can\'t meme']
@@ -324,28 +325,33 @@ class Loops(commands.Cog):
     guild = self.bot.get_guild(GUILD) 
     
     hour = int(datetime.datetime.now().hour)
-
+    
     if (guild and hour == 9):
 
-      proletariat = discord.utils.get(guild.roles, name='Пролетарий')
-      npc = discord.utils.get(guild.roles, name='NPC can\'t meme')
+      rows = get_all_rows("confessions")
+      row = rows[random.randint(0, len(rows) - 1)]
+      name = row["Name"]
+      confession = row["Confession"]
 
-      ps = proletariat.members 
-      ns = npc.members
-      ps = [p for p in ps if p not in ns]
+      # proletariat = discord.utils.get(guild.roles, name='Пролетарий')
+      # npc = discord.utils.get(guild.roles, name='NPC can\'t meme')
 
-      bl = [351749038497988621, 249503118885257216, 486137719647633408, 376990474466099201, 355781240479023115, 347757889210810369]
+      # ps = proletariat.members 
+      # ns = npc.members
+      # ps = [p for p in ps if p not in ns]
 
-      ps = [item for item in ps if item.id not in bl]      
-      m = ps[random.randint(0, len(ps) - 1)]
+      # bl = [351749038497988621, 249503118885257216, 486137719647633408, 376990474466099201, 355781240479023115, 347757889210810369]
+
+      # ps = [item for item in ps if item.id not in bl]      
+      # m = ps[random.randint(0, len(ps) - 1)]
       
       ch = get_channel_by_name(self.bot, "погран-застава", "Russian")
-      row = get_db_row("confessions", m.id)
+      # row = get_db_row("confessions", m.id)
 
-      if row:
-        confession = row["Confession"]
-        res = f"Товарищи! А знали ли вы что-нибудь о {m.name}? Вот что {m.name} говорит о себе: \n\n\t*{confession}*\n\nНе забывайте, что можно обновить своё описание (« **!рассказать** ») максимум один раз в 7 дней."
-        await ch.send(res)
+      # if row:
+        # confession = row["Confession"]
+      res = f"Товарищи! А знали ли вы что-нибудь о {name}? Вот что {name} говорит о себе: \n\n\t*{confession}*\n\nНе забывайте, что можно обновить своё описание (« **!рассказать** ») максимум один раз в 7 дней."
+      await ch.send(res)
  
   @tasks.loop(seconds=HOUR)
   async def deaths(self):
