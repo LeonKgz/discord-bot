@@ -22,12 +22,8 @@ from elevenlabs import generate, voices, set_api_key
 set_api_key('c173cd93acabc779a73edbb2755573de')
 
 
-# from elevenlabs.client import ElevenLabs
-
 import random
 from googletrans import Translator
-
-# down= "/mnt/c/Users/Халметов Юрий/Downloads/"
 
 class Nihon(commands.Cog):
 
@@ -48,53 +44,6 @@ class Nihon(commands.Cog):
       if name in ch.name:
         return ch
     return False
-
-  # @commands.command(name='on')
-  # async def on(self, ctx: commands.Context, number):
-
-  @commands.command(name="kanji")
-  async def kanji(self, ctx: commands.Context, *, args=None):
-
-      if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
-        return
-      name = ctx.author.name
-      iid = ctx.author.id
-      confession = str(args)
-      confession = confession.strip()
-      kanjis = confession.split()
-      for kanji in kanjis:
-        on, kun, meanings = get_kanji_info(kanji)
-        note = {
-              # "deckName": "__________Kanji",
-              "deckName": "N5 Kanji",
-              "modelName": "Основная",
-              # "modelName": "Основная (+ обратные карточки)",
-              "fields": {
-                "вопрос": f"{kanji}",
-                "ответ": f"{on}<br><br>{kun}<br><br>{meanings}"
-              },
-              "options": {
-                  "allowDuplicate": False,
-                  "duplicateScope": "deck",
-              },
-              "tags": [],
-          }
-
-        success = False
-        errmsg = ""
-        try:
-          invoke('addNote', note=note)
-          success = True
-        except Exception as e:
-          errmsg = f"{e}"
-
-        if not success:
-          ret = f"There was an error with {kanji}! ` {errmsg} `"
-          await ctx.send(ret)
-
-      await ctx.send("Processsing of new kanji is finished! Anki updated. Don't forget to synchronize!")
-
-  #####################################################################################################################################
 
   # create webdriver object
   def process_word(self, phrase, timerr, default_filename=False, add_particle=False):
@@ -134,8 +83,6 @@ class Nihon(commands.Cog):
       submit_button = submit_wrapper.find_element(By.CLASS_NAME, "submit")
       element.send_keys((phrase + "は") if add_particle else phrase)
 
-      #print(submit_button.rect)
-
       action = ActionChains(driver)
       driver.execute_script("window.scrollTo(0,200)")
       action.move_to_element(submit_button)
@@ -146,7 +93,6 @@ class Nihon(commands.Cog):
       driver.execute_script("window.scrollTo(0,700)")
 
       phrase = driver.find_element(By.ID, "phrasing_main")
-      # phrase = driver.find_element(By.CLASS_NAME,"phrasing_phrase_wrapper")
 
       phrase.screenshot(png_dir)
       driver.implicitly_wait(1)
@@ -192,9 +138,6 @@ class Nihon(commands.Cog):
     # if not default_filename:
     #   os.remove(png_dir)
     #   os.remove(wav_dir)
-  
-  def get_hash_filename(self, phrase):
-    pass
 
   # create webdriver object
   def process_words(self, phrases, timerr, default_filename=False, add_particle=False): 
@@ -508,89 +451,6 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new names is finished! Anki updated. Don't forget to synchronize!")
 
-  # @commands.command(name="grammar")
-  # async def grammar(self, ctx: commands.Context, *, args=None):
-
-  #     if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
-  #       return
-
-  #     confession = str(args)
-  #     confession = confession.strip()
-  #     ss = [s.strip() for s in confession.split("\n")]
-  #     single = ss[0] == 's'
-
-  #     for s in ss:
-  #       original = s.split("(")[0].strip()
-  #       interpret = s.split("(")[1].split(")")[0].strip()
-
-  #       ####################################
-
-
-  #       succ = False
-  #       curr_timer = 5
-  #       while not succ:
-  #         try:
-  #           self.process_word(original, curr_timer, default_filename=True)
-  #           succ = True
-  #         except Exception as e:
-  #           print(e)
-  #           curr_timer += 3
-  #       ####################################
-
-  #       self.get_voice_from_eleven(interpret, 'en_')
-  #       note = {
-  #             # "deckName": "__________Bunpou",
-  #             "deckName": "日本語::N5 Bunpou",
-  #             "modelName": "Основная",
-  #             # "modelName": "Основная (+ обратные карточки)" if not single else "Основная",
-  #             "fields": {
-  #               "вопрос": f"{original}<br><img src=\"{self.get_legit_file_name(interpret)}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(interpret)}_IN_JAPANESE.wav]",
-  #               # "ответ": interpret,
-  #               "ответ": f"{interpret}<br><br>[sound:{self.get_legit_file_name(interpret)}.wav]",
-  #             },
-  #             "options": {
-  #                 "allowDuplicate": False,
-  #                 "duplicateScope": "deck",
-  #             },
-  #             "tags": [],
-  #             "audio": [{
-  #                 "filename": f"{self.get_legit_file_name(interpret)}_IN_JAPANESE.wav",
-  #                 "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\wav.wav",
-  #                 "fields": [
-  #                     "ответ"
-  #                 ]
-  #             },
-  #             {
-  #                 "filename": f"{self.get_legit_file_name(interpret)}.wav",
-  #                 "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\en_wav.wav",
-  #                 "fields": [
-  #                     "ответ"
-  #                 ]
-  #               }
-  #             ],
-  #             "picture": [{
-  #                 "filename": f"{self.get_legit_file_name(interpret)}_IN_JAPANESE.png",
-  #                 "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\png.png",
-  #                 "fields": [
-  #                     "ответ"
-  #                 ]
-  #             }],
-  #         }
-
-  #       success = False
-  #       errmsg = ""
-  #       try:
-  #         invoke('addNote', note=note)
-  #         success = True
-  #       except Exception as e:
-  #         errmsg = f"{e}"
-
-  #       if not success:
-  #         ret = f"There was an error with {s}! ` {errmsg} `"
-  #         await ctx.send(ret)
-
-  #     await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
-
   @commands.command(name="ngrammar")
   async def grammar(self, ctx: commands.Context, *, args=None):
 
@@ -796,7 +656,6 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
 
-
   def get_img_src(self, word):
     try:
       query = f"\"deck:Nihon::Words (Listen)\" w:{word}"
@@ -813,7 +672,7 @@ class Nihon(commands.Cog):
       return "image_source_not_found"
 
   @commands.command(name="nwords")
-  async def nwords_improved(self, ctx: commands.Context, *, args=None):
+  async def nwords(self, ctx: commands.Context, *, args=None):
 
       if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
         return
@@ -929,9 +788,8 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
 
-
   @commands.command(name="ewords")
-  async def grammarwords(self, ctx: commands.Context, *, args=None):
+  async def ewords(self, ctx: commands.Context, *, args=None):
 
       if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
         return
@@ -983,8 +841,8 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
 
-  @commands.command(name="nwordsdeprec")
-  async def grammarwords_improved(self, ctx: commands.Context, *, args=None):
+  @commands.command(name="ephrase")
+  async def ephrase(self, ctx: commands.Context, *, args=None):
 
       if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
         return
@@ -994,110 +852,51 @@ class Nihon(commands.Cog):
       ss = [s.strip() for s in confession.split("\n")]
       single = ss[0] == 's'
 
-      phrases_to_process = []
-
       for s in ss:
-        all = s.split("\\")
-        single_word = all[0].strip()
-        full = all[1].strip()
-        phrases_to_process.append(full)
+        original = s.split("\\")[1].strip()
+        question = s.split("\\")[0].strip()
 
-      ####################################
+        ####################################
 
-      succ = False
-      curr_timer = 5
-      while not succ:
-        try:
-          self.process_words(phrases_to_process, curr_timer, default_filename=True)
-          succ = True
-        except Exception as e:
-          print(e)
-          curr_timer += 3
-      ####################################
-          
-      i = 0
-      for s in ss:
-
-        i += 1
-
-        all = s.split("\\")
-        single_word = all[0].strip()
-        full = all[1].strip()
-
-        to_replace = all[2].strip()
-        back_text = full.replace(to_replace, f"<u>{to_replace}</u>")
-        hint = self.get_img_src(single_word)
-        front = full.replace(to_replace, "＿＿＿")
-            
-        random_code = random.randrange(1000000000000)
-        note = {
-              "deckName": "Nihon::Words (Enter)",
-              "modelName": "Основная",
-              "fields": {
-                "вопрос": f"{front}<br><br><br>{hint}",
-                "ответ": f"{back_text}<br><img src=\"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav]",
-
-              },
-              "options": {
-                  "allowDuplicate": False,
-                  "duplicateScope": "deck",
-              },
-              "tags": [],
-              "audio": [{
-                  "filename": f"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav",
-                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\{i}.wav",
-                  # "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\wav.wav",
-                  "fields": [
-                      "ответ"
-                  ]
-              }],
-              "picture": [{
-                  "filename": f"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.png",
-                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\{i}.png",
-                  # "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\png.png",
-                  "fields": [
-                      "ответ"
-                  ]
-              }],
-          }
+        self.get_voice_from_eleven(original, 'en_')
         
-        note_pronounce = {
-              "deckName": "Nihon::Sentences (Say)",
+        ####################################
+        note = {
+              "deckName": "English::Phrases",
               "modelName": "Основная",
               "fields": {
-                "вопрос": f"{full}<br>",
-                "ответ": f"{full}<br><img src=\"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav]",
-
+                "ответ": f"{original}<br><br>[sound:{self.get_legit_file_name(original)}.wav]",
+                "вопрос": f"{question}",
               },
               "options": {
                   "allowDuplicate": False,
                   "duplicateScope": "deck",
               },
               "tags": [],
+              "audio": [
+                {
+                  "filename": f"{self.get_legit_file_name(original)}.wav",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\de_wav.wav",
+                  "fields": [
+                      "вопрос"
+                  ]
+                }
+              ],
           }
 
         success = False
         errmsg = ""
-
         try:
           invoke('addNote', note=note)
           success = True
         except Exception as e:
           errmsg = f"{e}"
 
-        try:
-          invoke('addNote', note=note_pronounce)
-          success = True
-        except Exception as e:
-          errmsg = f"{e}"
-
-
         if not success:
           ret = f"There was an error with {s}! ` {errmsg} `"
           await ctx.send(ret)
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
-
 
   def get_legit_file_name(self, original):
     ret = original.replace(".", "_dot_").replace("?", "_question_").replace("!", "_exclamation_").replace(",", "_comma_").replace("\"", "_quotation_").replace("'", "_apostrophe_")
@@ -1126,7 +925,6 @@ class Nihon(commands.Cog):
       print("WRITIN!")
       f.write(audio)
 
-
   @commands.command(name="gphrase")
   async def gphrase(self, ctx: commands.Context, *, args=None):
 
@@ -1141,16 +939,12 @@ class Nihon(commands.Cog):
       for s in ss:
         original = s.split("\\")[1].strip()
         question = s.split("\\")[0].strip()
-        # question = original.replace(to_replace, "____")
-        # interpret = s.split("(")[1].split(")")[0].strip()
 
         ####################################
 
         self.get_voice_from_eleven(original, 'de_')
-        # self.get_voice_from_eleven(interpret, 'en_')
         
         ####################################
-        # mnemonic = f"<br><br>{mnemonic}" if mnemonic else ""
         note = {
               # "deckName": "__________Bunpou",
               "deckName": "German::Phrases",
@@ -1172,13 +966,6 @@ class Nihon(commands.Cog):
                       "вопрос"
                   ]
                 }
-                # {
-                #   "filename": f"{self.get_legit_file_name(interpret)}.wav",
-                #   "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\en_wav.wav",
-                #   "fields": [
-                #       "ответ"
-                #   ]
-                # },
               ],
           }
 
@@ -1195,8 +982,6 @@ class Nihon(commands.Cog):
           await ctx.send(ret)
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
-
-
 
   @commands.command(name="ggrammar")
   async def ggrammar(self, ctx: commands.Context, *, args=None):
@@ -1342,7 +1127,6 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new words is finished! Anki updated. Don't forget to synchronize!")
 
-  
   @commands.command(name='get')
   async def download_link(self, ctx: commands.Context, *, args=None):
     if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
@@ -1384,3 +1168,122 @@ class Nihon(commands.Cog):
 
 def setup(bot):
   bot.add_cog(Nihon(bot))
+
+
+
+
+  # @commands.command(name="nwordsdeprec")
+  # async def grammarwords_improved(self, ctx: commands.Context, *, args=None):
+
+  #     if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
+  #       return
+
+  #     confession = str(args)
+  #     confession = confession.strip()
+  #     ss = [s.strip() for s in confession.split("\n")]
+  #     single = ss[0] == 's'
+
+  #     phrases_to_process = []
+
+  #     for s in ss:
+  #       all = s.split("\\")
+  #       single_word = all[0].strip()
+  #       full = all[1].strip()
+  #       phrases_to_process.append(full)
+
+  #     ####################################
+
+  #     succ = False
+  #     curr_timer = 5
+  #     while not succ:
+  #       try:
+  #         self.process_words(phrases_to_process, curr_timer, default_filename=True)
+  #         succ = True
+  #       except Exception as e:
+  #         print(e)
+  #         curr_timer += 3
+  #     ####################################
+          
+  #     i = 0
+  #     for s in ss:
+
+  #       i += 1
+
+  #       all = s.split("\\")
+  #       single_word = all[0].strip()
+  #       full = all[1].strip()
+
+  #       to_replace = all[2].strip()
+  #       back_text = full.replace(to_replace, f"<u>{to_replace}</u>")
+  #       hint = self.get_img_src(single_word)
+  #       front = full.replace(to_replace, "＿＿＿")
+            
+  #       random_code = random.randrange(1000000000000)
+  #       note = {
+  #             "deckName": "Nihon::Words (Enter)",
+  #             "modelName": "Основная",
+  #             "fields": {
+  #               "вопрос": f"{front}<br><br><br>{hint}",
+  #               "ответ": f"{back_text}<br><img src=\"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav]",
+
+  #             },
+  #             "options": {
+  #                 "allowDuplicate": False,
+  #                 "duplicateScope": "deck",
+  #             },
+  #             "tags": [],
+  #             "audio": [{
+  #                 "filename": f"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav",
+  #                 "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\{i}.wav",
+  #                 # "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\wav.wav",
+  #                 "fields": [
+  #                     "ответ"
+  #                 ]
+  #             }],
+  #             "picture": [{
+  #                 "filename": f"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.png",
+  #                 "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\{i}.png",
+  #                 # "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\png.png",
+  #                 "fields": [
+  #                     "ответ"
+  #                 ]
+  #             }],
+  #         }
+        
+  #       note_pronounce = {
+  #             "deckName": "Nihon::Sentences (Say)",
+  #             "modelName": "Основная",
+  #             "fields": {
+  #               "вопрос": f"{full}<br>",
+  #               "ответ": f"{full}<br><img src=\"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav]",
+
+  #             },
+  #             "options": {
+  #                 "allowDuplicate": False,
+  #                 "duplicateScope": "deck",
+  #             },
+  #             "tags": [],
+  #         }
+
+  #       success = False
+  #       errmsg = ""
+
+  #       try:
+  #         invoke('addNote', note=note)
+  #         success = True
+  #       except Exception as e:
+  #         errmsg = f"{e}"
+
+  #       try:
+  #         invoke('addNote', note=note_pronounce)
+  #         success = True
+  #       except Exception as e:
+  #         errmsg = f"{e}"
+
+
+  #       if not success:
+  #         ret = f"There was an error with {s}! ` {errmsg} `"
+  #         await ctx.send(ret)
+
+  #     await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
+
