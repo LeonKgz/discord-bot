@@ -1127,6 +1127,84 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new words is finished! Anki updated. Don't forget to synchronize!")
 
+  @commands.command(name="knewwords")
+  async def knewwords(self, ctx: commands.Context, *, args=None):
+      if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
+        return
+
+      confession = str(args)
+      confession = confession.strip()
+      ss = [s.strip() for s in confession.split("\n")]
+      single = ss[0] == 's'
+
+      for s in ss:
+        all = s.split("\\")
+
+        word = all[0].strip()
+        audio = all[1].strip()
+        image = all[2].strip()
+        translation = all[3].strip()
+
+        notes = [
+          {
+              "deckName": "Кыргызча::Words (Image)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{image}",
+                "ответ": f"{audio}<br><br>{word}<br><br>{translation}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
+          },
+          {
+              "deckName": "Кыргызча::Words (Listen)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{audio}",
+                "ответ": f"{image}<br><br>{word}<br><br>{translation}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
+          },
+          {
+              "deckName": "Кыргызча::Words (Read)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{word}",
+                "ответ": f"{audio}<br><br>{image}<br><br>{translation}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
+          },
+        ]
+        
+        success = False
+        errmsg = ""
+
+        try:
+          invoke('addNotes', note=notes)
+          success = True
+        except Exception as e:
+          errmsg = f"{e}"
+
+
+        if not success:
+          ret = f"There was an error with {s}! ` {errmsg} `"
+          await ctx.send(ret)
+
+      await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
+
+
+
   @commands.command(name='get')
   async def download_link(self, ctx: commands.Context, *, args=None):
     if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
