@@ -1151,7 +1151,7 @@ class Nihon(commands.Cog):
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{image}",
-                "ответ": f"{audio}<br><br>{word}<br><br>{translation}",
+                "ответ": f"{audio}<br><br>{word}<br><br><details><summary></summary><p>{translation}</p></details>",
               },
               "options": {
                   "allowDuplicate": False,
@@ -1164,7 +1164,7 @@ class Nihon(commands.Cog):
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{audio}",
-                "ответ": f"{image}<br><br>{word}<br><br>{translation}",
+                "ответ": f"{image}<br><br>{word}<br><br><details><summary></summary><p>{translation}</p></details>",
               },
               "options": {
                   "allowDuplicate": False,
@@ -1177,7 +1177,7 @@ class Nihon(commands.Cog):
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{word}",
-                "ответ": f"{audio}<br><br>{image}<br><br>{translation}",
+                "ответ": f"{audio}<br><br>{image}<br><br><details><summary></summary><p>{translation}</p></details>",
               },
               "options": {
                   "allowDuplicate": False,
