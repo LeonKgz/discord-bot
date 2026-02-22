@@ -46,10 +46,10 @@ class Nihon(commands.Cog):
     return False
 
   # create webdriver object
-  def process_word(self, phrase, timerr, default_filename=False, add_particle=False):
+  def process_word(self, phrase, timerr, default_filename=False, custom_filename=None, add_particle=False):
 
-    png_dir = f"./pngs/{phrase}.png" if not default_filename else "./pngs/png.png"
-    wav_dir = f"./wavs/{phrase}.wav" if not default_filename else "./wavs/wav.wav"
+    png_dir = f"./pngs/{phrase}.png" if not default_filename else ("./pngs/png.png" if not custom_filename else "./pngs/{custom_filename}.png")
+    wav_dir = f"./wavs/{phrase}.wav" if not default_filename else ("./wavs/wav.wav" if not custom_filename else "./wavs/{custom_filename}.wav")
 
     # remove all sound files in download directory first
     for file in os.listdir(down):
@@ -452,7 +452,7 @@ class Nihon(commands.Cog):
       await ctx.send("Processsing of new names is finished! Anki updated. Don't forget to synchronize!")
 
   @commands.command(name="ngrammar")
-  async def grammar(self, ctx: commands.Context, *, args=None):
+  async def ngrammar(self, ctx: commands.Context, *, args=None):
 
       if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
         return
@@ -475,7 +475,6 @@ class Nihon(commands.Cog):
         # interpret = s.split("(")[1].split(")")[0].strip()
 
         ####################################
-
 
         succ = False
         curr_timer = 5
@@ -537,16 +536,26 @@ class Nihon(commands.Cog):
               "tags": [],
           }
 
+        note_listen = {
+              "deckName": "Nihon::Sentences (Listen)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"[sound:{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav]",
+                "ответ": f"{full}<br><img src=\"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.png\"><br><br>",
+
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": [],
+          }
+
         success = False
         errmsg = ""
-        try:
-          invoke('addNote', note=note)
-          success = True
-        except Exception as e:
-          errmsg = f"{e}"
 
         try:
-          invoke('addNote', note=note_pronounce)
+          invoke('addNotes', notes=[note, note_pronounce, note_listen])
           success = True
         except Exception as e:
           errmsg = f"{e}"
@@ -558,7 +567,7 @@ class Nihon(commands.Cog):
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
 
   @commands.command(name="nphrase")
-  async def grammar(self, ctx: commands.Context, *, args=None):
+  async def nphrase(self, ctx: commands.Context, *, args=None):
 
       if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
         return
@@ -636,16 +645,24 @@ class Nihon(commands.Cog):
               "tags": [],
           }
 
+        note_listen = {
+              "deckName": "Nihon::Sentences (Listen)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"[sound:{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav]",
+                "ответ": f"{full}<br><img src=\"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.png\">",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": [],
+          }
+
         success = False
         errmsg = ""
         try:
-          invoke('addNote', note=note)
-          success = True
-        except Exception as e:
-          errmsg = f"{e}"
-
-        try:
-          invoke('addNote', note=note_pronounce)
+          invoke('addNotes', notes=[note, note_pronounce, note_listen])
           success = True
         except Exception as e:
           errmsg = f"{e}"
@@ -655,6 +672,120 @@ class Nihon(commands.Cog):
           await ctx.send(ret)
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
+
+  @commands.command(name="ngrammara")
+  async def ngrammara(self, ctx: commands.Context, *, args=None):
+
+      if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
+        return
+
+      confession = str(args)
+      confession = confession.strip()
+      ss = [s.strip() for s in confession.split("\n")]
+      single = ss[0] == 's'
+
+      for s in ss:
+        all = s.split("\\")
+
+        front = all[0].strip()
+        back = all[1].strip()
+
+        ####################################
+
+        succ = False
+        curr_timer = 5
+        while not succ:
+          try:
+            self.process_word(back, curr_timer, default_filename=True, custom_filename="back")
+            self.process_word(front, curr_timer, default_filename=True, custom_filename="front")
+            succ = True
+          except Exception as e:
+            print(e)
+            curr_timer += 3
+        ####################################
+
+        # self.get_voice_from_eleven(interpret, 'en_')
+        random_code = random.randrange(1000000000000)
+        note = {
+              "deckName": "Nihon::Grammar (Listen)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"[sound:{self.get_legit_file_name(front)}_{random_code}_IN_JAPANESE.wav]",
+                "ответ": f"{back}<br><img src=\"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav]",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": [],
+              "audio": [
+                {
+                  "filename": f"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\wav.wav",
+                  "fields": [
+                      "ответ"
+                  ]
+                },
+                {
+                  "filename": f"{self.get_legit_file_name(front)}_{random_code}_IN_JAPANESE.wav",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\wav.wav",
+                  "fields": [
+                      "ответ"
+                  ]
+                },
+              ],
+              "picture": [{
+                  "filename": f"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\png.png",
+                  "fields": [
+                      "ответ"
+                  ]
+              }],
+          }
+
+        note_pronounce = {
+              "deckName": "Nihon::Sentences (Say)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{full}<br>",
+                "ответ": f"{full}<br><img src=\"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav]",
+
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": [],
+          }
+
+        note_listen = {
+              "deckName": "Nihon::Sentences (Listen)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"[sound:{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav]",
+                "ответ": f"{full}<br><img src=\"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png\">",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": [],
+          }
+
+        success = False
+        errmsg = ""
+        try:
+          invoke('addNotes', notes=[note, note_pronounce, note_listen])
+          success = True
+        except Exception as e:
+          errmsg = f"{e}"
+
+        if not success:
+          ret = f"There was an error with {s}! ` {errmsg} `"
+          await ctx.send(ret)
+
+      await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
+
 
   def get_img_src(self, word):
     try:
@@ -766,21 +897,30 @@ class Nihon(commands.Cog):
               "tags": [],
           }
 
+        note_listen = {
+              # "deckName": "__________Bunpou",
+              "deckName": "Nihon::Sentences (Listen)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"[sound:{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav]",
+                "ответ": f"{full}<br><img src=\"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.png\">",
+
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": [],
+          }
+
         success = False
         errmsg = ""
 
         try:
-          invoke('addNote', note=note)
+          invoke('addNotes', notes=[note, note_pronounce, note_listen])
           success = True
         except Exception as e:
           errmsg = f"{e}"
-
-        try:
-          invoke('addNote', note=note_pronounce)
-          success = True
-        except Exception as e:
-          errmsg = f"{e}"
-
 
         if not success:
           ret = f"There was an error with {s}! ` {errmsg} `"
@@ -969,10 +1109,35 @@ class Nihon(commands.Cog):
               ],
           }
 
+        note_listen = {
+              # "deckName": "__________Bunpou",
+              "deckName": "German::Sentences (Listen)",
+              "modelName": "Основная",
+              "fields": {
+                "ответ": f"{original}",
+                "вопрос": f"[sound:{self.get_legit_file_name(original)}.wav]",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": [],
+              "audio": [
+                {
+                  "filename": f"{self.get_legit_file_name(original)}.wav",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\de_wav.wav",
+                  "fields": [
+                      "вопрос"
+                  ]
+                }
+              ],
+          }
+
+
         success = False
         errmsg = ""
         try:
-          invoke('addNote', note=note)
+          invoke('addNotes', notes=[note, note_listen])
           success = True
         except Exception as e:
           errmsg = f"{e}"
@@ -1039,10 +1204,41 @@ class Nihon(commands.Cog):
               ],
           }
 
+        note_listen = {
+              # "deckName": "__________Bunpou",
+              "deckName": "German::Sentences (Listen)",
+              "modelName": "Основная",
+              "fields": {
+                "ответ": f"{original}",
+                "вопрос": f"[sound:{self.get_legit_file_name(original)}.wav]",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": [],
+              "audio": [
+                {
+                  "filename": f"{self.get_legit_file_name(original)}.wav",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\de_wav.wav",
+                  "fields": [
+                      "вопрос"
+                  ]
+                }
+                # {
+                #   "filename": f"{self.get_legit_file_name(interpret)}.wav",
+                #   "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\en_wav.wav",
+                #   "fields": [
+                #       "ответ"
+                #   ]
+                # },
+              ],
+        }
+
         success = False
         errmsg = ""
         try:
-          invoke('addNote', note=note)
+          invoke('addNotes', notes=[note, note_listen])
           success = True
         except Exception as e:
           errmsg = f"{e}"
@@ -1249,7 +1445,6 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
 
-
   @commands.command(name="kpronounce")
   async def kpronounce(self, ctx: commands.Context, *, args=None):
       if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
@@ -1296,7 +1491,6 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
 
-
   @commands.command(name="kphrases")
   async def kphrases(self, ctx: commands.Context, *, args=None):
       if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
@@ -1342,8 +1536,6 @@ class Nihon(commands.Cog):
           await ctx.send(ret)
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
-
-
 
   @commands.command(name='get')
   async def download_link(self, ctx: commands.Context, *, args=None):
