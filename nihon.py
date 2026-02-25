@@ -1172,7 +1172,7 @@ class Nihon(commands.Cog):
         # self.get_voice_from_eleven(interpret, 'en_')
         
         ####################################
-        mnemonic = f"<br><br>{mnemonic}" if mnemonic else ""
+        # mnemonic = f"<br><br>{mnemonic}" if mnemonic else ""
         note = {
               # "deckName": "__________Bunpou",
               "deckName": "German::Grammar",
