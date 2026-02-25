@@ -1162,8 +1162,8 @@ class Nihon(commands.Cog):
       for s in ss:
         original = s.split("\\")[0].strip()
         to_replace = s.split("\\")[1].strip()
-        mnemonic = s.split("\\")[2].strip()
-        question = original.replace(to_replace, "____")
+        # mnemonic = s.split("\\")[2].strip()
+        # question = original.replace(to_replace, "____")
         # interpret = s.split("(")[1].split(")")[0].strip()
 
         ####################################
@@ -1179,7 +1179,8 @@ class Nihon(commands.Cog):
               "modelName": "Основная",
               "fields": {
                 "ответ": f"{original}<br><br>[sound:{self.get_legit_file_name(original)}.wav]",
-                "вопрос": f"{question}{mnemonic}",
+                "вопрос": f"{to_replace}",
+                # "вопрос": f"{question}{mnemonic}",
               },
               "options": {
                   "allowDuplicate": False,
