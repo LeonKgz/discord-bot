@@ -495,7 +495,7 @@ class Nihon(commands.Cog):
               "modelName": "Основная",
               # "modelName": "Основная (+ обратные карточки)" if not single else "Основная",
               "fields": {
-                "вопрос": f"{front}<br>\t({hint})",
+                "вопрос": f"{front}<br><details><summary></summary><p>{hint}</p></details>",
                 # "ответ": interpret,
                 # "ответ": f"{full}<br><br>[sound:{self.get_legit_file_name(full)}.wav]",
                 "ответ": f"{back_text}<br><img src=\"{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav]",
