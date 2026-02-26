@@ -1111,7 +1111,7 @@ class Nihon(commands.Cog):
 
         note_listen = {
               # "deckName": "__________Bunpou",
-              "deckName": "German::Sentences (Listen)",
+              "deckName": "German::Sentences::Listen",
               "modelName": "Основная",
               "fields": {
                 "ответ": f"{original}",
@@ -1207,7 +1207,7 @@ class Nihon(commands.Cog):
 
         note_listen = {
               # "deckName": "__________Bunpou",
-              "deckName": "German::Sentences (Listen)",
+              "deckName": "German::Sentences::Listen",
               "modelName": "Основная",
               "fields": {
                 "ответ": f"{original}",
