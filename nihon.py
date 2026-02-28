@@ -1372,6 +1372,19 @@ class Nihon(commands.Cog):
                   "duplicateScope": "deck",
               },
               "tags": []
+          },
+          {
+              "deckName": "Кыргызча::Sentences::Listen",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{audio}",
+                "ответ": f"{original}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
           }
         ]
         
@@ -1509,6 +1522,19 @@ class Nihon(commands.Cog):
                   "duplicateScope": "deck",
               },
               "tags": []
+          } ,
+          {
+              "deckName": "Кыргызча::Sentences::Listen",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{audio}",
+                "ответ": f"{sentence}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
           }
         ]
         success = False
@@ -1516,52 +1542,6 @@ class Nihon(commands.Cog):
 
         try:
           invoke('addNotes', notes=notes)
-          success = True
-        except Exception as e:
-          errmsg = f"{e}"
-
-
-        if not success:
-          ret = f"There was an error with {s}! ` {errmsg} `"
-          await ctx.send(ret)
-
-      await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
-
-  @commands.command(name="kpronounce")
-  async def kpronounce(self, ctx: commands.Context, *, args=None):
-      if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
-        return
-
-      confession = str(args)
-      confession = confession.strip()
-      ss = [s.strip() for s in confession.split("\n")]
-      single = ss[0] == 's'
-
-      for s in ss:
-        all = s.split("\\")
-
-        sentence = all[0].strip().replace("-", "<br><br>-")
-        audio = all[1].strip()
-
-        note = {
-              "deckName": "Кыргызча::Sentences::Pronounce",
-              "modelName": "Основная",
-              "fields": {
-                "вопрос": f"{sentence}",
-                "ответ": f"{audio}",
-              },
-              "options": {
-                  "allowDuplicate": False,
-                  "duplicateScope": "deck",
-              },
-              "tags": []
-        }
-        
-        success = False
-        errmsg = ""
-
-        try:
-          invoke('addNote', note=note)
           success = True
         except Exception as e:
           errmsg = f"{e}"
@@ -1609,6 +1589,19 @@ class Nihon(commands.Cog):
               "fields": {
                 "вопрос": f"{phrase}",
                 "ответ": f"{audio}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
+          },
+          {
+              "deckName": "Кыргызча::Sentences::Listen",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{audio}",
+                "ответ": f"{phrase}",
               },
               "options": {
                   "allowDuplicate": False,
