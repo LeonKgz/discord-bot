@@ -787,9 +787,9 @@ class Nihon(commands.Cog):
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
 
 
-  def get_img_src(self, word):
+  def get_img_src(self, word, deck_to_search):
     try:
-      query = f"\"deck:Nihon::Words (Listen)\" w:{word}"
+      query = f"\"deck:{deck_to_search}\" w:{word}"
       notes = invoke('findNotes', query=query)
 
       notesInfo = invoke('notesInfo', notes=notes)
@@ -823,7 +823,7 @@ class Nihon(commands.Cog):
 
         # hint = all[2]
         # hint = "<img src=\"5ad982870b7504e7d6733b120bebaa93_t.jpeg\">"
-        hint = self.get_img_src(single_word)
+        hint = self.get_img_src(single_word, "Nihon::Words::Listen")
 
         front = full.replace(to_replace, "＿＿＿")
 
@@ -1323,6 +1323,87 @@ class Nihon(commands.Cog):
           await ctx.send(ret)
 
       await ctx.send("Processsing of new words is finished! Anki updated. Don't forget to synchronize!")
+
+  @commands.command(name="kwords")
+  async def kwords(self, ctx: commands.Context, *, args=None):
+      if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
+        return
+
+      confession = str(args)
+      confession = confession.strip()
+      ss = [s.strip() for s in confession.split("\n")]
+      single = ss[0] == 's'
+
+      for s in ss:
+        all = s.split("\\")
+
+        word = all[0].strip()
+        original = all[1].strip()
+        to_hide = all[2].strip()
+        audio = all[3].strip()
+
+        hidden = original.replace(to_hide, "_____")
+
+        hint = self.get_img_src(word, "Кыргызча::Words::Listen")
+
+        notes = [
+          {
+              "deckName": "Кыргызча::Words::Enter",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{hidden}<br><br><details><summary></summary><p>{hint}</p></details>",
+                "ответ": f"{original}<br><br>{audio}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
+          },
+          {
+              "deckName": "Кыргызча::Words (Listen)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{audio}",
+                "ответ": f"{image}<br><br>{word}<br><br><details><summary></summary><p>{translation}</p></details>",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
+          },
+          {
+              "deckName": "Кыргызча::Words (Read)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{word}",
+                "ответ": f"{audio}<br><br>{image}<br><br><details><summary></summary><p>{translation}</p></details>",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
+          },
+        ]
+        
+        success = False
+        errmsg = ""
+
+        try:
+          invoke('addNotes', note=notes)
+          success = True
+        except Exception as e:
+          errmsg = f"{e}"
+
+
+        if not success:
+          ret = f"There was an error with {s}! ` {errmsg} `"
+          await ctx.send(ret)
+
+      await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
+
 
   @commands.command(name="knewwords")
   async def knewwords(self, ctx: commands.Context, *, args=None):
