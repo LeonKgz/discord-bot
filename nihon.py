@@ -1359,33 +1359,7 @@ class Nihon(commands.Cog):
                   "duplicateScope": "deck",
               },
               "tags": []
-          },
-          {
-              "deckName": "Кыргызча::Words (Listen)",
-              "modelName": "Основная",
-              "fields": {
-                "вопрос": f"{audio}",
-                "ответ": f"{image}<br><br>{word}<br><br><details><summary></summary><p>{translation}</p></details>",
-              },
-              "options": {
-                  "allowDuplicate": False,
-                  "duplicateScope": "deck",
-              },
-              "tags": []
-          },
-          {
-              "deckName": "Кыргызча::Words (Read)",
-              "modelName": "Основная",
-              "fields": {
-                "вопрос": f"{word}",
-                "ответ": f"{audio}<br><br>{image}<br><br><details><summary></summary><p>{translation}</p></details>",
-              },
-              "options": {
-                  "allowDuplicate": False,
-                  "duplicateScope": "deck",
-              },
-              "tags": []
-          },
+          }
         ]
         
         success = False
