@@ -1415,13 +1415,14 @@ class Nihon(commands.Cog):
 
         sentence = all[0].strip().replace("-", "<br><br>-")
         sentence_modified = all[1].strip().replace("-", "<br><br>-")
+        audio = all[2].strip()
 
         note = {
               "deckName": "Кыргызча::Grammar",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{sentence_modified}",
-                "ответ": f"{sentence}",
+                "ответ": f"{sentence}<br><br>{audio}",
               },
               "options": {
                   "allowDuplicate": False,
@@ -1463,7 +1464,7 @@ class Nihon(commands.Cog):
         audio = all[1].strip()
 
         note = {
-              "deckName": "Кыргызча::Grammar",
+              "deckName": "Кыргызча::Sentences::Pronounce",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{sentence}",
@@ -1507,13 +1508,14 @@ class Nihon(commands.Cog):
 
         translation = all[0].strip()
         phrase = all[1].strip()
+        audio = all[2].strip()
 
         note = {
               "deckName": "Кыргызча::Phrases",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{translation}",
-                "ответ": f"{phrase}",
+                "ответ": f"{phrase}<br><br>{audio}",
               },
               "options": {
                   "allowDuplicate": False,
