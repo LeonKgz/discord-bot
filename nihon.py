@@ -1359,6 +1359,19 @@ class Nihon(commands.Cog):
                   "duplicateScope": "deck",
               },
               "tags": []
+          },
+          {
+              "deckName": "Кыргызча::Sentences::Pronounce",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{original}",
+                "ответ": f"{audio}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
           }
         ]
         
@@ -1366,7 +1379,7 @@ class Nihon(commands.Cog):
         errmsg = ""
 
         try:
-          invoke('addNotes', note=notes)
+          invoke('addNotes', notes=notes)
           success = True
         except Exception as e:
           errmsg = f"{e}"
@@ -1377,7 +1390,6 @@ class Nihon(commands.Cog):
           await ctx.send(ret)
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
-
 
   @commands.command(name="knewwords")
   async def knewwords(self, ctx: commands.Context, *, args=None):
@@ -1443,7 +1455,7 @@ class Nihon(commands.Cog):
         errmsg = ""
 
         try:
-          invoke('addNotes', note=notes)
+          invoke('addNotes', notes=notes)
           success = True
         except Exception as e:
           errmsg = f"{e}"
@@ -1472,7 +1484,7 @@ class Nihon(commands.Cog):
         sentence_modified = all[1].strip().replace("-", "<br><br>-")
         audio = all[2].strip()
 
-        note = {
+        notes = [{
               "deckName": "Кыргызча::Grammar",
               "modelName": "Основная",
               "fields": {
@@ -1484,13 +1496,26 @@ class Nihon(commands.Cog):
                   "duplicateScope": "deck",
               },
               "tags": []
-        }
-        
+          },
+          {
+              "deckName": "Кыргызча::Sentences::Pronounce",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{sentence}",
+                "ответ": f"{audio}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
+          }
+        ]
         success = False
         errmsg = ""
 
         try:
-          invoke('addNote', note=note)
+          invoke('addNotes', notes=notes)
           success = True
         except Exception as e:
           errmsg = f"{e}"
@@ -1565,7 +1590,7 @@ class Nihon(commands.Cog):
         phrase = all[1].strip()
         audio = all[2].strip()
 
-        note = {
+        notes = [{
               "deckName": "Кыргызча::Phrases",
               "modelName": "Основная",
               "fields": {
@@ -1577,13 +1602,27 @@ class Nihon(commands.Cog):
                   "duplicateScope": "deck",
               },
               "tags": []
-        }
+          },
+          {
+              "deckName": "Кыргызча::Sentences::Pronounce",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"{phrase}",
+                "ответ": f"{audio}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": []
+          }
+        ]
         
         success = False
         errmsg = ""
 
         try:
-          invoke('addNote', note=note)
+          invoke('addNotes', notes=notes)
           success = True
         except Exception as e:
           errmsg = f"{e}"
