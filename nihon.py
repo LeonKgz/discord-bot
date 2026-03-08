@@ -1110,8 +1110,7 @@ class Nihon(commands.Cog):
           }
 
         note_listen = {
-              # "deckName": "__________Bunpou",
-              "deckName": "German::Sentences::Listen",
+              "deckName": "German::Sentences (Listen)",
               "modelName": "Основная",
               "fields": {
                 "ответ": f"{original}",
@@ -1250,42 +1249,111 @@ class Nihon(commands.Cog):
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
 
-  @commands.command(name="gwords")
-  async def ggwords(self, ctx: commands.Context, *, args=None):
+  # @commands.command(name="gwords")
+  # async def ggwords(self, ctx: commands.Context, *, args=None):
 
+  #     if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
+  #       return
+
+  #     confession = str(args)
+  #     confession = confession.strip()
+  #     words = confession.split("\n")
+
+  #     for word in words: 
+  #       if ("(" in word):
+  #         translation = word.split("(")[1].split(")")[0].strip()
+  #       else:
+  #         tr = Translator()
+  #         # By default translate german to english (russian if explicitly specified with a 'ru_' prefix)
+  #         translation = tr.translate(word, dest=LANGUAGE_CODES['russian' if word[:3] == 'ru_' else 'english']).text
+
+  #       # Clear the prefix
+  #       if (word[:3] == 'ru_'):
+  #         word = word[3:]
+
+  #       ####################################
+
+  #       self.get_voice_from_eleven(word, 'de_')
+  #       self.get_voice_from_eleven(translation, 'en_')
+        
+  #       ####################################
+
+  #       note = {
+  #             # "deckName": "__________Bunpou",
+  #             "deckName": "German Vocab",
+  #             "modelName": "Основная (+ обратные карточки)",
+  #             "fields": {
+  #               "вопрос": f"{word}<br><br>[sound:{word}.wav]",
+  #               "ответ": f"{translation}<br><br>[sound:{translation}.wav]",
+  #             },
+  #             "options": {
+  #                 "allowDuplicate": False,
+  #                 "duplicateScope": "deck",
+  #             },
+  #             "tags": [],
+  #             "audio": [
+  #               {
+  #                 "filename": f"{word}.wav",
+  #                 "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\de_wav.wav",
+  #                 "fields": [
+  #                     "вопрос"
+  #                 ]
+  #               },
+  #               {
+  #                 "filename": f"{translation}.wav",
+  #                 "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\en_wav.wav",
+  #                 "fields": [
+  #                     "ответ"
+  #                 ]
+  #               },
+  #             ],
+  #         }
+
+  #       success = False
+  #       errmsg = ""
+  #       try:
+  #         invoke('addNote', note=note)
+  #         success = True
+  #       except Exception as e:
+  #         errmsg = f"{e}"
+
+  #       if not success:
+  #         ret = f"There was an error with {word}! ` {errmsg} `"
+  #         await ctx.send(ret)
+
+  #     await ctx.send("Processsing of new words is finished! Anki updated. Don't forget to synchronize!")
+
+ 
+  @commands.command(name="gwords")
+  async def gwords(self, ctx: commands.Context, *, args=None):
       if (not await self.check_rights(ctx, ['Политбюро ЦКТМГ'])):
         return
 
       confession = str(args)
       confession = confession.strip()
-      words = confession.split("\n")
+      ss = [s.strip() for s in confession.split("\n")]
+      single = ss[0] == 's'
 
-      for word in words: 
-        if ("(" in word):
-          translation = word.split("(")[1].split(")")[0].strip()
-        else:
-          tr = Translator()
-          # By default translate german to english (russian if explicitly specified with a 'ru_' prefix)
-          translation = tr.translate(word, dest=LANGUAGE_CODES['russian' if word[:3] == 'ru_' else 'english']).text
+      for s in ss:
+        all = s.split("\\")
 
-        # Clear the prefix
-        if (word[:3] == 'ru_'):
-          word = word[3:]
-
-        ####################################
-
-        self.get_voice_from_eleven(word, 'de_')
-        self.get_voice_from_eleven(translation, 'en_')
+        word = all[0].strip()
+        original = all[1].strip()
+        to_hide = all[2].strip()
         
-        ####################################
+        self.get_voice_from_eleven(original, 'de_')
 
-        note = {
-              # "deckName": "__________Bunpou",
-              "deckName": "German Vocab",
-              "modelName": "Основная (+ обратные карточки)",
+        hidden = original.replace(to_hide, "_____")
+
+        hint = self.get_img_src(word, "German::Words::Listen")
+
+        notes = [
+          {
+              "deckName": "German::Words::Enter",
+              "modelName": "Основная",
               "fields": {
-                "вопрос": f"{word}<br><br>[sound:{word}.wav]",
-                "ответ": f"{translation}<br><br>[sound:{translation}.wav]",
+                "вопрос": f"{hidden}<br><br><details><summary></summary><p>{hint}</p></details>",
+                "ответ": f"{original}<br><br>[sound:{self.get_legit_file_name(original)}.wav]",
               },
               "options": {
                   "allowDuplicate": False,
@@ -1293,36 +1361,56 @@ class Nihon(commands.Cog):
               },
               "tags": [],
               "audio": [
-                {
-                  "filename": f"{word}.wav",
-                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\de_wav.wav",
-                  "fields": [
-                      "вопрос"
-                  ]
-                },
-                {
-                  "filename": f"{translation}.wav",
-                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\en_wav.wav",
-                  "fields": [
-                      "ответ"
-                  ]
-                },
-              ],
-          }
-
+                    {
+                      "filename": f"{self.get_legit_file_name(original)}.wav",
+                      "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\de_wav.wav",
+                      "fields": [
+                          "вопрос"
+                      ]
+                    }
+                  ],
+          },
+          {
+              "deckName": "German::Sentences (Listen)",
+              "modelName": "Основная",
+              "fields": {
+                "вопрос": f"[sound:{self.get_legit_file_name(original)}.wav]",
+                "ответ": f"{original}",
+              },
+              "options": {
+                  "allowDuplicate": False,
+                  "duplicateScope": "deck",
+              },
+              "tags": [],
+              "audio": [
+                    {
+                      "filename": f"{self.get_legit_file_name(original)}.wav",
+                      "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\de_wav.wav",
+                      "fields": [
+                          "вопрос"
+                      ]
+                    }
+                  ],
+              }
+        ]
+        
         success = False
         errmsg = ""
+
         try:
-          invoke('addNote', note=note)
+          invoke('addNotes', notes=notes)
           success = True
         except Exception as e:
           errmsg = f"{e}"
 
+
         if not success:
-          ret = f"There was an error with {word}! ` {errmsg} `"
+          ret = f"There was an error with {s}! ` {errmsg} `"
           await ctx.send(ret)
 
-      await ctx.send("Processsing of new words is finished! Anki updated. Don't forget to synchronize!")
+      await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
+
+
 
   @commands.command(name="kwords")
   async def kwords(self, ctx: commands.Context, *, args=None):
