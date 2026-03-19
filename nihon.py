@@ -721,14 +721,14 @@ class Nihon(commands.Cog):
               "audio": [
                 {
                   "filename": f"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav",
-                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\wav.wav",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\back.wav",
                   "fields": [
                       "ответ"
                   ]
                 },
                 {
                   "filename": f"{self.get_legit_file_name(front)}_{random_code}_IN_JAPANESE.wav",
-                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\wav.wav",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\front.wav",
                   "fields": [
                       "ответ"
                   ]
@@ -736,7 +736,7 @@ class Nihon(commands.Cog):
               ],
               "picture": [{
                   "filename": f"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png",
-                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\png.png",
+                  "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\back.png",
                   "fields": [
                       "ответ"
                   ]
@@ -744,7 +744,7 @@ class Nihon(commands.Cog):
           }
 
         note_pronounce = {
-              "deckName": "Nihon::Sentences (Say)",
+              "deckName": "Nihon::Sentences::Say",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{full}<br>",
@@ -759,7 +759,7 @@ class Nihon(commands.Cog):
           }
 
         note_listen = {
-              "deckName": "Nihon::Sentences (Listen)",
+              "deckName": "Nihon::Sentences::Listen",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"[sound:{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav]",
