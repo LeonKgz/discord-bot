@@ -48,8 +48,8 @@ class Nihon(commands.Cog):
   # create webdriver object
   def process_word(self, phrase, timerr, default_filename=False, custom_filename=None, add_particle=False):
 
-    png_dir = f"./pngs/{phrase}.png" if not default_filename else ("./pngs/png.png" if not custom_filename else "./pngs/{custom_filename}.png")
-    wav_dir = f"./wavs/{phrase}.wav" if not default_filename else ("./wavs/wav.wav" if not custom_filename else "./wavs/{custom_filename}.wav")
+    png_dir = f"./pngs/{phrase}.png" if not default_filename else ("./pngs/png.png" if not custom_filename else f"./pngs/{custom_filename}.png")
+    wav_dir = f"./wavs/{phrase}.wav" if not default_filename else ("./wavs/wav.wav" if not custom_filename else f"./wavs/{custom_filename}.wav")
 
     # remove all sound files in download directory first
     for file in os.listdir(down):
@@ -62,8 +62,9 @@ class Nihon(commands.Cog):
     allwavfile = f"./wavs/*.wav"
 
     try:
-      [os.remove(f"./pngs/{f}") for f in os.listdir("./pngs/")]
-      [os.remove(f"./wavs/{f}") for f in os.listdir("./wavs/")]
+      #[os.remove(f"./pngs/{f}") for f in os.listdir("./pngs/")]
+      #[os.remove(f"./wavs/{f}") for f in os.listdir("./wavs/")]
+      pass
     except Exception as e:
       print(e)
       pass
@@ -707,7 +708,7 @@ class Nihon(commands.Cog):
         # self.get_voice_from_eleven(interpret, 'en_')
         random_code = random.randrange(1000000000000)
         note = {
-              "deckName": "Nihon::Grammar (Listen)",
+              "deckName": "Nihon::Grammar::Listen",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"[sound:{self.get_legit_file_name(front)}_{random_code}_IN_JAPANESE.wav]",
@@ -730,7 +731,7 @@ class Nihon(commands.Cog):
                   "filename": f"{self.get_legit_file_name(front)}_{random_code}_IN_JAPANESE.wav",
                   "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\front.wav",
                   "fields": [
-                      "ответ"
+                      "вопрос"
                   ]
                 },
               ],
@@ -747,8 +748,8 @@ class Nihon(commands.Cog):
               "deckName": "Nihon::Sentences::Say",
               "modelName": "Основная",
               "fields": {
-                "вопрос": f"{full}<br>",
-                "ответ": f"{full}<br><img src=\"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav]",
+                "вопрос": f"{back}<br>",
+                "ответ": f"{back}<br><img src=\"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav]",
 
               },
               "options": {
@@ -763,7 +764,7 @@ class Nihon(commands.Cog):
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"[sound:{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav]",
-                "ответ": f"{full}<br><img src=\"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png\">",
+                "ответ": f"{back}<br><img src=\"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png\">",
               },
               "options": {
                   "allowDuplicate": False,
@@ -775,7 +776,8 @@ class Nihon(commands.Cog):
         success = False
         errmsg = ""
         try:
-          invoke('addNotes', notes=[note, note_pronounce, note_listen])
+          invoke('addNotes', notes=[note])
+          invoke('addNotes', notes=[note_pronounce, note_listen])
           success = True
         except Exception as e:
           errmsg = f"{e}"
@@ -783,6 +785,14 @@ class Nihon(commands.Cog):
         if not success:
           ret = f"There was an error with {s}! ` {errmsg} `"
           await ctx.send(ret)
+
+      try:
+        [os.remove(f"./pngs/{f}") for f in os.listdir("./pngs/")]
+        [os.remove(f"./wavs/{f}") for f in os.listdir("./wavs/")]
+        pass
+      except Exception as e:
+        print(e)
+        pass
 
       await ctx.send("Processsing of new grammar is finished! Anki updated. Don't forget to synchronize!")
 
@@ -848,7 +858,7 @@ class Nihon(commands.Cog):
         random_code = random.randrange(1000000000000)
         note = {
               # "deckName": "__________Bunpou",
-              "deckName": "Nihon::Words (Enter)",
+              "deckName": "Nihon::Words::Enter",
               "modelName": "Основная",
               # "modelName": "Основная (+ обратные карточки)" if not single else "Основная",
               "fields": {
@@ -881,7 +891,7 @@ class Nihon(commands.Cog):
         
         note_pronounce = {
               # "deckName": "__________Bunpou",
-              "deckName": "Nihon::Sentences (Say)",
+              "deckName": "Nihon::Sentences::Say",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{full}<br>",
@@ -899,7 +909,7 @@ class Nihon(commands.Cog):
 
         note_listen = {
               # "deckName": "__________Bunpou",
-              "deckName": "Nihon::Sentences (Listen)",
+              "deckName": "Nihon::Sentences::Listen",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"[sound:{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav]",
@@ -1161,6 +1171,7 @@ class Nihon(commands.Cog):
       for s in ss:
         original = s.split("\\")[0].strip()
         to_replace = s.split("\\")[1].strip()
+        hint = s.split("\\")[2].strip()
         # mnemonic = s.split("\\")[2].strip()
         # question = original.replace(to_replace, "____")
         # interpret = s.split("(")[1].split(")")[0].strip()
@@ -1178,7 +1189,7 @@ class Nihon(commands.Cog):
               "modelName": "Основная",
               "fields": {
                 "ответ": f"{original}<br><br>[sound:{self.get_legit_file_name(original)}.wav]",
-                "вопрос": f"{to_replace}",
+                "вопрос": f"{to_replace}<br><br><details><summary></summary><p>{hint}</p></details>",
                 # "вопрос": f"{question}{mnemonic}",
               },
               "options": {
