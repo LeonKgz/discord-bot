@@ -706,13 +706,14 @@ class Nihon(commands.Cog):
         ####################################
 
         # self.get_voice_from_eleven(interpret, 'en_')
-        random_code = random.randrange(1000000000000)
+        random_code_front = random.randrange(1000000000000)
+        random_code_back = random.randrange(1000000000000)
         note = {
               "deckName": "Nihon::Grammar::Listen",
               "modelName": "Основная",
               "fields": {
-                "вопрос": f"[sound:{self.get_legit_file_name(front)}_{random_code}_IN_JAPANESE.wav]",
-                "ответ": f"{back}<br><img src=\"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav]",
+                "вопрос": f"[sound:{self.get_legit_file_name(front)}_{random_code_front}_IN_JAPANESE.wav]",
+                "ответ": f"{back}<br><img src=\"{self.get_legit_file_name(back)}_{random_code_back}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(back)}_{random_code_back}_IN_JAPANESE.wav]",
               },
               "options": {
                   "allowDuplicate": False,
@@ -721,14 +722,14 @@ class Nihon(commands.Cog):
               "tags": [],
               "audio": [
                 {
-                  "filename": f"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav",
+                  "filename": f"{self.get_legit_file_name(back)}_{random_code_back}_IN_JAPANESE.wav",
                   "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\back.wav",
                   "fields": [
                       "ответ"
                   ]
                 },
                 {
-                  "filename": f"{self.get_legit_file_name(front)}_{random_code}_IN_JAPANESE.wav",
+                  "filename": f"{self.get_legit_file_name(front)}_{random_code_front}_IN_JAPANESE.wav",
                   "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\wavs\\front.wav",
                   "fields": [
                       "вопрос"
@@ -736,7 +737,7 @@ class Nihon(commands.Cog):
                 },
               ],
               "picture": [{
-                  "filename": f"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png",
+                  "filename": f"{self.get_legit_file_name(back)}_{random_code_back}_IN_JAPANESE.png",
                   "path": f"C:\\Users\\alben\\vscode\\bot\\bot\\pngs\\back.png",
                   "fields": [
                       "ответ"
@@ -749,7 +750,7 @@ class Nihon(commands.Cog):
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{back}<br>",
-                "ответ": f"{back}<br><img src=\"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav]",
+                "ответ": f"{back}<br><img src=\"{self.get_legit_file_name(back)}_{random_code_back}_IN_JAPANESE.png\"><br><br>[sound:{self.get_legit_file_name(back)}_{random_code_back}_IN_JAPANESE.wav]",
 
               },
               "options": {
@@ -763,8 +764,8 @@ class Nihon(commands.Cog):
               "deckName": "Nihon::Sentences::Listen",
               "modelName": "Основная",
               "fields": {
-                "вопрос": f"[sound:{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.wav]",
-                "ответ": f"{back}<br><img src=\"{self.get_legit_file_name(back)}_{random_code}_IN_JAPANESE.png\">",
+                "вопрос": f"[sound:{self.get_legit_file_name(back)}_{random_code_back}_IN_JAPANESE.wav]",
+                "ответ": f"{back}<br><img src=\"{self.get_legit_file_name(back)}_{random_code_back}_IN_JAPANESE.png\">",
               },
               "options": {
                   "allowDuplicate": False,
