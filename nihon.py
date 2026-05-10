@@ -603,7 +603,7 @@ class Nihon(commands.Cog):
         random_code = random.randrange(1000000000000)
         note = {
               # "deckName": "__________Bunpou",
-              "deckName": "Nihon::Words::Sentence",
+              "deckName": "Extra Lingua::Nihon::Words::Sentence",
               "modelName": "Основная",
               # "modelName": "Основная (+ обратные карточки)" if not single else "Основная",
               "fields": {
@@ -853,7 +853,7 @@ class Nihon(commands.Cog):
           }
 
         note_pronounce = {
-              "deckName": "Nihon::Sentences::Say",
+              "deckName": "Extra Lingua::Nihon::Sentences::Say",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{back}<br>",
@@ -868,7 +868,7 @@ class Nihon(commands.Cog):
           }
 
         note_listen = {
-              "deckName": "Nihon::Sentences::Listen",
+              "deckName": "Extra Lingua::Nihon::Sentences::Listen",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"[sound:{self.get_legit_file_name(back)}_{random_code_back}_IN_JAPANESE.wav]",
@@ -998,7 +998,7 @@ class Nihon(commands.Cog):
         
         note_pronounce = {
               # "deckName": "__________Bunpou",
-              "deckName": "Nihon::Sentences::Say",
+              "deckName": "Extra Lingua::Nihon::Sentences::Say",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"{full}<br>",
@@ -1016,7 +1016,7 @@ class Nihon(commands.Cog):
 
         note_listen = {
               # "deckName": "__________Bunpou",
-              "deckName": "Nihon::Sentences::Listen",
+              "deckName": "Extra Lingua::Nihon::Sentences::Listen",
               "modelName": "Основная",
               "fields": {
                 "вопрос": f"[sound:{self.get_legit_file_name(full)}_{random_code}_IN_JAPANESE.wav]",
@@ -1344,7 +1344,7 @@ class Nihon(commands.Cog):
         ####################################
         note = {
               # "deckName": "__________Bunpou",
-              "deckName": "German::Words::Sentence",
+              "deckName": "Extra Lingua::German::Words::Sentence",
               "modelName": "Основная",
               "fields": {
                 "ответ": f"{original}<br><br>[sound:{self.get_legit_file_name(original)}.wav]",
@@ -1367,7 +1367,7 @@ class Nihon(commands.Cog):
           }
 
         note_listen = {
-              "deckName": "German::Sentences (Listen)",
+              "deckName": "Extra Lingua::German::Sentences (Listen)",
               "modelName": "Основная",
               "fields": {
                 "ответ": f"{original}",
